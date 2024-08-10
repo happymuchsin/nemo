@@ -1,0 +1,147 @@
+<?php
+
+namespace App\Http\Controllers\Admin\Master;
+
+use App\Http\Controllers\Controller;
+use App\Models\MasterCounter;
+use App\Models\MasterLine;
+use App\Models\MasterPlacement;
+use App\Models\User;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use stdClass;
+
+class MasterPlacementController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('ajax-session-expired');
+        $this->middleware('auth');
+    }
+
+    public function index(Request $request)
+    {
+        $page = 'admin_master_placement';
+        $title = 'ADMIN MASTER PLACEMENT';
+
+        $admin_master = 'menu-open';
+
+        return view('Admin.Master.Placement.index', compact('title', 'page', 'admin_master'));
+    }
+
+    public function data(Request $request)
+    {
+        $data = User::with(['division', 'position'])->get();
+        return datatables()->of($data)
+            ->addColumn('lokasi', function ($q) {
+                $s = MasterPlacement::where('user_id', $q->id)->first();
+                if ($s) {
+                    $h = '';
+                    if ($s->reff == 'line') {
+                        $x = MasterLine::with(['area'])->where('id', $s->location_id)->first();
+                        $h = $x->area->name . ' - ' . $x->name;
+                    } else if ($s->reff == 'counter') {
+                        $x = MasterCounter::with(['area'])->where('id', $s->location_id)->first();
+                        $h = $x->area->name . ' - ' . $x->name;
+                    }
+                    return $h;
+                } else {
+                    return '';
+                }
+            })
+            ->addColumn('division', function ($q) {
+                return $q->division->name;
+            })
+            ->addColumn('position', function ($q) {
+                return $q->position->name;
+            })
+            ->addColumn('action', function ($q) {
+                return view('includes.admin.action', [
+                    'edit' => route('admin.master.placement.edit', ['id' => $q->id]),
+                    'hapus' => route('admin.master.placement.hapus', ['id' => $q->id]),
+                ]);
+            })
+            ->make(true);
+    }
+
+    public function spinner(Request $request)
+    {
+        $reff = $request->reff;
+        if ($reff == 'line') {
+            $item = MasterLine::with(['area'])->get();
+        } else if ($reff == 'counter') {
+            $item = MasterCounter::with(['area'])->get();
+        } else {
+            $item = [];
+        }
+        return response()->json($item, 200);
+    }
+
+    public function crup(Request $request)
+    {
+        $id = $request->id;
+        $reff = $request->reff;
+        $lokasi = $request->lokasi;
+
+        try {
+            DB::beginTransaction();
+
+            $s = MasterPlacement::where('user_id', $id)->first();
+            if ($s) {
+                $s->reff = $reff;
+                $s->location_id = $lokasi;
+                $s->updated_by = Auth::user()->username;
+                $s->updated_at = Carbon::now();
+                $s->save();
+            } else {
+                MasterPlacement::create([
+                    'user_id' => $id,
+                    'reff' => $reff,
+                    'location_id' => $lokasi,
+                    'created_by' => Auth::user()->username,
+                    'created_at' => Carbon::now(),
+                ]);
+            }
+
+            DB::commit();
+            return response()->json('Save Successfully', 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json('Save Failed', 422);
+        }
+    }
+
+    public function edit($id)
+    {
+        $u = User::where('id', $id)->first();
+        $d = new stdClass;
+        $d->id = $u->id;
+        $d->username = $u->username;
+        $d->name = $u->name;
+        $p = MasterPlacement::where('user_id', $id)->first();
+        if ($p) {
+            $d->reff = $p->reff;
+            $d->lokasi = $p->location_id;
+        }
+        return response()->json($d, 200);
+    }
+
+    public function hapus($id)
+    {
+        try {
+            DB::beginTransaction();
+            MasterPlacement::where('user_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
+            DB::commit();
+            return response()->json('Delete Successfully', 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json('Delete Failed', 422);
+        }
+    }
+}

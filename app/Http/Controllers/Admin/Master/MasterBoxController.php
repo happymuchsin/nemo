@@ -1,0 +1,128 @@
+<?php
+
+namespace App\Http\Controllers\Admin\Master;
+
+use App\Http\Controllers\Controller;
+use App\Models\MasterCounter;
+use App\Models\MasterBox;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class MasterBoxController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('ajax-session-expired');
+        $this->middleware('auth');
+    }
+
+    public function index(Request $request)
+    {
+        $page = 'admin_master_box';
+        $title = 'ADMIN MASTER BOX';
+
+        $admin_master = 'menu-open';
+        $counter = MasterCounter::with(['area'])->get();
+
+        return view('Admin.Master.Box.index', compact('title', 'page', 'admin_master', 'counter'));
+    }
+
+    public function data(Request $request)
+    {
+        $data = MasterBox::with(['counter' => function ($q) {
+            $q->with(['area']);
+        }])->get();
+        return datatables()->of($data)
+            ->addColumn('counter', function ($q) {
+                return $q->counter->area->name . ' - ' .  $q->counter->name;
+            })
+            ->addColumn('action', function ($q) {
+                return view('includes.admin.action', [
+                    'edit' => route('admin.master.box.edit', ['id' => $q->id]),
+                    'hapus' => route('admin.master.box.hapus', ['id' => $q->id]),
+                ]);
+            })
+            ->make(true);
+    }
+
+    public function crup(Request $request)
+    {
+        $id = $request->id;
+        $master_counter_id = $request->master_counter_id;
+        $name = strtoupper($request->name);
+        $rfid = $request->rfid;
+
+        try {
+            DB::beginTransaction();
+
+            if ($id == 0) {
+                $s = MasterBox::where('master_counter_id', $master_counter_id)->where('name', $name)->first();
+                if ($s) {
+                    return response()->json('Box already used', 422);
+                } else {
+                    MasterBox::create([
+                        'master_counter_id' => $master_counter_id,
+                        'name' => $name,
+                        'rfid' => $rfid,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]);
+                }
+            } else {
+                $c = 0;
+                $s = MasterBox::where('id', $id)->first();
+                if ($s->name != $name) {
+                    $u = MasterBox::where('master_counter_id', $master_counter_id)->where('name', $name)->first();
+                    if ($u) {
+                        return response()->json('Box already used', 422);
+                    } else {
+                        $c = 1;
+                    }
+                } else {
+                    $c = 1;
+                }
+
+                if ($c == 1) {
+                    MasterBox::where('id', $id)->update([
+                        'master_counter_id' => $master_counter_id,
+                        'name' => $name,
+                        'rfid' => $rfid,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return response()->json('Save Successfully', 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json('Save Failed', 422);
+        }
+    }
+
+    public function edit($id)
+    {
+        $s = MasterBox::find($id);
+        return response()->json($s, 200);
+    }
+
+    public function hapus($id)
+    {
+        try {
+            DB::beginTransaction();
+            MasterBox::where('id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
+            DB::commit();
+            return response()->json('Delete Successfully', 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json('Delete Failed', 422);
+        }
+    }
+}

@@ -1,0 +1,107 @@
+<?php
+
+namespace App\Http\Controllers\User;
+
+use App\Http\Controllers\Controller;
+use App\Models\MasterCounter;
+use App\Models\MasterLine;
+use App\Models\MasterStatus;
+use App\Models\Needle;
+use App\Models\NeedleDetail;
+use App\Models\Stock;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use Illuminate\Http\Request;
+use stdClass;
+
+class NeedleReportController extends Controller
+{
+    public function __construct()
+    {
+
+        $this->middleware('ajax-session-expired');
+        $this->middleware('auth');
+    }
+
+    public function index(Request $request)
+    {
+        $page = 'user_needle_report';
+        $title = 'USER DASHBOARD';
+
+        $user_needle_report = 'active';
+
+        $line = MasterLine::with(['area'])->get();
+        $counter = MasterCounter::with(['area'])->get();
+
+        return view('User.NeedleReport.index', compact('title', 'page', 'user_needle_report', 'line', 'counter'));
+    }
+
+    public function data(Request $request)
+    {
+        $id = $request->id;
+        if ($id == 'needle_report_exchange') {
+            $filter_date = $request->filter_date;
+            $filter_line = $request->filter_line;
+            $data = NeedleDetail::join('needles as n', 'n.id', 'needle_details.needle_id')
+                ->join('master_statuses as ms', 'ms.id', 'needle_details.master_status_id')
+                ->join('users as u', 'u.id', 'n.user_id')
+                ->join('master_lines as ml', 'ml.id', 'n.master_line_id')
+                ->join('master_needles as mn', 'mn.id', 'n.master_needle_id')
+                ->selectRaw('needle_details.created_at as created_at, ml.name as line, u.username as username, u.name as name, mn.brand as brand, mn.tipe as tipe, mn.size as size, ms.name as remark, needle_details.filename as filename, needle_details.ext as ext, needle_details.needle_id as needle_id, needle_details.id as id')
+                ->whereDate('needle_details.created_at', $filter_date)
+                ->whereIn('needle_details.master_status_id', [1, 2, 3, 4])
+                ->when($filter_line != 'all', function ($q) use ($filter_line) {
+                    $q->where('ml.id', $filter_line);
+                })
+                ->orderBy('needle_details.created_at')
+                ->get();
+            return datatables()->of($data)
+                ->addColumn('time', function ($q) {
+                    return Carbon::parse($q->created_at)->format('H:i:s');
+                })
+                ->addColumn('user', function ($q) {
+                    return $q->username . ' - ' . $q->name;
+                })
+                ->addColumn('gambar', function ($q) {
+                    $c = Carbon::parse($q->created_at);
+                    if (strlen($c->month) == 1) {
+                        $month = '0' . $c->month;
+                    } else {
+                        $month = $c->month;
+                    }
+                    $h = '';
+                    if ($q->filename) {
+                        $gambar = asset("assets/uploads/needle/$c->year/$month/$q->needle_id/$q->id.$q->ext");
+                    } else {
+                        $gambar = asset('assets/img/altgambar.jpeg');
+                    }
+                    $h .= '<a href="#" onclick="poto(\'' . $gambar . '\')"><img src="' . $gambar . '" width="75px" /></a>';
+                    return $h;
+                })
+                ->rawColumns(['gambar'])
+                ->make(true);
+        } else if ($id == 'needle_report_counter') {
+            $filter_counter = $request->filter_counter;
+            $data = [];
+            $s = Stock::join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')
+                ->join('master_boxes as mb', 'mb.id', 'stocks.master_box_id')
+                ->selectRaw('mb.name as box, brand, tipe, size, sum(`in`) as `in`, sum(`out`) as `out`')
+                ->where('stocks.master_counter_id', $filter_counter)
+                ->where('stocks.is_clear', 'not')
+                ->groupBy('master_box_id')
+                ->get();
+            foreach ($s as $s) {
+                $d = new stdClass;
+                $d->boxName = $s->box;
+                $d->brand = $s->brand;
+                $d->tipe = $s->tipe;
+                $d->size = $s->size;
+                $d->qty = $s->in - $s->out;
+                $data[] = $d;
+            }
+
+            return datatables()->of($data)
+                ->make(true);
+        }
+    }
+}

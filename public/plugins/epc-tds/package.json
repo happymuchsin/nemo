@@ -1,0 +1,46 @@
+{
+  "name": "epc-tds",
+  "version": "1.3.0",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "EPC",
+    "RFID",
+    "TAG",
+    "GS1",
+    "Decode",
+    "Encode",
+    "Library",
+    "Barcode",
+    "Sgtin96",
+    "Sgtin198",
+    "Sgln96",
+    "Sgln195",
+    "Sscc96",
+    "Grai96",
+    "Grai170",
+    "Gid96",
+    "Giai96",
+    "Giai202",
+    "Gsrn96",
+    "Cpi96",
+    "Gdti96",
+    "Gdti174",
+    "Sgcn96"
+  ],
+  "author": "Sergio Soriano",
+  "license": "MIT",
+  "description": "EPC Tag Data Standard encoding and decoding library, written in javascript",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sergiss/epc-tds.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sergiss/epc-tds/issues"
+  },
+  "homepage": "https://github.com/sergiss/epc-tds#readme"
+}
