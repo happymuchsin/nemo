@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use stdClass;
 
 class HelperController extends Controller
@@ -39,5 +42,31 @@ class HelperController extends Controller
         }
 
         return $d;
+    }
+
+    static function activityLog(
+        $activity,
+        $reff_name,
+        $event,
+        $ip = null,
+        $agent = null,
+        $properties = null,
+        $reff_id = null,
+        $username = null
+    ) {
+        if ($username == null) {
+            $username = Auth::user()->username;
+        }
+        ActivityLog::create([
+            'activity' => $activity,
+            'reff_name' => $reff_name,
+            'reff_id' => $reff_id,
+            'event' => $event,
+            'username' => $username,
+            'properties' => $properties,
+            'ip_address' => $ip,
+            'user_agent' => $agent,
+            'created_at' => Carbon::now(),
+        ]);
     }
 }

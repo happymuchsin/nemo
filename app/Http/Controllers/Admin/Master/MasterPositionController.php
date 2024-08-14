@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Http\Controllers\HomeController;
 use App\Models\MasterPosition;
 use Carbon\Carbon;
@@ -25,6 +26,8 @@ class MasterPositionController extends Controller
         $page = 'admin_master_position';
         $title = 'ADMIN MASTER POSITION';
 
+        HelperController::activityLog('OPEN ADMIN MASTER POSITION', 'master_positions', 'read', $request->ip(), $request->userAgent());
+
         $admin_master = 'menu-open';
 
         return view('Admin.Master.Position.index', compact('title', 'page', 'admin_master'));
@@ -32,7 +35,7 @@ class MasterPositionController extends Controller
 
     public function data(Request $request)
     {
-        $data = MasterPosition::get();
+        $data = MasterPosition::where('name', '!=', 'DEVELOPER')->get();
         return datatables()->of($data)
             ->addColumn('action', function ($q) {
                 return view('includes.admin.action', [
@@ -61,6 +64,11 @@ class MasterPositionController extends Controller
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("CREATE MASTER POSITION", 'master_positions', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'name' => $name,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]));
                 }
             } else {
                 $c = 0;
@@ -82,6 +90,12 @@ class MasterPositionController extends Controller
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("UPDATE MASTER POSITION", 'master_positions', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'name' => $name,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
                 }
             }
 
@@ -99,7 +113,7 @@ class MasterPositionController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -107,6 +121,7 @@ class MasterPositionController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
+            HelperController::activityLog("DELETE MASTER POSITION", 'master_positions', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {

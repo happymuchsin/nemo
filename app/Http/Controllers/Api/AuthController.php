@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Http\Resources\ApiResource;
 use App\Models\MasterCounter;
 use App\Models\MasterLine;
@@ -58,12 +59,12 @@ class AuthController extends Controller
             if ($user) {
                 if (Auth::validate($credentials)) {
                     $u = Auth::getLastAttempted();
-                    Auth::login($u, $request->has('remember'));
 
                     $reff = '';
                     $area = '';
                     $area_id = '';
                     $lokasi = '';
+                    $lokasi_id = '';
                     $placement = MasterPlacement::where('user_id', $user->id)->first();
                     if ($placement) {
                         if ($placement->reff == 'counter') {
@@ -81,19 +82,28 @@ class AuthController extends Controller
                             $lokasi = $r->name;
                             $lokasi_id = $r->id;
                         }
-                    }
 
-                    return new ApiResource(200, 'success', [
-                        'token' => $user->createToken('authToken')->plainTextToken,
-                        'tokenType' => 'Bearer',
-                        'user' => $user,
-                        'role' => $user->getRoleNames(),
-                        'reff' => $reff,
-                        'area' => $area,
-                        'area_id' => $area_id,
-                        'lokasi' => $lokasi,
-                        'lokasi_id' => $lokasi_id,
-                    ]);
+                        if ($placement->reff == 'counter') {
+                            Auth::login($u, $request->has('remember'));
+                            HelperController::activityLog('ANDROID LOGIN', 'users', 'login', $request->ip(), $request->userAgent(), json_encode($request->all), null, $u->username);
+
+                            return new ApiResource(200, 'success', [
+                                'token' => $user->createToken('authToken')->plainTextToken,
+                                'tokenType' => 'Bearer',
+                                'user' => $user,
+                                'role' => $user->getRoleNames(),
+                                'reff' => $reff,
+                                'area' => $area,
+                                'area_id' => $area_id,
+                                'lokasi' => $lokasi,
+                                'lokasi_id' => $lokasi_id,
+                            ]);
+                        } else {
+                            return new ApiResource(422, 'Placement counter only', '');
+                        }
+                    } else {
+                        return new ApiResource(422, 'Placement not found', '');
+                    }
                 }
             } else {
                 return new ApiResource(422, 'User not found', '');
@@ -115,6 +125,8 @@ class AuthController extends Controller
         }
 
         // Auth::user()->tokens->delete();
+
+        HelperController::activityLog("ANDROID LOGOUT", 'users', 'logout', $request->ip(), $request->userAgent(), null, null, $request->user()->username);
 
         return new ApiResource(200, 'Logout Success', []);
     }

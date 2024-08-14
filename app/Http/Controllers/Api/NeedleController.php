@@ -92,6 +92,16 @@ class NeedleController extends Controller
                     'created_by' => $username,
                     'created_at' => $now,
                 ]);
+                HelperController::activityLog("ANDROID CREATE NEEDLE", 'needles', 'create', $request->ip(), $request->userAgent(), json_encode([
+                    'user_id' => $user->id,
+                    'master_line_id' => $line,
+                    'master_style_id' => $style,
+                    'master_box_id' => $box->id,
+                    'master_needle_id' => $needle,
+                    'status' => $x,
+                    'created_by' => $username,
+                    'created_at' => $now,
+                ]), null, $username);
 
                 $needle_id = $ins->id;
             }
@@ -104,6 +114,15 @@ class NeedleController extends Controller
                 'created_by' => $username,
                 'created_at' => $now,
             ]);
+
+            HelperController::activityLog("ANDROID CREATE NEEDLE DETAIL", 'needle_details', 'create', $request->ip(), $request->userAgent(), json_encode([
+                'needle_id' => $needle_id,
+                'master_status_id' => $stat->id,
+                'filename' => $filename,
+                'ext' => $ext,
+                'created_by' => $username,
+                'created_at' => $now,
+            ]), null, $username);
 
             $stock = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
 
@@ -120,17 +139,36 @@ class NeedleController extends Controller
                     'updated_at' => $now,
                 ]);
 
+                HelperController::activityLog("ANDROID UPDATE NEEDLE", 'needles', 'update', $request->ip(), $request->userAgent(), json_encode([
+                    'id' => $needle_id,
+                    'status' => 'return',
+                    'updated_by' => $username,
+                    'updated_at' => $now,
+                ]), $needle_id, $username);
+
                 Stock::where('id', $stock->id)->update([
                     'out' => DB::raw("`out` - 1"),
                     'updated_by' => $username,
                     'updated_at' => $now,
                 ]);
+                HelperController::activityLog("ANDROID UPDATE STOCK", 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
+                    'id' => $stock->id,
+                    'out' => 'out - 1',
+                    'updated_by' => $username,
+                    'updated_at' => $now,
+                ]), $stock->id, $username);
             } else {
                 Stock::where('id', $stock->id)->update([
                     'out' => DB::raw("`out` + 1"),
                     'updated_by' => $username,
                     'updated_at' => $now,
                 ]);
+                HelperController::activityLog("ANDROID UPDATE STOCK", 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
+                    'id' => $stock->id,
+                    'out' => 'out + 1',
+                    'updated_by' => $username,
+                    'updated_at' => $now,
+                ]), $stock->id, $username);
 
                 if ($status == 'REPLACEMENT') {
                     Approval::where('id', $approvalId)->update([
@@ -138,6 +176,12 @@ class NeedleController extends Controller
                         'updated_by' => $username,
                         'updated_at' => $now,
                     ]);
+                    HelperController::activityLog("ANDROID UPDATE APPROVAL", 'approvals', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $approvalId,
+                        'status' => 'DONE',
+                        'updated_by' => $username,
+                        'updated_at' => $now,
+                    ]), $approvalId, $username);
                 }
             }
 
@@ -227,6 +271,21 @@ class NeedleController extends Controller
                 'created_by' => $username,
                 'created_at' => $now,
             ]);
+            HelperController::activityLog("ANDROID CREATE APPROVAL", 'approvals', 'create', $request->ip(), $request->userAgent(), json_encode([
+                'id' => $id,
+                'tanggal' => $now->today(),
+                'user_id' => $user_id,
+                'needle_id' => $needle->id,
+                'approval_id' => $approval,
+                'master_area_id' => $area_id,
+                'master_counter_id' => $lokasi_id,
+                'needle_status' => $needle_status,
+                'status' => 'WAITING',
+                'filename' => $filename,
+                'ext' => $ext,
+                'created_by' => $username,
+                'created_at' => $now,
+            ]), null, $username);
 
             if (strlen($now->month) == 1) {
                 $month = '0' . $now->month;
@@ -282,6 +341,8 @@ class NeedleController extends Controller
         $username = $request->username;
         $area_id = $request->area_id;
         $lokasi_id = $request->lokasi_id;
+
+        HelperController::activityLog('ANDROID STOCK', 'stocks', 'read', $request->ip(), $request->userAgent(), null, null, $username);
 
         $data = [];
         $s = Stock::join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')

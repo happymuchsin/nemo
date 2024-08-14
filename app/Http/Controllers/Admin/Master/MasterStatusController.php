@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Models\MasterStatus;
 use Carbon\Carbon;
 use Exception;
@@ -22,6 +23,8 @@ class MasterStatusController extends Controller
     {
         $page = 'admin_master_status';
         $title = 'ADMIN MASTER STATUS';
+
+        HelperController::activityLog('OPEN ADMIN MASTER STATUS', 'master_statuses', 'read', $request->ip(), $request->userAgent());
 
         $admin_master = 'menu-open';
 
@@ -59,6 +62,11 @@ class MasterStatusController extends Controller
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("CREATE MASTER STATUS", 'master_statuses', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'name' => $name,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]));
                 }
             } else {
                 $c = 0;
@@ -80,6 +88,12 @@ class MasterStatusController extends Controller
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("UPDATE MASTER STATUS", 'master_statuses', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'name' => $name,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
                 }
             }
 
@@ -97,7 +111,7 @@ class MasterStatusController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -105,6 +119,7 @@ class MasterStatusController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
+            HelperController::activityLog("DELETE MASTER STATUS", 'master_statuses', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {

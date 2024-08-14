@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreign('master_buyer_id')->references('id')->on('master_buyers')->onUpdate('cascade')->onDelete('cascade');
             $table->unsignedBigInteger('master_category_id')->nullable();
             $table->foreign('master_category_id')->references('id')->on('master_categories')->onUpdate('cascade')->onDelete('cascade');
+            $table->unsignedBigInteger('master_sub_category_id')->nullable();
+            $table->foreign('master_sub_category_id')->references('id')->on('master_sub_categories')->onUpdate('cascade')->onDelete('cascade');
             $table->unsignedBigInteger('master_sample_id')->nullable();
             $table->foreign('master_sample_id')->references('id')->on('master_samples')->onUpdate('cascade')->onDelete('cascade');
             $table->unsignedBigInteger('master_fabric_id')->nullable();
@@ -24,6 +26,8 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->date('start')->nullable();
             $table->date('end')->nullable();
+            $table->string('srf')->nullable();
+            $table->string('season')->nullable();
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->string('deleted_by')->nullable();

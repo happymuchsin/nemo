@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Models\MasterApproval;
 use App\Models\User;
 use Carbon\Carbon;
@@ -24,16 +25,24 @@ class MasterApprovalController extends Controller
         $page = 'admin_master_approval';
         $title = 'ADMIN MASTER APPROVAL';
 
+        HelperController::activityLog('OPEN ADMIN MASTER APPROVAL', 'master_approvals', 'read', $request->ip(), $request->userAgent());
+
         $admin_master = 'menu-open';
 
-        $user = User::get();
+        $user = User::where('name', '!=', 'developer')->get();
 
         return view('Admin.Master.Approval.index', compact('title', 'page', 'admin_master', 'user'));
     }
 
     public function data(Request $request)
     {
-        $data = MasterApproval::with(['user'])->get();
+        $data = MasterApproval::with(['user'])
+            ->whereIn('user_id', function ($q) {
+                $q->select('id')
+                    ->from('users')
+                    ->where('name', '!=', 'developer');
+            })
+            ->get();
         return datatables()->of($data)
             ->addColumn('user_id', function ($q) {
                 return $q->user->username . ' - ' . $q->user->name;
@@ -64,6 +73,12 @@ class MasterApprovalController extends Controller
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
+
+                    HelperController::activityLog("CREATE MASTER APPROVAL", 'master_approvals', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'user_id' => $user_id,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]));
                 }
             } else {
                 $c = 0;
@@ -85,6 +100,13 @@ class MasterApprovalController extends Controller
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
+
+                    HelperController::activityLog("UPDATE MASTER APPROVAL", 'master_approvals', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'user_id' => $user_id,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
                 }
             }
 
@@ -102,7 +124,7 @@ class MasterApprovalController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -110,6 +132,8 @@ class MasterApprovalController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
+
+            HelperController::activityLog("DELETE MASTER APPROVAL", 'master_approvals', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {

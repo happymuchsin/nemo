@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\MasterApproval;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -19,16 +21,22 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
         $this->call([
-            // PermissionSeeder::class,
-            // RoleSeeder::class,
+            PermissionSeeder::class,
+            RoleSeeder::class,
             MasterDivisionSeeder::class,
             MasterPositionSeeder::class,
             MasterStatusSeeder::class,
             MasterAreaSeeder::class,
             MasterLineSeeder::class,
-            MasterNeedleSeeder::class,
             UserSeeder::class,
             KaryawanSeeder::class,
+            MasterApprovalSeeder::class,
+            MasterNeedleSeeder::class,
+            MasterBuyerSeeder::class,
+            MasterCategorySeeder::class,
+            MasterSubCategorySeeder::class,
+            MasterSampleSeeder::class,
+            MasterFabricSeeder::class,
         ]);
     }
 }

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('size')->nullable();
             $table->string('code')->nullable();
             $table->string('machine')->nullable();
+            $table->integer('min_stock')->default(0);
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->string('deleted_by')->nullable();

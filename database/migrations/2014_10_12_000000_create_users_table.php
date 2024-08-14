@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('username')->nullable();
             $table->string('name')->nullable();
             $table->string('rfid')->nullable();
-            $table->string('email')->unique()->nullable();
+            $table->date('join_date')->nullable();
+            $table->string('skill')->nullable();
+            $table->string('email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

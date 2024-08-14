@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HelperController;
 use App\Models\MasterDivision;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use stdClass;
 
 class MasterDivisionController extends Controller
 {
@@ -25,6 +24,8 @@ class MasterDivisionController extends Controller
         $page = 'admin_master_division';
         $title = 'ADMIN MASTER DIVISION';
 
+        HelperController::activityLog('OPEN ADMIN MASTER DIVISION', 'master_divisions', 'read', $request->ip(), $request->userAgent());
+
         $admin_master = 'menu-open';
 
         return view('Admin.Master.Division.index', compact('title', 'page', 'admin_master'));
@@ -32,7 +33,7 @@ class MasterDivisionController extends Controller
 
     public function data(Request $request)
     {
-        $data = MasterDivision::get();
+        $data = MasterDivision::where('name', '!=', 'DEVELOPER')->get();
         return datatables()->of($data)
             ->addColumn('action', function ($q) {
                 return view('includes.admin.action', [
@@ -61,6 +62,12 @@ class MasterDivisionController extends Controller
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
+
+                    HelperController::activityLog("CREATE MASTER DIVISION", 'master_divisions', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'name' => $name,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]));
                 }
             } else {
                 $c = 0;
@@ -82,6 +89,13 @@ class MasterDivisionController extends Controller
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
+
+                    HelperController::activityLog("UPDATE MASTER DIVISION", 'master_divisions', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'name' => $name,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
                 }
             }
 
@@ -99,7 +113,7 @@ class MasterDivisionController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -107,6 +121,8 @@ class MasterDivisionController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
+
+            HelperController::activityLog("DELETE MASTER DIVISION", 'master_divisions', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {

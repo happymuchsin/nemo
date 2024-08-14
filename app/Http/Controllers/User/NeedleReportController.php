@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Models\MasterCounter;
 use App\Models\MasterLine;
 use App\Models\MasterStatus;
@@ -18,7 +19,6 @@ class NeedleReportController extends Controller
 {
     public function __construct()
     {
-
         $this->middleware('ajax-session-expired');
         $this->middleware('auth');
     }
@@ -26,7 +26,9 @@ class NeedleReportController extends Controller
     public function index(Request $request)
     {
         $page = 'user_needle_report';
-        $title = 'USER DASHBOARD';
+        $title = 'USER NEEDLE REPORT';
+
+        HelperController::activityLog('OPEN USER NEEDLE REPORT', null, 'read', $request->ip(), $request->userAgent());
 
         $user_needle_report = 'active';
 

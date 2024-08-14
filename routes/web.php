@@ -19,14 +19,18 @@ use App\Http\Controllers\Admin\Master\MasterPositionController;
 use App\Http\Controllers\Admin\Master\MasterSampleController;
 use App\Http\Controllers\Admin\Master\MasterStatusController;
 use App\Http\Controllers\Admin\Master\MasterStyleController;
+use App\Http\Controllers\Admin\Master\MasterSubCategoryController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\Tools\ToolsActivityLogController;
 use App\Http\Controllers\Admin\Tools\ToolsPermissionController;
-use App\Http\Controllers\Admin\Tools\ToolsProfileController;
 use App\Http\Controllers\Admin\Tools\ToolsRoleController;
 use App\Http\Controllers\Admin\Tools\ToolsUserController;
+use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\NotifController;
 use App\Http\Controllers\User\ApprovalController;
 use App\Http\Controllers\User\DashboardController as UserDashboard;
 use App\Http\Controllers\User\NeedleReportController;
+use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\StockController;
 
 /*
@@ -42,6 +46,8 @@ use App\Http\Controllers\User\StockController;
 
 Route::get('/', [HomeController::class, 'index'])
     ->name('home');
+
+Route::get('/download/{apk?}', [DownloadController::class, 'download'])->name('download');
 
 
 Auth::routes();
@@ -60,16 +66,25 @@ Route::group(['middleware' => ['auth']], function () {
     Route::prefix('/user')
         ->group(function () {
             Route::prefix('/dashboard')
-                // ->middleware(['permission:user-dashboard'])
+                ->middleware(['permission:user-dashboard'])
                 ->group(function () {
                     Route::get('', [UserDashboard::class, 'index'])
                         ->name('user.dashboard');
-                    Route::get('data', [UserDashboard::class, 'data'])
+                    Route::post('data', [UserDashboard::class, 'data'])
                         ->name('user.dashboard.data');
                 });
 
+            Route::prefix('/report')
+                ->middleware(['permission:user-report'])
+                ->group(function () {
+                    Route::get('', [ReportController::class, 'index'])
+                        ->name('user.report');
+                    Route::get('data', [ReportController::class, 'data'])
+                        ->name('user.report.data');
+                });
+
             Route::prefix('/needle-report')
-                // ->middleware(['permission:user-needle-report'])
+                ->middleware(['permission:user-needle-report'])
                 ->group(function () {
                     Route::get('', [NeedleReportController::class, 'index'])
                         ->name('user.needle-report');
@@ -78,7 +93,7 @@ Route::group(['middleware' => ['auth']], function () {
                 });
 
             Route::prefix('/stock')
-                // ->middleware(['permission:user-stock'])
+                ->middleware(['permission:user-stock'])
                 ->group(function () {
                     Route::get('', [StockController::class, 'index'])
                         ->name('user.stock');
@@ -105,7 +120,7 @@ Route::group(['middleware' => ['auth']], function () {
                 });
 
             Route::prefix('/approval')
-                // ->middleware(['permission:user-approval'])
+                ->middleware(['permission:user-approval'])
                 ->group(function () {
                     Route::get('', [ApprovalController::class, 'index'])
                         ->name('user.approval');
@@ -119,17 +134,17 @@ Route::group(['middleware' => ['auth']], function () {
     Route::prefix('/admin')
         ->group(function () {
             Route::prefix('/dashboard')
-                // ->middleware(['permission:admin-dashboard'])
+                ->middleware(['permission:admin-dashboard'])
                 ->group(function () {
                     Route::get('', [AdminDashboard::class, 'index'])
                         ->name('admin.dashboard');
                 });
 
             Route::prefix('/master')
-                // ->middleware(['permission:admin-master'])
+                ->middleware(['permission:admin-master'])
                 ->group(function () {
                     Route::prefix('/division')
-                        // ->middleware(['permission:admin-master-division'])
+                        ->middleware(['permission:admin-master-division'])
                         ->group(function () {
                             Route::get('', [MasterDivisionController::class, 'index'])
                                 ->name('admin.master.division');
@@ -144,7 +159,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/position')
-                        // ->middleware(['permission:admin-master-position'])
+                        ->middleware(['permission:admin-master-position'])
                         ->group(function () {
                             Route::get('', [MasterPositionController::class, 'index'])
                                 ->name('admin.master.position');
@@ -159,7 +174,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/approval')
-                        // ->middleware(['permission:admin-master-approval'])
+                        ->middleware(['permission:admin-master-approval'])
                         ->group(function () {
                             Route::get('', [MasterApprovalController::class, 'index'])
                                 ->name('admin.master.approval');
@@ -172,7 +187,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/area')
-                        // ->middleware(['permission:admin-master-area'])
+                        ->middleware(['permission:admin-master-area'])
                         ->group(function () {
                             Route::get('', [MasterAreaController::class, 'index'])
                                 ->name('admin.master.area');
@@ -187,7 +202,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/line')
-                        // ->middleware(['permission:admin-master-line'])
+                        ->middleware(['permission:admin-master-line'])
                         ->group(function () {
                             Route::get('', [MasterLineController::class, 'index'])
                                 ->name('admin.master.line');
@@ -202,7 +217,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/counter')
-                        // ->middleware(['permission:admin-master-counter'])
+                        ->middleware(['permission:admin-master-counter'])
                         ->group(function () {
                             Route::get('', [MasterCounterController::class, 'index'])
                                 ->name('admin.master.counter');
@@ -217,7 +232,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/box')
-                        // ->middleware(['permission:admin-master-box'])
+                        ->middleware(['permission:admin-master-box'])
                         ->group(function () {
                             Route::get('', [MasterBoxController::class, 'index'])
                                 ->name('admin.master.box');
@@ -232,7 +247,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/placement')
-                        // ->middleware(['permission:admin-master-placement'])
+                        ->middleware(['permission:admin-master-placement'])
                         ->group(function () {
                             Route::get('', [MasterPlacementController::class, 'index'])
                                 ->name('admin.master.placement');
@@ -249,7 +264,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/status')
-                        // ->middleware(['permission:admin-master-status'])
+                        ->middleware(['permission:admin-master-status'])
                         ->group(function () {
                             Route::get('', [MasterStatusController::class, 'index'])
                                 ->name('admin.master.status');
@@ -264,7 +279,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/needle')
-                        // ->middleware(['permission:admin-master-needle'])
+                        ->middleware(['permission:admin-master-needle'])
                         ->group(function () {
                             Route::get('', [MasterNeedleController::class, 'index'])
                                 ->name('admin.master.needle');
@@ -279,7 +294,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/buyer')
-                        // ->middleware(['permission:admin-master-buyer'])
+                        ->middleware(['permission:admin-master-buyer'])
                         ->group(function () {
                             Route::get('', [MasterBuyerController::class, 'index'])
                                 ->name('admin.master.buyer');
@@ -294,7 +309,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/category')
-                        // ->middleware(['permission:admin-master-category'])
+                        ->middleware(['permission:admin-master-category'])
                         ->group(function () {
                             Route::get('', [MasterCategoryController::class, 'index'])
                                 ->name('admin.master.category');
@@ -308,8 +323,23 @@ Route::group(['middleware' => ['auth']], function () {
                                 ->name('admin.master.category.hapus');
                         });
 
+                    Route::prefix('/sub-category')
+                        ->middleware(['permission:admin-master-sub-category'])
+                        ->group(function () {
+                            Route::get('', [MasterSubCategoryController::class, 'index'])
+                                ->name('admin.master.sub-category');
+                            Route::get('data', [MasterSubCategoryController::class, 'data'])
+                                ->name('admin.master.sub-category.data');
+                            Route::post('crup', [MasterSubCategoryController::class, 'crup'])
+                                ->name('admin.master.sub-category.crup');
+                            Route::get('edit/{id?}', [MasterSubCategoryController::class, 'edit'])
+                                ->name('admin.master.sub-category.edit');
+                            Route::get('hapus/{id?}', [MasterSubCategoryController::class, 'hapus'])
+                                ->name('admin.master.sub-category.hapus');
+                        });
+
                     Route::prefix('/sample')
-                        // ->middleware(['permission:admin-master-sample'])
+                        ->middleware(['permission:admin-master-sample'])
                         ->group(function () {
                             Route::get('', [MasterSampleController::class, 'index'])
                                 ->name('admin.master.sample');
@@ -324,7 +354,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/fabric')
-                        // ->middleware(['permission:admin-master-fabric'])
+                        ->middleware(['permission:admin-master-fabric'])
                         ->group(function () {
                             Route::get('', [MasterFabricController::class, 'index'])
                                 ->name('admin.master.fabric');
@@ -339,7 +369,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/style')
-                        // ->middleware(['permission:admin-master-style'])
+                        ->middleware(['permission:admin-master-style'])
                         ->group(function () {
                             Route::get('', [MasterStyleController::class, 'index'])
                                 ->name('admin.master.style');
@@ -355,10 +385,10 @@ Route::group(['middleware' => ['auth']], function () {
                 });
 
             Route::prefix('/tools')
-                // ->middleware(['permission:admin-tools'])
+                ->middleware(['permission:admin-tools'])
                 ->group(function () {
                     Route::prefix('/user')
-                        // ->middleware(['permission:admin-tools-user'])
+                        ->middleware(['permission:admin-tools-user'])
                         ->group(function () {
                             Route::get('', [ToolsUserController::class, 'index'])
                                 ->name('admin.tools.user');
@@ -382,8 +412,19 @@ Route::group(['middleware' => ['auth']], function () {
                                 ->name('admin.tools.user.hapus-role');
                         });
 
+                    Route::prefix('/activity-log')
+                        ->middleware(['permission:admin-tools-activity-log'])
+                        ->group(function () {
+                            Route::get('', [ToolsActivityLogController::class, 'index'])
+                                ->name('admin.tools.activity-log');
+                            Route::get('/data', [ToolsActivityLogController::class, 'data'])
+                                ->name('admin.tools.activity-log.data');
+                            Route::get('/hapus', [ToolsActivityLogController::class, 'hapus'])
+                                ->name('admin.tools.activity-log.hapus');
+                        });
+
                     Route::prefix('/permission')
-                        // ->middleware(['permission:admin-tools-permission'])
+                        ->middleware(['permission:admin-tools-permission'])
                         ->group(function () {
                             Route::get('', [ToolsPermissionController::class, 'index'])
                                 ->name('admin.tools.permission');
@@ -398,7 +439,7 @@ Route::group(['middleware' => ['auth']], function () {
                         });
 
                     Route::prefix('/role')
-                        // ->middleware(['permission:admin-tools-role'])
+                        ->middleware(['permission:admin-tools-role'])
                         ->group(function () {
                             Route::get('', [ToolsRoleController::class, 'index'])
                                 ->name('admin.tools.role');
@@ -421,15 +462,15 @@ Route::group(['middleware' => ['auth']], function () {
                             Route::get('/hapus-permission/{role_id?}/{id?}', [ToolsRoleController::class, 'hapus_permission'])
                                 ->name('admin.tools.role.hapus-permission');
                         });
+                });
 
-                    Route::prefix('/profile')
-                        // ->middleware(['permission:admin-tools-profile'])
-                        ->group(function () {
-                            Route::get('', [ToolsProfileController::class, 'index'])
-                                ->name('admin.tools.profile');
-                            Route::post('/change', [ToolsProfileController::class, 'change'])
-                                ->name('admin.tools.profile.change');
-                        });
+            Route::prefix('/profile')
+                // ->middleware(['permission:admin-profile'])
+                ->group(function () {
+                    Route::get('', [ProfileController::class, 'index'])
+                        ->name('admin.profile');
+                    Route::post('/change', [ProfileController::class, 'change'])
+                        ->name('admin.profile.change');
                 });
         });
 });

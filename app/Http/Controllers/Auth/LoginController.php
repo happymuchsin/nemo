@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use Exception;
 use GuzzleHttp\Exception\BadResponseException;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -63,7 +64,8 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $this->validate($request, [
-            'login' => 'required', 'password' => 'required',
+            'login' => 'required',
+            'password' => 'required',
         ]);
 
         $credentials = $this->credentials($request);
@@ -72,6 +74,8 @@ class LoginController extends Controller
             if (Auth::attempt([$this->username() => $request->input($this->username()), 'password' => $credentials['password']])) {
                 $user = Auth::getLastAttempted();
                 Auth::login($user);
+
+                HelperController::activityLog('LOGIN', 'users', 'login', $request->ip(), $request->userAgent(), null, null, $user->username);
 
                 return redirect()->route('user.dashboard');
             }

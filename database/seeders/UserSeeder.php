@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
             'password' => bcrypt('qwe123'),
         ]);
 
-        // $u = User::find(1);
-        // $u->assignRole('developer');
+        $u = User::find(1);
+        $u->assignRole('developer');
     }
 }

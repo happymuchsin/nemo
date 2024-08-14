@@ -12,7 +12,9 @@
                         <th>RFID</th>
                         <th>Division</th>
                         <th>Position</th>
+                        <th>Skill</th>
                         <th>Role</th>
+                        <th>Join Date</th>
                         <th>Action</th>
                     </tr>
                 </x-slot:thead>
@@ -42,6 +44,13 @@
                     @endforeach
                 </x-slot:option>
             </x-modal.body>
+            <x-modal.body :tipe="'select'" :label="'Skill'" :id="'skill'">
+                <x-slot:option>
+                    <option value="MULTI">MULTI</option>
+                    <option value="SINGLE">SINGLE</option>
+                </x-slot:option>
+            </x-modal.body>
+            <x-modal.body :tipe="'date'" :label="'Join Date'" :id="'join_date'" />
             <x-modal.body :tipe="'password'" :label="'Password'" :id="'password'" />
         </x-slot:body>
         <x-slot:footer>
@@ -82,6 +91,12 @@
                 width: '100%',
             });
 
+            $('#skill').select2({
+                placeholder: "Select Skill",
+                dropdownParent: $('#crupModal'),
+                width: '100%',
+            });
+
             table = $('#table').DataTable({
                 dom: '<"toolbar">flrtip',
                 scrollY: screen.height * .6,
@@ -109,7 +124,13 @@
                         data: "position"
                     },
                     {
+                        data: "skill"
+                    },
+                    {
                         data: "role"
+                    },
+                    {
+                        data: "join_date"
                     },
                     {
                         data: "action",
@@ -139,6 +160,8 @@
             $('#rfid').val('');
             $('#master_division_id').val('').trigger('change');
             $('#master_position_id').val('').trigger('change');
+            $('#skill').val('').trigger('change');
+            $('#join_date').val('');
             $('#password').val('');
             $('#key').val(0);
             $('#crupModal').modal('toggle');
@@ -154,6 +177,10 @@
                 Swal.fire('Warning', 'Please select Division', 'warning');
             } else if ($('#master_position_id').val() == '') {
                 Swal.fire('Warning', 'Please select Position', 'warning');
+            } else if ($('#skill').val() == '') {
+                Swal.fire('Warning', 'Please select Skill', 'warning');
+            } else if ($('#join_date').val() == '') {
+                Swal.fire('Warning', 'Please select Join Date', 'warning');
             } else if ($('#password').val() == '') {
                 if ($('#key').val() == 0) {
                     Swal.fire('Warning', 'Please insert Password', 'warning');
@@ -180,6 +207,8 @@
                         rfid: $('#rfid').val(),
                         master_division_id: $('#master_division_id').val(),
                         master_position_id: $('#master_position_id').val(),
+                        skill: $('#skill').val(),
+                        join_date: $('#join_date').val(),
                         password: $('#password').val(),
                     },
                     beforeSend: function() {
@@ -240,6 +269,9 @@
                     $('#rfid').val(response.rfid);
                     $('#master_division_id').val(response.master_division_id).trigger('change');
                     $('#master_position_id').val(response.master_position_id).trigger('change');
+                    $('#skill').val(response.skill).trigger('change');
+                    $('#join_date').val(response.join_date);
+                    $('#password').val('');
                     $('#password').val('');
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');
@@ -362,7 +394,7 @@
                                     return {
                                         results: $.map(data, function(item) {
                                             return {
-                                                text: item.name,
+                                                text: item.description,
                                                 id: item.id,
                                             };
                                         }),

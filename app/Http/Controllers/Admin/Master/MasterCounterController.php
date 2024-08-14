@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Models\MasterArea;
 use App\Models\MasterCounter;
 use Carbon\Carbon;
@@ -23,6 +24,8 @@ class MasterCounterController extends Controller
     {
         $page = 'admin_master_counter';
         $title = 'ADMIN MASTER COUNTER';
+
+        HelperController::activityLog('OPEN ADMIN MASTER COUNTER', 'master_counters', 'read', $request->ip(), $request->userAgent());
 
         $admin_master = 'menu-open';
         $area = MasterArea::get();
@@ -66,6 +69,12 @@ class MasterCounterController extends Controller
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("CREATE MASTER COUNTER", 'master_counters', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'master_area_id' => $master_area_id,
+                        'name' => $name,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]));
                 }
             } else {
                 $c = 0;
@@ -88,6 +97,13 @@ class MasterCounterController extends Controller
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("UPDATE MASTER COUNTER", 'master_counters', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'master_area_id' => $master_area_id,
+                        'name' => $name,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
                 }
             }
 
@@ -105,7 +121,7 @@ class MasterCounterController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -113,6 +129,7 @@ class MasterCounterController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
+            HelperController::activityLog("DELETE MASTER COUNTER", 'master_counters', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {

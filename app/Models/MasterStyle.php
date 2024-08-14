@@ -20,6 +20,10 @@ class MasterStyle extends Model
     {
         return $this->belongsTo(MasterCategory::class, 'master_category_id', 'id');
     }
+    public function sub_category()
+    {
+        return $this->belongsTo(MasterSubCategory::class, 'master_sub_category_id', 'id');
+    }
     public function sample()
     {
         return $this->belongsTo(MasterSample::class, 'master_sample_id', 'id');

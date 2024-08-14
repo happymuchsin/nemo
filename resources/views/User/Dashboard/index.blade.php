@@ -1,517 +1,309 @@
-@extends('layouts.user', ['page' => $page, 'sidebar' => true])
+@extends('layouts.user', ['page' => $page, 'sidebar' => false])
 @section('title', $title)
 
 @section('page-content')
-    <x-layout.content :name="''">
+    <x-layout.content :name="'Dashboard'">
         <x-slot:body>
-            <x-filter.user-filter>
-            </x-filter.user-filter>
-            <x-layout.table :id="'table'">
-                <x-slot:thead>
-                </x-slot:thead>
-                <x-slot:tfoot>
-                </x-slot:tfoot>
-            </x-layout.table>
+            <div class="row">
+                <div class="col-sm-2">
+                    <div class="small-box" style="background-color: #dd3849;margin-bottom:0px;">
+                        <h4 class="text-bold text-center text-white">OUTSTANDING</h4>
+                    </div>
+                    <div class="small-box" style="background-color: #ff5c42">
+                        <div class="inner" id="outstanding" style="height: 200pt;"></div>
+                    </div>
+                </div>
+                <div class="col-sm-10">
+                    <div class="row">
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #3698d8'" :footerStyle="'color:black'" :id="'ava_single_needle'" :inner="'Single Needle'"
+                            :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #25cb76'" :footerStyle="'color:black'" :id="'ava_obras'" :inner="'Obras'"
+                            :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #e67f32'" :footerStyle="'color:black'" :id="'ava_double_needle'" :inner="'Double Needle'"
+                            :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #e84e42'" :footerStyle="'color:black'" :id="'ava_kansai'" :inner="'Kansai'"
+                            :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #85c1e7'" :footerStyle="'color:black'" :id="'rep_single_needle'" :inner="'Single Needle'"
+                            :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #80dfac'" :footerStyle="'color:black'" :id="'rep_obras'" :inner="'Obras'"
+                            :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #f0b27f'" :footerStyle="'color:black'" :id="'rep_double_needle'" :inner="'Double Needle'"
+                            :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #f1958c'" :footerStyle="'color:black'" :id="'rep_kansai'" :inner="'Kansai'"
+                            :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
+                    </div>
+                </div>
+            </div>
+            <div id="chart" style="width: 100%; height: 500pt;"></div>
         </x-slot:body>
     </x-layout.content>
 
     <script>
-        var page = '',
-            table = null;
+        var chart = null;
         $(document).ready(function() {
-            setSidebar('dashboard_daily');
+            $('#collSidebar').attr('hidden', true);
+            $('#collSidebar').click();
+
+            outstanding();
+
+            reloadData();
+
+            setChart();
         })
 
-        function setSidebar(id) {
-            $('.user_dashboard').removeClass('active');
-            $('#' + id).addClass('active');
-            page = id;
-
-            var judul = '';
-            if (page.replace('dashboard_', '').trim() == 'daily') {
-                judul = 'Daily';
-            } else if (page.replace('dashboard_', '').trim() == 'weekly') {
-                judul = 'Weekly';
-            } else if (page.replace('dashboard_', '').trim() == 'monthly') {
-                judul = 'Monthly';
-            } else if (page.replace('dashboard_', '').trim() == 'quarterly') {
-                judul = 'Quarterly';
-            } else if (page.replace('dashboard_', '').trim() == 'half') {
-                judul = 'Half Yearly';
-            } else if (page.replace('dashboard_', '').trim() == 'yearly') {
-                judul = 'Yearly';
-            } else {
-                judul = '';
-            }
-            $('.card-title').html('<i class="text-info fas fa-chalkboard"></i> ' + judul);
-
-            setFilter(id);
-
-            setTable(id);
+        function outstanding() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                type: "POST",
+                url: "{{ route('user.dashboard.data') }}",
+                data: {
+                    tipe: 'outstanding',
+                },
+                success: function(response) {
+                    $('#outstanding').html(response);
+                },
+                error: function(response) {
+                    Swal.fire('Warning!', response.responseText, 'warning');
+                }
+            })
         }
 
-        function setFilter(id) {
-            $('#filterMe').html('');
-            if (id == 'dashboard_daily') {
-                $('#filterMe').html(
-                    `<x-filter.filter :tipe="'date'" :label="'Date'" :id="'filter_date'" :colom="'col-sm-auto'" />`
-                );
-
-                $('#filter_date').val("{{ date('Y-m-d') }}")
-            } else if (id == 'dashboard_weekly') {
-                $('#filterMe').html(
-                    `<x-filter.filter :tipe="'week'" :label="'Week'" :id="'filter_week'" :colom="'col-sm-auto'" />`
-                );
-
-                $('#filter_week').val("{{ date('Y') . '-W' . date('W') }}")
-            } else if (id == 'dashboard_monthly') {
-                $('#filterMe').html(
-                    `<x-filter.filter :tipe="'month'" :label="'Month'" :id="'filter_month'" :colom="'col-sm-auto'" />`
-                );
-
-                $('#filter_month').val("{{ date('Y-m') }}")
-            } else if (id == 'dashboard_quarterly') {
-                $('#filterMe').html(
-                    `<x-filter.filter :tipe="'select'" :label="'Quarter'" :id="'filter_quarter'" :colom="'col-sm-auto'" :alloption="false">
-                        <x-slot:option>
-                            <option value="Q1">Q1 (January, February, March)</option>
-                            <option value="Q2">Q2 (April, May, June)</option>
-                            <option value="Q3">Q3 (July, August, September)</option>
-                            <option value="Q4">Q4 (October, Novemeber, December)</option>
-                        </x-slot:option>
-                    </x-filter.filter>
-                    <x-filter.filter :tipe="'number'" :label="'Year'" :id="'filter_year'" :colom="'col-sm-auto'" />
-                    `
-                );
-
-                $('#filter_year').val("{{ date('Y') }}")
-                $('#filter_quarter').val("{{ $quarter }}").trigger('change');
-            } else if (id == 'dashboard_half') {
-                $('#filterMe').html(
-                    `<x-filter.filter :tipe="'select'" :label="'Half Year'" :id="'filter_half'" :colom="'col-sm-auto'" :alloption="false">
-                        <x-slot:option>
-                            <option value="H1">Semester 1 (January - June)</option>
-                            <option value="H2">Semester 2 (July - December)</option>
-                        </x-slot:option>
-                    </x-filter.filter>
-                    <x-filter.filter :tipe="'number'" :label="'Year'" :id="'filter_year'" :colom="'col-sm-auto'" />
-                    `
-                );
-
-                $('#filter_year').val("{{ date('Y') }}")
-                $('#filter_half').val("{{ $half }}").trigger('change');
-            } else if (id == 'dashboard_yearly') {
-                $('#filterMe').html(
-                    `<x-filter.filter :tipe="'number'" :label="'Year'" :id="'filter_year'" :colom="'col-sm-auto'" />`
-                );
-
-                $('#filter_year').val("{{ date('Y') }}")
-            }
-            if ($('#filterMe').html() != '') {
-                $('#filterMe').append(`
-                    <div class="form-group">
-                        <x-layout.button :class="'btn-primary'" :id="'cari'" :onclick="'table.ajax.reload()'" :icon="'fa fa-search'"
-                            :name="'SEARCH'" />
-                    </div>`);
-            }
+        function reloadData() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                type: "POST",
+                url: "{{ route('user.dashboard.data') }}",
+                data: {
+                    tipe: 'box',
+                },
+                success: function(response) {
+                    $('#ava_single_needle').text(response.ava_single_needle);
+                    $('#ava_obras').text(response.ava_obras);
+                    $('#ava_double_needle').text(response.ava_double_needle);
+                    $('#ava_kansai').text(response.ava_kansai);
+                    $('#rep_single_needle').text(response.rep_single_needle);
+                    $('#rep_obras').text(response.rep_obras);
+                    $('#rep_double_needle').text(response.rep_double_needle);
+                    $('#rep_kansai').text(response.rep_kansai);
+                },
+                error: function(response) {
+                    Swal.fire('Warning!', response.responseText, 'warning');
+                }
+            })
         }
 
-        function setTable(id) {
-            if ($.fn.DataTable.isDataTable("#table")) {
-                $('#table').html('');
-                table.destroy();
+        function setChart() {
+            if (chart != null) {
+                chart.dispose();
             }
-            $('#tableHead').html('');
-            if (id == 'dashboard_daily') {
-                setTimeout(() => {
-                    $('#tableHead').html(`
-                        <tr>
-                            <th>Time</th>
-                            <th>Line</th>
-                            <th>User</th>
-                            <th>Brand</th>
-                            <th>Type</th>
-                            <th>Size</th>
-                            <th>Remark</th>
-                        </tr>
-                        `)
-                    $('#tableFoot').html('<tr></tr>');
-                    table = $('#table').DataTable({
-                        dom: '<"toolbar"B>flrtip',
-                        buttons: [{
-                            extend: 'excelHtml5',
-                            title: 'Daily ' + $('#filter_date').val(),
-                        }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
-                        ajax: {
-                            url: "{{ route('user.dashboard.data') }}",
-                            data: function(d) {
-                                d.id = id;
-                                d.filter_date = $('#filter_date').val();
-                            }
-                        },
-                        columns: [{
-                                data: 'time'
-                            },
-                            {
-                                data: 'line'
-                            },
-                            {
-                                data: 'user'
-                            },
-                            {
-                                data: 'brand'
-                            },
-                            {
-                                data: 'tipe'
-                            },
-                            {
-                                data: 'size'
-                            },
-                            {
-                                data: 'remark'
-                            },
-                        ],
-                        order: [],
-                        paging: false,
-                    });
-                }, 250);
-            } else if (id == 'dashboard_weekly') {
-                setTimeout(() => {
-                    $('#tableHead').html(`
-                        <tr>
-                            <th>Date</th>
-                            @foreach ($master_status as $d)
-                            <th>{{ $d->name }}</th>
-                            @endforeach
-                            <th>Last Stock</th>
-                        </tr>
-                    `)
-                    $('#tableFoot').html(`
-                        <tr>
-                            <th>Total</th>
-                            @foreach ($master_status as $d)
-                            <th></th>
-                            @endforeach
-                            <th></th>
-                        </tr>
-                    `)
-                    table = $('#table').DataTable({
-                        dom: '<"toolbar"B>flrtip',
-                        buttons: [{
-                            extend: 'excelHtml5',
-                            title: 'Weekly ' + $('#filter_week').val(),
-                        }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
-                        ajax: {
-                            url: "{{ route('user.dashboard.data') }}",
-                            data: function(d) {
-                                d.id = id;
-                                d.filter_week = $('#filter_week').val();
-                            }
-                        },
-                        columns: [{
-                                data: 'date'
-                            },
-                            @foreach ($master_status as $d)
-                                {
-                                    data: '{{ $d->kolom }}'
-                                },
-                            @endforeach {
-                                data: 'stock'
-                            },
-                        ],
-                        order: [],
-                        paging: false,
-                        footerCallback: function(tfoot, data) {
-                            var api = this.api();
-                            var d = "{{ count($master_status) }}";
-                            var f = 0;
-                            for (var x = 1; x <= +d + +1; x++) {
-                                f++;
-                                $(api.column(x).footer()).html(api
-                                    .column(x)
-                                    .data()
-                                    .reduce(function(a, b) {
-                                        return +a + +b;
-                                    }, 0));
-                            }
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                    url: "{{ route('user.dashboard.data') }}",
+                    type: "POST",
+                    data: {
+                        tipe: 'chart',
+                    },
+                    beforeSend: function() {
+                        Swal.fire({
+                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
+                            title: 'Please Wait',
+                            html: 'Fetching your data..',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                        });
+                        Swal.showLoading();
+                    },
+                    complete: function() {
+                        Swal.close();
+                    },
+                })
+                .done(function(response) {
+                    am4core.ready(function() {
+                        am4core.useTheme(am4themes_animated);
+                        var chart = am4core.create("chart", am4charts.XYChart);
+                        var x = [];
+                        $.each(response, function(k, v) {
+                            x.push({
+                                'date': v.date,
+                                'ava_single_needle': v.ava_single_needle,
+                                'ava_double_needle': v.ava_double_needle,
+                                'ava_obras': v.ava_obras,
+                                'ava_kansai': v.ava_kansai,
+                                'rep_single_needle': v.rep_single_needle,
+                                'rep_double_needle': v.rep_double_needle,
+                                'rep_obras': v.rep_obras,
+                                'rep_kansai': v.rep_kansai,
+                            });
+                        })
+                        chart.data = x;
+                        var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+                        categoryAxis.dataFields.category = "date";
+
+                        var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+                        function createSeries(field, name, color) {
+                            var series = chart.series.push(new am4charts.LineSeries());
+                            series.dataFields.valueY = field;
+                            series.dataFields.categoryX = "date";
+                            series.name = name;
+                            series.tooltipText = "{name}: [b]{valueY}[/]";
+                            series.stroke = am4core.color(color);
+                            series.strokeWidth = 2;
+
+                            var bullet = series.bullets.push(new am4charts.CircleBullet());
+                            bullet.circle.stroke = am4core.color(color);
+                            bullet.circle.strokeWidth = 2;
+
+                            return series;
                         }
-                    });
-                }, 250);
-            } else if (id == 'dashboard_monthly') {
-                setTimeout(() => {
-                    $('#tableHead').html(`
-                        <tr>
-                            <th>Date</th>
-                            @foreach ($master_status as $d)
-                            <th>{{ $d->name }}</th>
-                            @endforeach
-                            <th>Last Stock</th>
-                        </tr>
-                    `)
-                    $('#tableFoot').html(`
-                        <tr>
-                            <th>Total</th>
-                            @foreach ($master_status as $d)
-                            <th></th>
-                            @endforeach
-                            <th></th>
-                        </tr>
-                    `)
-                    table = $('#table').DataTable({
-                        dom: '<"toolbar"B>flrtip',
-                        buttons: [{
-                            extend: 'excelHtml5',
-                            title: 'Monthly ' + $('#filter_month').val(),
-                        }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
-                        ajax: {
-                            url: "{{ route('user.dashboard.data') }}",
-                            data: function(d) {
-                                d.id = id;
-                                d.filter_month = $('#filter_month').val();
-                            }
-                        },
-                        columns: [{
-                                data: 'date'
-                            },
-                            @foreach ($master_status as $d)
-                                {
-                                    data: '{{ $d->kolom }}'
-                                },
-                            @endforeach {
-                                data: 'stock'
-                            },
-                        ],
-                        order: [],
-                        paging: false,
-                        footerCallback: function(tfoot, data) {
-                            var api = this.api();
-                            var d = "{{ count($master_status) }}";
-                            var f = 0;
-                            for (var x = 1; x <= +d + +1; x++) {
-                                f++;
-                                $(api.column(x).footer()).html(api
-                                    .column(x)
-                                    .data()
-                                    .reduce(function(a, b) {
-                                        return +a + +b;
-                                    }, 0));
-                            }
-                        }
-                    });
-                }, 250);
-            } else if (id == 'dashboard_quarterly') {
-                setTimeout(() => {
-                    $('#tableHead').html(`
-                        <tr>
-                            <th>Month</th>
-                            @foreach ($master_status as $d)
-                            <th>{{ $d->name }}</th>
-                            @endforeach
-                            <th>Last Stock</th>
-                        </tr>
-                    `)
-                    $('#tableFoot').html(`
-                        <tr>
-                            <th>Total</th>
-                            @foreach ($master_status as $d)
-                            <th></th>
-                            @endforeach
-                            <th></th>
-                        </tr>
-                    `)
-                    table = $('#table').DataTable({
-                        dom: '<"toolbar"B>flrtip',
-                        buttons: [{
-                            extend: 'excelHtml5',
-                            title: 'Quarterly ' + $('#filter_quarter').val() + ' ' + $(
-                                '#filter_year').val(),
-                        }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
-                        ajax: {
-                            url: "{{ route('user.dashboard.data') }}",
-                            data: function(d) {
-                                d.id = id;
-                                d.filter_quarter = $('#filter_quarter').val();
-                                d.filter_year = $('#filter_year').val();
-                            }
-                        },
-                        columns: [{
-                                data: 'date'
-                            },
-                            @foreach ($master_status as $d)
-                                {
-                                    data: '{{ $d->kolom }}'
-                                },
-                            @endforeach {
-                                data: 'stock'
-                            },
-                        ],
-                        order: [],
-                        paging: false,
-                        footerCallback: function(tfoot, data) {
-                            var api = this.api();
-                            var d = "{{ count($master_status) }}";
-                            var f = 0;
-                            for (var x = 1; x <= +d + +1; x++) {
-                                f++;
-                                $(api.column(x).footer()).html(api
-                                    .column(x)
-                                    .data()
-                                    .reduce(function(a, b) {
-                                        return +a + +b;
-                                    }, 0));
-                            }
-                        }
-                    });
-                }, 250);
-            } else if (id == 'dashboard_half') {
-                setTimeout(() => {
-                    $('#tableHead').html(`
-                        <tr>
-                            <th>Month</th>
-                            @foreach ($master_status as $d)
-                            <th>{{ $d->name }}</th>
-                            @endforeach
-                            <th>Last Stock</th>
-                        </tr>
-                    `)
-                    $('#tableFoot').html(`
-                        <tr>
-                            <th>Total</th>
-                            @foreach ($master_status as $d)
-                            <th></th>
-                            @endforeach
-                            <th></th>
-                        </tr>
-                    `)
-                    table = $('#table').DataTable({
-                        dom: '<"toolbar"B>flrtip',
-                        buttons: [{
-                            extend: 'excelHtml5',
-                            title: 'Half Yearly ' + $('#filter_half').val() + ' ' + $(
-                                '#filter_year').val(),
-                        }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
-                        ajax: {
-                            url: "{{ route('user.dashboard.data') }}",
-                            data: function(d) {
-                                d.id = id;
-                                d.filter_half = $('#filter_half').val();
-                                d.filter_year = $('#filter_year').val();
-                            }
-                        },
-                        columns: [{
-                                data: 'date'
-                            },
-                            @foreach ($master_status as $d)
-                                {
-                                    data: '{{ $d->kolom }}'
-                                },
-                            @endforeach {
-                                data: 'stock'
-                            },
-                        ],
-                        order: [],
-                        paging: false,
-                        footerCallback: function(tfoot, data) {
-                            var api = this.api();
-                            var d = "{{ count($master_status) }}";
-                            var f = 0;
-                            for (var x = 1; x <= +d + +1; x++) {
-                                f++;
-                                $(api.column(x).footer()).html(api
-                                    .column(x)
-                                    .data()
-                                    .reduce(function(a, b) {
-                                        return +a + +b;
-                                    }, 0));
-                            }
-                        }
-                    });
-                }, 250);
-            } else if (id == 'dashboard_yearly') {
-                setTimeout(() => {
-                    $('#tableHead').html(`
-                        <tr>
-                            <th>Month</th>
-                            @foreach ($master_status as $d)
-                            <th>{{ $d->name }}</th>
-                            @endforeach
-                            <th>Last Stock</th>
-                        </tr>
-                    `)
-                    $('#tableFoot').html(`
-                        <tr>
-                            <th>Total</th>
-                            @foreach ($master_status as $d)
-                            <th></th>
-                            @endforeach
-                            <th></th>
-                        </tr>
-                    `)
-                    table = $('#table').DataTable({
-                        dom: '<"toolbar"B>flrtip',
-                        buttons: [{
-                            extend: 'excelHtml5',
-                            title: 'Yearly ' + $('#filter_year').val(),
-                        }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
-                        ajax: {
-                            url: "{{ route('user.dashboard.data') }}",
-                            data: function(d) {
-                                d.id = id;
-                                d.filter_year = $('#filter_year').val();
-                            }
-                        },
-                        columns: [{
-                                data: 'date'
-                            },
-                            @foreach ($master_status as $d)
-                                {
-                                    data: '{{ $d->kolom }}'
-                                },
-                            @endforeach {
-                                data: 'stock'
-                            },
-                        ],
-                        order: [],
-                        paging: false,
-                        footerCallback: function(tfoot, data) {
-                            var api = this.api();
-                            var d = "{{ count($master_status) }}";
-                            var f = 0;
-                            for (var x = 1; x <= +d + +1; x++) {
-                                f++;
-                                $(api.column(x).footer()).html(api
-                                    .column(x)
-                                    .data()
-                                    .reduce(function(a, b) {
-                                        return +a + +b;
-                                    }, 0));
-                            }
-                        }
-                    });
-                }, 250);
-            }
+
+                        var series1 = createSeries("void", "Toggle All", "#fff");
+                        var series2 = createSeries("void", "Toggle Single Needle", "#fff");
+                        var series3 = createSeries("void", "Toggle Obras", "#fff");
+                        var series4 = createSeries("void", "Toggle Double Needle", "#fff");
+                        var series5 = createSeries("void", "Toggle Kansai", "#fff");
+                        var series6 = createSeries("ava_single_needle", "Available Single Needle", "#3698d8");
+                        var series7 = createSeries("rep_single_needle", "Replacement Single Needle", "#85c1e7");
+                        var series8 = createSeries("ava_obras", "Available Obras", "#25cb76");
+                        var series9 = createSeries("rep_obras", "Replacement Obras", "#80dfac");
+                        var series10 = createSeries("ava_double_needle", "Available Double Needle", "#e67f32");
+                        var series11 = createSeries("rep_double_needle", "Replacement Double Needle",
+                            "#f0b27f");
+                        var series12 = createSeries("ava_kansai", "Available Kansai", "#e84e42");
+                        var series13 = createSeries("rep_kansai", "Replacement Kansai", "#f1958c");
+
+                        // All
+                        series1.events.on("hidden", function() {
+                            series2.hide();
+                            series3.hide();
+                            series4.hide();
+                            series5.hide();
+                            series6.hide();
+                            series7.hide();
+                            series8.hide();
+                            series9.hide();
+                            series10.hide();
+                            series11.hide();
+                            series12.hide();
+                            series13.hide();
+                        });
+
+                        series1.events.on("shown", function() {
+                            series6.show();
+                            series7.show();
+                            series8.show();
+                            series9.show();
+                            series10.show();
+                            series11.show();
+                            series12.show();
+                            series13.show();
+                        });
+                        // Single Needle
+                        series2.events.on("hidden", function() {
+                            series1.hide();
+                            series3.hide();
+                            series4.hide();
+                            series5.hide();
+                            series6.hide();
+                            series7.hide();
+                            series8.hide();
+                            series9.hide();
+                            series10.hide();
+                            series11.hide();
+                            series12.hide();
+                            series13.hide();
+                        });
+
+                        series2.events.on("shown", function() {
+                            series6.show();
+                            series7.show();
+                        });
+                        // Obras
+                        series3.events.on("hidden", function() {
+                            series2.hide();
+                            series1.hide();
+                            series4.hide();
+                            series5.hide();
+                            series6.hide();
+                            series7.hide();
+                            series8.hide();
+                            series9.hide();
+                            series10.hide();
+                            series11.hide();
+                            series12.hide();
+                            series13.hide();
+                        });
+
+                        series3.events.on("shown", function() {
+                            series8.show();
+                            series9.show();
+                        });
+                        // Double Needle
+                        series4.events.on("hidden", function() {
+                            series2.hide();
+                            series3.hide();
+                            series1.hide();
+                            series5.hide();
+                            series6.hide();
+                            series7.hide();
+                            series8.hide();
+                            series9.hide();
+                            series10.hide();
+                            series11.hide();
+                            series12.hide();
+                            series13.hide();
+                        });
+
+                        series4.events.on("shown", function() {
+                            series10.show();
+                            series11.show();
+                        });
+                        // Kansai
+                        series5.events.on("hidden", function() {
+                            series2.hide();
+                            series3.hide();
+                            series4.hide();
+                            series1.hide();
+                            series6.hide();
+                            series7.hide();
+                            series8.hide();
+                            series9.hide();
+                            series10.hide();
+                            series11.hide();
+                            series12.hide();
+                            series13.hide();
+                        });
+
+                        series5.events.on("shown", function() {
+                            series12.show();
+                            series13.show();
+                        });
+
+
+                        chart.legend = new am4charts.Legend();
+                        chart.cursor = new am4charts.XYCursor();
+                    })
+                })
         }
 
         socket.on('nemoReload', () => {
-            table.ajax.reload();
+            outstanding();
+
+            reloadData();
+
+            setChart();
         })
     </script>
 @endsection

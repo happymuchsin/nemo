@@ -19,7 +19,7 @@ class MasterDivisionSeeder extends Seeder
         ]);
         MasterDivision::firstOrCreate([
             'id' => 2,
-            'name' => 'PRODUCTION',
+            'name' => 'ANGGUN',
         ]);
     }
 }

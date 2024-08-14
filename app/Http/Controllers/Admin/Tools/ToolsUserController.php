@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Admin\Tools;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HelperController;
 use App\Models\MasterDivision;
 use App\Models\MasterPosition;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +18,6 @@ class ToolsUserController extends Controller
 {
     public function __construct()
     {
-
         $this->middleware('ajax-session-expired');
         $this->middleware('auth');
     }
@@ -30,18 +27,31 @@ class ToolsUserController extends Controller
         $page = 'admin_tools_user';
         $title = 'ADMIN TOOLS USER';
 
+        HelperController::activityLog('OPEN ADMIN USER', 'users', 'read', $request->ip(), $request->userAgent());
+
         // $admin_tools = 'menu-open';
         $admin_master = 'menu-open';
 
-        $divisi = MasterDivision::get();
-        $position = MasterPosition::get();
+        $divisi = MasterDivision::where('name', '!=', 'DEVELOPER')->get();
+        $position = MasterPosition::where('name', '!=', 'DEVELOPER')->get();
 
         return view('Admin.Tools.User.index', compact('title', 'page', 'admin_master', 'divisi', 'position'));
     }
 
     public function data(Request $request)
     {
-        $data = User::with(['division', 'position'])->get();
+        $data = User::with(['division', 'position'])
+            ->whereIn('master_division_id', function ($q) {
+                $q->select('id')
+                    ->from('master_divisions')
+                    ->where('name', '!=', 'DEVELOPER');
+            })
+            ->whereIn('master_position_id', function ($q) {
+                $q->select('id')
+                    ->from('master_positions')
+                    ->where('name', '!=', 'DEVELOPER');
+            })
+            ->get();
         return datatables()->of($data)
             ->addColumn('division', function ($q) {
                 return $q->division->name;
@@ -50,14 +60,14 @@ class ToolsUserController extends Controller
                 return $q->position->name;
             })
             ->addColumn('role', function ($q) {
-                $r = Role::selectRaw('roles.name as name')
+                $r = Role::selectRaw('roles.name as name, roles.description as ket')
                     ->join('model_has_roles as mhr', 'roles.id', 'mhr.role_id')
                     ->where('mhr.model_type', User::class)
                     ->where('mhr.model_id', $q->id)
                     ->get();
                 $k = "";
                 foreach ($r as $r) {
-                    $k .= $r->name;
+                    $k .= $r->ket;
                     $k .= ' ';
                 }
 
@@ -81,6 +91,8 @@ class ToolsUserController extends Controller
         $rfid = $request->rfid;
         $master_division_id = $request->master_division_id;
         $master_position_id = $request->master_position_id;
+        $skill = $request->skill;
+        $join_date = $request->join_date;
         $password = $request->password;
 
         try {
@@ -96,10 +108,24 @@ class ToolsUserController extends Controller
                         'rfid' => $rfid,
                         'master_division_id' => $master_division_id,
                         'master_position_id' => $master_position_id,
+                        'skill' => $skill,
+                        'join_date' => $join_date,
                         'password' => bcrypt($password),
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("CREATE USER", 'users', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'username' => $username,
+                        'name' => $name,
+                        'rfid' => $rfid,
+                        'master_division_id' => $master_division_id,
+                        'master_position_id' => $master_position_id,
+                        'skill' => $skill,
+                        'join_date' => $join_date,
+                        'password' => bcrypt($password),
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]));
                 }
             } else {
                 $c = 0;
@@ -129,10 +155,25 @@ class ToolsUserController extends Controller
                         'rfid' => $rfid,
                         'master_division_id' => $master_division_id,
                         'master_position_id' => $master_position_id,
+                        'skill' => $skill,
+                        'join_date' => $join_date,
                         'password' => $password ? bcrypt($password) : DB::raw('password'),
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("UPDATE USER", 'users', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'username' => $username,
+                        'name' => $name,
+                        'rfid' => $rfid,
+                        'master_division_id' => $master_division_id,
+                        'master_position_id' => $master_position_id,
+                        'skill' => $skill,
+                        'join_date' => $join_date,
+                        'password' => $password ? bcrypt($password) : DB::raw('password'),
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
                 }
             }
 
@@ -149,7 +190,7 @@ class ToolsUserController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         $u = User::where('id', $id)->first();
         if ($u->username == 'developer') {
@@ -158,6 +199,7 @@ class ToolsUserController extends Controller
         User::where('id', $id)->update([
             'deleted_at' => Carbon::now(),
         ]);
+        HelperController::activityLog("DELETE USER", 'users', 'delete', $request->ip(), $request->userAgent(), null, $id);
 
         return response()->json('Delete Success', 200);
     }
@@ -170,7 +212,7 @@ class ToolsUserController extends Controller
     public function data_role(Request $request)
     {
         $user_id = $request->user_id;
-        $data = Role::selectRaw('roles.id as id, roles.name as name')
+        $data = Role::selectRaw('roles.id as id, roles.name as name, roles.description as ket')
             ->join('model_has_roles as mhr', 'roles.id', 'mhr.role_id')
             ->where('mhr.model_type', User::class)
             ->when($user_id != 0, function ($q) use ($user_id) {
@@ -178,6 +220,9 @@ class ToolsUserController extends Controller
             });
 
         return datatables()->of($data)
+            ->editColumn('name', function ($q) {
+                return $q->ket;
+            })
             ->addColumn('action', function ($data) use ($user_id) {
                 return view('includes.admin.action', [
                     'hapusDetail' => route('admin.tools.user.hapus-role', ['user_id' => $user_id, 'id' => $data->id]),

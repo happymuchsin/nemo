@@ -1,11 +1,13 @@
 <nav class="main-header navbar navbar-expand navbar-white navbar-light" style="height: 55pt;">
     <!-- Left navbar links -->
-    <ul class="navbar-nav">
+    <ul class="navbar-nav mr-auto">
         <li class="nav-item px-0">
             <a class="nav-link" data-widget="pushmenu" id="collSidebar" href="#" role="button"><i
                     class="fa fa-bars"></i></a>
         </li>
     </ul>
+
+    <img class="mr-auto ml-auto" src="{{ asset('assets/img/anggun.png') }}" alt="" width="180">
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">

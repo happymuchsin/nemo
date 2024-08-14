@@ -31,204 +31,222 @@
                 </li> --}}
                 {{-- @endcan --}}
 
-                {{-- @can('admin-master') --}}
-                <li class="nav-item {{ isset($admin_master) ? $admin_master : '' }}">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fa-sharp fa fa-database text-warning"></i>
-                        <p>
-                            Master
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
+                @can('admin-master')
+                    <li class="nav-item {{ isset($admin_master) ? $admin_master : '' }}">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fa-sharp fa fa-database text-warning"></i>
+                            <p>
+                                Master
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
 
-                        {{-- @can('admin-master-division') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.division') }}"
-                                class="nav-link {{ $page == 'admin_master_division' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Division</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-position') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.position') }}"
-                                class="nav-link {{ $page == 'admin_master_position' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Position</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-tools-user') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.tools.user') }}"
-                                class="nav-link {{ $page == 'admin_tools_user' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Data Users</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-approval') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.approval') }}"
-                                class="nav-link {{ $page == 'admin_master_approval' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Approval</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-area') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.area') }}"
-                                class="nav-link {{ $page == 'admin_master_area' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Area</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-line') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.line') }}"
-                                class="nav-link {{ $page == 'admin_master_line' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Line</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-counter') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.counter') }}"
-                                class="nav-link {{ $page == 'admin_master_counter' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Counter</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-box') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.box') }}"
-                                class="nav-link {{ $page == 'admin_master_box' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Box</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-placement') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.placement') }}"
-                                class="nav-link {{ $page == 'admin_master_placement' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Placement</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-status') --}}
-                        {{-- <li class="nav-item">
+                            @can('admin-master-division')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.division') }}"
+                                        class="nav-link {{ $page == 'admin_master_division' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Division</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-position')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.position') }}"
+                                        class="nav-link {{ $page == 'admin_master_position' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Position</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-tools-user')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.tools.user') }}"
+                                        class="nav-link {{ $page == 'admin_tools_user' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Data Users</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-approval')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.approval') }}"
+                                        class="nav-link {{ $page == 'admin_master_approval' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Approval</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-area')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.area') }}"
+                                        class="nav-link {{ $page == 'admin_master_area' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Area</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-line')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.line') }}"
+                                        class="nav-link {{ $page == 'admin_master_line' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Line</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-counter')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.counter') }}"
+                                        class="nav-link {{ $page == 'admin_master_counter' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Counter</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-box')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.box') }}"
+                                        class="nav-link {{ $page == 'admin_master_box' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Box</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-placement')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.placement') }}"
+                                        class="nav-link {{ $page == 'admin_master_placement' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Placement</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            {{-- @can('admin-master-status') --}}
+                            {{-- <li class="nav-item">
                             <a href="{{ route('admin.master.status') }}"
                                 class="nav-link {{ $page == 'admin_master_status' ? 'active' : '' }}">
                                 <i class="fa fa-circle nav-icon text-warning"></i>
                                 <p>Status</p>
                             </a>
                         </li> --}}
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-needle') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.needle') }}"
-                                class="nav-link {{ $page == 'admin_master_needle' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Needle</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-buyer') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.buyer') }}"
-                                class="nav-link {{ $page == 'admin_master_buyer' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Buyer</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-category') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.category') }}"
-                                class="nav-link {{ $page == 'admin_master_category' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Category</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-sample') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.sample') }}"
-                                class="nav-link {{ $page == 'admin_master_sample' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Sample</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-fabric') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.fabric') }}"
-                                class="nav-link {{ $page == 'admin_master_fabric' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Fabric</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-master-style') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.master.style') }}"
-                                class="nav-link {{ $page == 'admin_master_style' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Style</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                    </ul>
-                </li>
-                {{-- @endcan --}}
+                            {{-- @endcan --}}
+                            @can('admin-master-needle')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.needle') }}"
+                                        class="nav-link {{ $page == 'admin_master_needle' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Needle</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-buyer')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.buyer') }}"
+                                        class="nav-link {{ $page == 'admin_master_buyer' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Buyer</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-category')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.category') }}"
+                                        class="nav-link {{ $page == 'admin_master_category' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Category</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-sub-category')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.sub-category') }}"
+                                        class="nav-link {{ $page == 'admin_master_sub_category' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Sub Category</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-sample')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.sample') }}"
+                                        class="nav-link {{ $page == 'admin_master_sample' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Sample</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-fabric')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.fabric') }}"
+                                        class="nav-link {{ $page == 'admin_master_fabric' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Fabric</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-master-style')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.style') }}"
+                                        class="nav-link {{ $page == 'admin_master_style' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Style</p>
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endcan
 
-                {{-- @can('admin-tools') --}}
-                <li class="nav-item {{ isset($admin_tools) ? $admin_tools : '' }}">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fa fa-gears text-warning"></i>
-                        <p>
-                            Tools
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
+                @can('admin-tools')
+                    <li class="nav-item {{ isset($admin_tools) ? $admin_tools : '' }}">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fa fa-gears text-warning"></i>
+                            <p>
+                                Tools
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            @can('admin-tools-activity-log')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.tools.activity-log') }}"
+                                        class="nav-link {{ $page == 'admin_tools_activity_log' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Activity Log</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-tools-role')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.tools.role') }}"
+                                        class="nav-link {{ $page == 'admin_tools_role' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Role</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            {{-- @can('admin-tools-permission')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.tools.permission') }}"
+                                        class="nav-link {{ $page == 'admin_tools_permission' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Permission</p>
+                                    </a>
+                                </li>
+                            @endcan --}}
+                        </ul>
+                    </li>
+                @endcan
+
+                {{-- @can('admin-profile') --}}
+                <li class="nav-item">
+                    <a href="{{ route('admin.profile') }}"
+                        class="nav-link {{ $page == 'admin_profile' ? 'active' : '' }}">
+                        <i class="fa fa-circle nav-icon text-warning"></i>
+                        <p>Profile</p>
                     </a>
-                    <ul class="nav nav-treeview">
-
-                        {{-- @can('admin-tools-role') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.tools.role') }}"
-                                class="nav-link {{ $page == 'admin_tools_role' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Role</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-tools-permission') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.tools.permission') }}"
-                                class="nav-link {{ $page == 'admin_tools_permission' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Permission</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                        {{-- @can('admin-tools-profile') --}}
-                        <li class="nav-item">
-                            <a href="{{ route('admin.tools.profile') }}"
-                                class="nav-link {{ $page == 'admin_tools_profile' ? 'active' : '' }}">
-                                <i class="fa fa-circle nav-icon text-warning"></i>
-                                <p>Profile</p>
-                            </a>
-                        </li>
-                        {{-- @endcan --}}
-                    </ul>
                 </li>
                 {{-- @endcan --}}
             </ul>

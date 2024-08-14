@@ -23,45 +23,45 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent nav-compact" data-widget="treeview"
                 role="menu" data-accordion="false">
-                @if ($page == 'user_dashboard')
+                @if ($page == 'user_report')
                     <li class="nav-item">
-                        <a class="nav-link user_dashboard" href="#" id="dashboard_daily"
-                            onclick="setSidebar('dashboard_daily')">
+                        <a class="nav-link user_report" href="#" id="report_daily"
+                            onclick="setSidebar('report_daily')">
                             <i class="nav-icon fa fa-d text-warning"></i>
                             <p>aily</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link user_dashboard" href="#" id="dashboard_weekly"
-                            onclick="setSidebar('dashboard_weekly')">
+                        <a class="nav-link user_report" href="#" id="report_weekly"
+                            onclick="setSidebar('report_weekly')">
                             <i class="nav-icon fa fa-w text-warning"></i>
                             <p>eekly</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link user_dashboard" href="#" id="dashboard_monthly"
-                            onclick="setSidebar('dashboard_monthly')">
+                        <a class="nav-link user_report" href="#" id="report_monthly"
+                            onclick="setSidebar('report_monthly')">
                             <i class="nav-icon fa fa-m text-warning"></i>
                             <p>onthly</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link user_dashboard" href="#" id="dashboard_quarterly"
-                            onclick="setSidebar('dashboard_quarterly')">
+                        <a class="nav-link user_report" href="#" id="report_quarterly"
+                            onclick="setSidebar('report_quarterly')">
                             <i class="nav-icon fa fa-q text-warning"></i>
                             <p>uarterly</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link user_dashboard" href="#" id="dashboard_half"
-                            onclick="setSidebar('dashboard_half')">
+                        <a class="nav-link user_report" href="#" id="report_half"
+                            onclick="setSidebar('report_half')">
                             <i class="nav-icon fa fa-h text-warning"></i>
                             <p>alf Yearly</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link user_dashboard" href="#" id="dashboard_yearly"
-                            onclick="setSidebar('dashboard_yearly')">
+                        <a class="nav-link user_report" href="#" id="report_yearly"
+                            onclick="setSidebar('report_yearly')">
                             <i class="nav-icon fa fa-y text-warning"></i>
                             <p>early</p>
                         </a>

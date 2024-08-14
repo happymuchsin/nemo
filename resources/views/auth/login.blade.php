@@ -79,6 +79,9 @@
             </div>
             <!-- /.login-card-body -->
         </div>
+        <div class="login-logo">
+            <img src="{{ asset('assets/img/anggun.png') }}" height="80">
+        </div>
     </div>
     <!-- /.login-box -->
 

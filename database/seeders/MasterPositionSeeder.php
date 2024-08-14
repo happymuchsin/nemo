@@ -19,7 +19,7 @@ class MasterPositionSeeder extends Seeder
         ]);
         MasterPosition::firstOrCreate([
             'id' => 2,
-            'name' => 'OPERATOR',
+            'name' => 'SEWING',
         ]);
     }
 }

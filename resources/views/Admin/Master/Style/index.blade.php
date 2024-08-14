@@ -6,29 +6,36 @@
         <x-slot:body>
             <x-filter.user-filter>
                 <x-slot:filter>
-                    <x-filter.filter :tipe="'text'" :label="'Range Date'" :id="'filter_range_date'" />
-                    <x-filter.filter :tipe="'select'" :label="'Buyer'" :id="'filter_master_buyer_id'">
+                    <x-filter.filter :colom="'col-sm-auto'" :tipe="'text'" :label="'Range Date'" :id="'filter_range_date'" />
+                    <x-filter.filter :colom="'col-sm-auto'" :tipe="'select'" :label="'Buyer'" :id="'filter_master_buyer_id'">
                         <x-slot:option>
                             @foreach ($buyer as $d)
                                 <option value="{{ $d->id }}">{{ $d->name }}</option>
                             @endforeach
                         </x-slot:option>
                     </x-filter.filter>
-                    <x-filter.filter :tipe="'select'" :label="'Category'" :id="'filter_master_category_id'">
+                    <x-filter.filter :colom="'col-sm-auto'" :tipe="'select'" :label="'Category'" :id="'filter_master_category_id'">
                         <x-slot:option>
                             @foreach ($category as $d)
                                 <option value="{{ $d->id }}">{{ $d->name }}</option>
                             @endforeach
                         </x-slot:option>
                     </x-filter.filter>
-                    <x-filter.filter :tipe="'select'" :label="'Sample'" :id="'filter_master_sample_id'">
+                    <x-filter.filter :colom="'col-sm-auto'" :tipe="'select'" :label="'Sub Category'" :id="'filter_master_sub_category_id'">
+                        <x-slot:option>
+                            @foreach ($subcategory as $d)
+                                <option value="{{ $d->id }}">{{ $d->name }}</option>
+                            @endforeach
+                        </x-slot:option>
+                    </x-filter.filter>
+                    <x-filter.filter :colom="'col-sm-auto'" :tipe="'select'" :label="'Sample'" :id="'filter_master_sample_id'">
                         <x-slot:option>
                             @foreach ($sample as $d)
                                 <option value="{{ $d->id }}">{{ $d->name }}</option>
                             @endforeach
                         </x-slot:option>
                     </x-filter.filter>
-                    <x-filter.filter :tipe="'select'" :label="'Fabric'" :id="'filter_master_fabric_id'">
+                    <x-filter.filter :colom="'col-sm-auto'" :tipe="'select'" :label="'Fabric'" :id="'filter_master_fabric_id'">
                         <x-slot:option>
                             @foreach ($fabric as $d)
                                 <option value="{{ $d->id }}">{{ $d->name }}</option>
@@ -46,9 +53,12 @@
                     <tr>
                         <th>Buyer</th>
                         <th>Category</th>
+                        <th>Sub Category</th>
                         <th>Sample</th>
                         <th>Fabric</th>
                         <th>Name</th>
+                        <th>SRF No</th>
+                        <th>Season</th>
                         <th>Start</th>
                         <th>End</th>
                         <th>Action</th>
@@ -58,39 +68,68 @@
         </x-slot:body>
     </x-layout.content>
 
-    <x-modal.modal :name="'crup'">
+    <x-modal.modal :name="'crup'" :ukuran="'modal-lg'">
         <x-slot:body>
             <input type="hidden" name="key" id="key">
-            <x-modal.body :tipe="'select'" :label="'Buyer'" :id="'master_buyer_id'">
-                <x-slot:option>
-                    @foreach ($buyer as $d)
-                        <option value="{{ $d->id }}">{{ $d->name }}</option>
-                    @endforeach
-                </x-slot:option>
-            </x-modal.body>
-            <x-modal.body :tipe="'select'" :label="'Category'" :id="'master_category_id'">
-                <x-slot:option>
-                    @foreach ($category as $d)
-                        <option value="{{ $d->id }}">{{ $d->name }}</option>
-                    @endforeach
-                </x-slot:option>
-            </x-modal.body>
-            <x-modal.body :tipe="'select'" :label="'Sample'" :id="'master_sample_id'">
-                <x-slot:option>
-                    @foreach ($sample as $d)
-                        <option value="{{ $d->id }}">{{ $d->name }}</option>
-                    @endforeach
-                </x-slot:option>
-            </x-modal.body>
-            <x-modal.body :tipe="'select'" :label="'Fabric'" :id="'master_fabric_id'">
-                <x-slot:option>
-                    @foreach ($fabric as $d)
-                        <option value="{{ $d->id }}">{{ $d->name }}</option>
-                    @endforeach
-                </x-slot:option>
-            </x-modal.body>
-            <x-modal.body :tipe="'text'" :label="'Name'" :id="'name'" />
-            <x-modal.body :tipe="'text'" :label="'Start - End'" :id="'range_date'" />
+            <div class="row">
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'select'" :label="'Buyer'" :id="'master_buyer_id'">
+                        <x-slot:option>
+                            @foreach ($buyer as $d)
+                                <option value="{{ $d->id }}">{{ $d->name }}</option>
+                            @endforeach
+                        </x-slot:option>
+                    </x-modal.body>
+                </div>
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'select'" :label="'Category'" :id="'master_category_id'">
+                        <x-slot:option>
+                            @foreach ($category as $d)
+                                <option value="{{ $d->id }}">{{ $d->name }}</option>
+                            @endforeach
+                        </x-slot:option>
+                    </x-modal.body>
+                </div>
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'select'" :label="'Sub Category'" :id="'master_sub_category_id'">
+                        <x-slot:option>
+                            @foreach ($subcategory as $d)
+                                <option value="{{ $d->id }}">{{ $d->name }}</option>
+                            @endforeach
+                        </x-slot:option>
+                    </x-modal.body>
+                </div>
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'select'" :label="'Sample'" :id="'master_sample_id'">
+                        <x-slot:option>
+                            @foreach ($sample as $d)
+                                <option value="{{ $d->id }}">{{ $d->name }}</option>
+                            @endforeach
+                        </x-slot:option>
+                    </x-modal.body>
+                </div>
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'select'" :label="'Fabric'" :id="'master_fabric_id'">
+                        <x-slot:option>
+                            @foreach ($fabric as $d)
+                                <option value="{{ $d->id }}">{{ $d->name }}</option>
+                            @endforeach
+                        </x-slot:option>
+                    </x-modal.body>
+                </div>
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'text'" :label="'Name'" :id="'name'" />
+                </div>
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'text'" :label="'SRF No'" :id="'srf'" :upper="false" />
+                </div>
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'text'" :label="'Season'" :id="'season'" />
+                </div>
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'text'" :label="'Start - End'" :id="'range_date'" />
+                </div>
+            </div>
         </x-slot:body>
         <x-slot:footer>
             <x-layout.button :class="'btn-primary'" :id="'save'" :onclick="'crup()'" :icon="'fa fa-save'"
@@ -137,6 +176,11 @@
                 dropdownParent: $('#crupModal'),
                 width: '100%',
             });
+            $('#master_sub_category_id').select2({
+                placeholder: "Select Category",
+                dropdownParent: $('#crupModal'),
+                width: '100%',
+            });
             $('#master_sample_id').select2({
                 placeholder: "Select Sample",
                 dropdownParent: $('#crupModal'),
@@ -159,6 +203,7 @@
                         d.filter_range_date = $('#filter_range_date').val();
                         d.filter_master_buyer_id = $('#filter_master_buyer_id').val();
                         d.filter_master_category_id = $('#filter_master_category_id').val();
+                        d.filter_master_sub_category_id = $('#filter_master_sub_category_id').val();
                         d.filter_master_sample_id = $('#filter_master_sample_id').val();
                         d.filter_master_fabric_id = $('#filter_master_fabric_id').val();
                     }
@@ -170,6 +215,9 @@
                         data: 'category'
                     },
                     {
+                        data: 'sub_category'
+                    },
+                    {
                         data: 'sample'
                     },
                     {
@@ -177,6 +225,12 @@
                     },
                     {
                         data: 'name'
+                    },
+                    {
+                        data: 'srf'
+                    },
+                    {
+                        data: 'season'
                     },
                     {
                         data: 'start'
@@ -210,9 +264,12 @@
             $('#update').hide();
             $('#master_buyer_id').val('').trigger('change');
             $('#master_category_id').val('').trigger('change');
+            $('#master_sub_category_id').val('').trigger('change');
             $('#master_sample_id').val('').trigger('change');
             $('#master_fabric_id').val('').trigger('change');
             $('#name').val('');
+            $('#srf').val('');
+            $('#season').val('');
             $('#range_date').val('');
             $('#key').val(0);
             $('#crupModal').modal('toggle');
@@ -223,12 +280,18 @@
                 Swal.fire('Warning!', 'Please select Buyer', 'warning');
             } else if ($('#master_category_id').val() == '') {
                 Swal.fire('Warning!', 'Please select Category', 'warning');
+            } else if ($('#master_sub_category_id').val() == '') {
+                Swal.fire('Warning!', 'Please select Sub Category', 'warning');
             } else if ($('#master_sample_id').val() == '') {
                 Swal.fire('Warning!', 'Please select Sample', 'warning');
             } else if ($('#master_fabric_id').val() == '') {
                 Swal.fire('Warning!', 'Please select Fabric', 'warning');
             } else if ($('#name').val() == '') {
                 Swal.fire('Warning!', 'Please insert Name', 'warning');
+            } else if ($('#srf').val() == '') {
+                Swal.fire('Warning!', 'Please insert SRF No', 'warning');
+            } else if ($('#season').val() == '') {
+                Swal.fire('Warning!', 'Please insert Season', 'warning');
             } else if ($('#range_date').val() == '') {
                 Swal.fire('Warning!', 'Please select Start - End', 'warning');
             } else {
@@ -243,9 +306,12 @@
                     data: {
                         'id': $('#key').val(),
                         'name': $('#name').val(),
+                        'srf': $('#srf').val(),
+                        'season': $('#season').val(),
                         'range_date': $('#range_date').val(),
                         'master_buyer_id': $('#master_buyer_id').val(),
                         'master_category_id': $('#master_category_id').val(),
+                        'master_sub_category_id': $('#master_sub_category_id').val(),
                         'master_sample_id': $('#master_sample_id').val(),
                         'master_fabric_id': $('#master_fabric_id').val(),
                     },
@@ -304,9 +370,12 @@
                     $('#update').show();
                     $('#master_buyer_id').val(response.master_buyer_id).trigger('change');
                     $('#master_category_id').val(response.master_category_id).trigger('change');
+                    $('#master_sub_category_id').val(response.master_sub_category_id).trigger('change');
                     $('#master_sample_id').val(response.master_sample_id).trigger('change');
                     $('#master_fabric_id').val(response.master_fabric_id).trigger('change');
                     $('#name').val(response.name);
+                    $('#srf').val(response.srf);
+                    $('#season').val(response.season);
                     $('#range_date').val(response.range_date);
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');

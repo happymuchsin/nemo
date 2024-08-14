@@ -1,6 +1,6 @@
 <nav class="main-header navbar navbar-expand navbar-white navbar-light" style="position: fixed;">
     <!-- Left navbar links -->
-    <ul class="navbar-nav p-0">
+    <ul class="navbar-nav mr-auto">
         <li class="nav-item px-0">
             <a class="nav-link" data-widget="pushmenu" id="collSidebar" href="#" role="button"><i
                     class="fa fa-bars"></i></a>
@@ -10,6 +10,14 @@
             <a class="nav-link {{ $page == 'user_dashboard' ? 'rounded-lg bg-warning' : '' }}"
                 href="{{ route('user.dashboard') }}">
                 <b class="text-center text-black"><i class="fa fa-laptop"></i> Dashboard</b>
+            </a>
+        </li>
+        {{-- @endcan --}}
+        {{-- @can('user-report') --}}
+        <li id="" class="nav-item text-center">
+            <a class="nav-link {{ $page == 'user_report' ? 'rounded-lg bg-warning' : '' }}"
+                href="{{ route('user.report') }}">
+                <b class="text-center text-black"><i class="fa fa-list-dropdown"></i> Report</b>
             </a>
         </li>
         {{-- @endcan --}}
@@ -38,6 +46,8 @@
         </li>
         {{-- @endcan --}}
     </ul>
+
+    <img class="mr-auto ml-auto" src="{{ asset('assets/img/anggun.png') }}" alt="" width="180">
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
@@ -76,12 +86,12 @@
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                 <span class="dropdown-item dropdown-header"><b>Tools</b></span>
                 <div class="dropdown-divider"></div>
-                {{-- @can('admin-dashboard') --}}
-                <a href="{{ route('admin.dashboard') }}" class="dropdown-item">
-                    <i class="fa fa-users-gear text-info mr-2"></i> Admin
-                </a>
-                {{-- @endcan --}}
-                <a href="{{ route('admin.tools.profile') }}" class="dropdown-item">
+                @can('admin-dashboard')
+                    <a href="{{ route('admin.dashboard') }}" class="dropdown-item">
+                        <i class="fa fa-users-gear text-info mr-2"></i> Admin
+                    </a>
+                @endcan
+                <a href="{{ route('admin.profile') }}" class="dropdown-item">
                     <i class="fa fa-user-gear text-info mr-2"></i> Change Password
                 </a>
                 <div class="dropdown-divider"></div>

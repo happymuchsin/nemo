@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Models\HistoryAddStock;
 use App\Models\HistoryEditStock;
 use App\Models\MasterArea;
@@ -21,7 +22,6 @@ class StockController extends Controller
 {
     public function __construct()
     {
-
         $this->middleware('ajax-session-expired');
         $this->middleware('auth');
     }
@@ -30,6 +30,8 @@ class StockController extends Controller
     {
         $page = 'user_stock';
         $title = 'USER STOCK';
+
+        HelperController::activityLog('OPEN USER STOCK', 'stocks', 'read', $request->ip(), $request->userAgent());
 
         $area = MasterArea::get();
         $needle = MasterNeedle::get();
@@ -42,50 +44,14 @@ class StockController extends Controller
 
     public function data(Request $request)
     {
-        // $filter_area = $request->filter_area;
-        // $filter_counter = $request->filter_counter;
-        // $filter_box = $request->filter_box;
         $data = Stock::join('master_areas as ma', 'ma.id', 'stocks.master_area_id')
             ->join('master_counters as mc', 'mc.id', 'stocks.master_counter_id')
             ->join('master_boxes as mb', 'mb.id', 'stocks.master_box_id')
             ->join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')
-            ->selectRaw('stocks.id as id, ma.name as area, mc.name as counter, mb.name as box, mn.brand as brand, mn.tipe as tipe, mn.size as size, mn.code as code, mn.machine as machine, stocks.`in` as `in`, stocks.`out` as `out`, stocks.is_clear as is_clear')
-            // ->when($filter_area != 'all', function ($q) use ($filter_area) {
-            //     $q->where('master_area_id', $filter_area);
-            // })
-            // ->when($filter_counter != 'all', function ($q) use ($filter_counter) {
-            //     $q->where('master_counter_id', $filter_counter);
-            // })
-            // ->when($filter_box != 'all', function ($q) use ($filter_box) {
-            //     $q->where('master_box_id', $filter_box);
-            // })
+            ->selectRaw('stocks.id as id, ma.name as area, mc.name as counter, mb.name as box, mn.brand as brand, mn.tipe as tipe, mn.size as size, mn.code as code, mn.machine as machine, mn.min_stock as min_stock, stocks.`in` as `in`, stocks.`out` as `out`, stocks.is_clear as is_clear')
             ->where('is_clear', 'not')
             ->get();
         return datatables()->of($data)
-            // ->addColumn('area', function ($q) {
-            //     return $q->area->name;
-            // })
-            // ->addColumn('counter', function ($q) {
-            //     return $q->counter->name;
-            // })
-            // ->addColumn('box', function ($q) {
-            //     return $q->box->name;
-            // })
-            // ->addColumn('brand', function ($q) {
-            //     return $q->needle->brand;
-            // })
-            // ->addColumn('tipe', function ($q) {
-            //     return $q->needle->tipe;
-            // })
-            // ->addColumn('size', function ($q) {
-            //     return $q->needle->size;
-            // })
-            // ->addColumn('code', function ($q) {
-            //     return $q->needle->code;
-            // })
-            // ->addColumn('machine', function ($q) {
-            //     return $q->needle->machine;
-            // })
             ->addColumn('stock', function ($q) {
                 return $q->in - $q->out;
             })
@@ -138,59 +104,6 @@ class StockController extends Controller
         return response()->json($x, 200);
     }
 
-    // public function needle(Request $request)
-    // {
-    //     $master_needle_id = $request->master_needle_id;
-    //     $s = MasterNeedle::where('id', $master_needle_id)->first();
-    //     if ($s) {
-    //         $d = new stdClass;
-    //         $d->brand = $s->brand;
-    //         $d->tipe = $s->tipe;
-    //         $d->size = $s->size;
-    //         $d->qty = '<input type="number" min="1" required name="qty[]" id="qty' . $s->id . '" class="form-control"><input type="text" hidden name="master_needle_id[]" id="master_needle_id' . $s->id . '" class="form-control" value="' . $s->id . '">';
-    //         $x = '';
-    //         $x .= '<a href="#" class="text-center" title="Delete" onclick="hapusStore(this, \'' . $s->id . '\')"><i class="fa fa-trash-alt text-danger mr-3"></i></a>';
-    //         $d->action = $x;
-    //         return response()->json($d, 200);
-    //     } else {
-    //         return response()->json('Needle not found', 422);
-    //     }
-    // }
-
-    // public function store(Request $request)
-    // {
-    //     $master_needle_id = $request->master_needle_id;
-    //     $qty = $request->qty;
-    //     $tanggal = $request->tanggal;
-    //     $master_area_id = $request->master_area_id;
-    //     $master_counter_id = $request->master_counter_id;
-    //     $master_box_id = $request->master_box_id;
-    //     $now = Carbon::now();
-
-    //     try {
-    //         DB::beginTransaction();
-
-    //         for ($i = 0; $i < count($qty); $i++) {
-    //             Stock::create([
-    //                 'tanggal' => $tanggal,
-    //                 'master_area_id' => $master_area_id,
-    //                 'master_counter_id' => $master_counter_id,
-    //                 'master_box_id' => $master_box_id,
-    //                 'master_needle_id' => $master_needle_id[$i],
-    //                 'in' => $qty[$i],
-    //                 'created_by' => Auth::user()->username,
-    //                 'created_at' => $now,
-    //             ]);
-    //         }
-
-    //         DB::commit();
-    //         return response()->json('Saved Successfully', 200);
-    //     } catch (Exception $e) {
-    //         DB::rollBack();
-    //         return response()->json('Saved Failed', 422);
-    //     }
-    // }
-
     public function store(Request $request)
     {
         $master_area_id = $request->master_area_id;
@@ -213,14 +126,32 @@ class StockController extends Controller
                 'created_at' => $now,
             ]);
 
-            // HistoryAddStock::create([
-            //     'stock_id' => $i->id,
-            //     'stock_before' => 0,
-            //     'qty' => $qty,
-            //     'stock_after' => $qty,
-            //     'created_by' => Auth::user()->username,
-            //     'created_at' => $now,
-            // ]);
+            HelperController::activityLog("CREATE STOCK", 'stocks', 'create', $request->ip(), $request->userAgent(), json_encode([
+                'master_area_id' => $master_area_id,
+                'master_counter_id' => $master_counter_id,
+                'master_box_id' => $master_box_id,
+                'master_needle_id' => $master_needle_id,
+                'in' => $qty,
+                'created_by' => Auth::user()->username,
+                'created_at' => $now,
+            ]));
+
+            HistoryAddStock::create([
+                'stock_id' => $i->id,
+                'stock_before' => 0,
+                'qty' => $qty,
+                'stock_after' => $qty,
+                'created_by' => Auth::user()->username,
+                'created_at' => $now,
+            ]);
+            HelperController::activityLog("CREATE HISTORY ADD STOCK", 'history_add_stocks', 'create', $request->ip(), $request->userAgent(), json_encode([
+                'stock_id' => $i->id,
+                'stock_before' => 0,
+                'qty' => $qty,
+                'stock_after' => $qty,
+                'created_by' => Auth::user()->username,
+                'created_at' => $now,
+            ]));
 
             DB::commit();
             return response()->json('Saved Successfully', 200);
@@ -275,6 +206,12 @@ class StockController extends Controller
                     'updated_by' => Auth::user()->username,
                     'updated_at' => $now,
                 ]);
+                HelperController::activityLog("EDIT STOCK", 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
+                    'id' => $id,
+                    'in' => $in,
+                    'updated_by' => Auth::user()->username,
+                    'updated_at' => $now,
+                ]), $id);
 
                 HistoryEditStock::create([
                     'stock_id' => $id,
@@ -283,12 +220,24 @@ class StockController extends Controller
                     'created_by' => Auth::user()->username,
                     'created_at' => $now,
                 ]);
+                HelperController::activityLog("CREATE HISTORY EDIT STOCK", 'history_edit_stocks', 'create', $request->ip(), $request->userAgent(), json_encode([
+                    'stock_id' => $id,
+                    'stock_before' => $s->in,
+                    'stock_after' => $in,
+                    'created_by' => Auth::user()->username,
+                    'created_at' => $now,
+                ]));
             } else if ($tipe == 'add') {
                 Stock::where('id', $id)->update([
                     'in' => $s->in + $in,
                     'updated_by' => Auth::user()->username,
                     'updated_at' => $now,
                 ]);
+                HelperController::activityLog("ADD STOCK", 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
+                    'in' => $s->in + $in,
+                    'updated_by' => Auth::user()->username,
+                    'updated_at' => $now,
+                ]), $id);
 
                 HistoryAddStock::create([
                     'stock_id' => $id,
@@ -298,6 +247,15 @@ class StockController extends Controller
                     'created_by' => Auth::user()->username,
                     'created_at' => $now,
                 ]);
+                HelperController::activityLog("CREATE HISTORY ADD STOCK", 'history_add_stocks', 'create', $request->ip(), $request->userAgent(), json_encode([
+                    'stock_id' => $id,
+                    'stock_before' => $s->in,
+                    'qty' => $in,
+                    'stock_after' => $s->in + $in,
+                    'created_by' => Auth::user()->username,
+                    'created_at' => $now,
+
+                ]));
             }
 
             DB::commit();
@@ -308,7 +266,7 @@ class StockController extends Controller
         }
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -316,6 +274,7 @@ class StockController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
+            HelperController::activityLog("DELETE STOCK", 'stocks', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {
@@ -324,7 +283,7 @@ class StockController extends Controller
         }
     }
 
-    public function clear($id)
+    public function clear(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -333,6 +292,7 @@ class StockController extends Controller
                 'updated_by' => Auth::user()->username,
                 'updated_at' => Carbon::now(),
             ]);
+            HelperController::activityLog("CLEAR STOCK", 'stocks', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Clear Successfully', 200);
         } catch (Exception $e) {

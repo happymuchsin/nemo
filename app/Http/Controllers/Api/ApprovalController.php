@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Http\Resources\ApiResource;
 use App\Models\Approval;
 use Carbon\Carbon;
@@ -16,6 +17,8 @@ class ApprovalController extends Controller
         $username = $request->username;
         $area_id = $request->area_id;
         $lokasi_id = $request->lokasi_id;
+
+        HelperController::activityLog('ANDROID OPEN APPROVAL', 'approvals', 'read', $request->ip(), $request->userAgent(), null, null, $username);
 
         $data = [];
         $s = Approval::with(['user', 'needle' => function ($q) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Models\MasterArea;
 use Carbon\Carbon;
 use Exception;
@@ -22,6 +23,8 @@ class MasterAreaController extends Controller
     {
         $page = 'admin_master_area';
         $title = 'ADMIN MASTER AREA';
+
+        HelperController::activityLog('OPEN ADMIN MASTER AREA', 'master_areas', 'read', $request->ip(), $request->userAgent());
 
         $admin_master = 'menu-open';
 
@@ -59,6 +62,12 @@ class MasterAreaController extends Controller
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
+
+                    HelperController::activityLog("CREATE MASTER AREA", 'master_areas', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'name' => $name,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]));
                 }
             } else {
                 $c = 0;
@@ -80,6 +89,13 @@ class MasterAreaController extends Controller
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
+
+                    HelperController::activityLog("UPDATE MASTER AREA", 'master_areas', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'name' => $name,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
                 }
             }
 
@@ -97,7 +113,7 @@ class MasterAreaController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -105,6 +121,7 @@ class MasterAreaController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
+            HelperController::activityLog("DELETE MASTER AREA", 'master_areas', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {

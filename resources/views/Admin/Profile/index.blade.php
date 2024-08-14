@@ -21,7 +21,7 @@
                 });
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('admin.tools.profile.change') }}",
+                    url: "{{ route('admin.profile.change') }}",
                     data: {
                         password: $('#password').val(),
                     },

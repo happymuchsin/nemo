@@ -15,7 +15,6 @@ class ApprovalController extends Controller
 {
     public function __construct()
     {
-
         $this->middleware('ajax-session-expired');
         $this->middleware('auth');
     }
@@ -24,6 +23,8 @@ class ApprovalController extends Controller
     {
         $page = 'user_approval';
         $title = 'USER APPROVAL';
+
+        HelperController::activityLog('OPEN USER APPROVAL', 'approvals', 'read', $request->ip(), $request->userAgent());
 
         return view('User.Approval.index', compact('title', 'page'));
     }
@@ -91,7 +92,7 @@ class ApprovalController extends Controller
             ->make(true);
     }
 
-    public function approval($id, $status)
+    public function approval(Request $request, $id, $status)
     {
         try {
             DB::beginTransaction();
@@ -103,6 +104,14 @@ class ApprovalController extends Controller
                 'updated_by' => Auth::user()->username,
                 'updated_at' => $now,
             ]);
+
+            HelperController::activityLog("UPDATE APPROVAL", 'approvals', 'update', $request->ip(), $request->userAgent(), json_encode([
+                'id' => $id,
+                'status' => strtoupper($status),
+                $status => $now,
+                'updated_by' => Auth::user()->username,
+                'updated_at' => $now,
+            ]), $id);
 
             HelperController::emitEvent('nemo', [
                 'event' => 'nemoReload',

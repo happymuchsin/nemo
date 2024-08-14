@@ -4,35 +4,6 @@
 @section('page-content')
     <x-layout.content :name="'Stock'">
         <x-slot:body>
-            {{-- <x-filter.user-filter>
-                <x-slot:filter>
-                    <x-filter.filter :tipe="'select'" :label="'Area'" :id="'filter_area'">
-                        <x-slot:option>
-                            @foreach ($area as $d)
-                                <option value="{{ $d->id }}">{{ $d->name }}</option>
-                            @endforeach
-                        </x-slot:option>
-                    </x-filter.filter>
-                    <x-filter.filter :tipe="'select'" :label="'Counter'" :id="'filter_counter'">
-                        <x-slot:option>
-                            @foreach ($counter as $d)
-                                <option value="{{ $d->id }}">{{ $d->name }}</option>
-                            @endforeach
-                        </x-slot:option>
-                    </x-filter.filter>
-                    <x-filter.filter :tipe="'select'" :label="'Box'" :id="'filter_box'">
-                        <x-slot:option>
-                            @foreach ($box as $d)
-                                <option value="{{ $d->id }}">{{ $d->name }}</option>
-                            @endforeach
-                        </x-slot:option>
-                    </x-filter.filter>
-                    <div class="form-group">
-                        <x-layout.button :class="'btn-primary'" :id="'cari'" :onclick="'table.ajax.reload()'" :icon="'fa fa-search'"
-                            :name="'SEARCH'" />
-                    </div>
-                </x-slot:filter>
-            </x-filter.user-filter> --}}
             <x-layout.table :id="'table'">
                 <x-slot:thead>
                     <tr>
@@ -73,28 +44,6 @@
                     @endforeach
                 </x-slot:option>
             </x-modal.body>
-            {{-- <div class="row">
-                <div class="col-sm-4">
-                </div>
-                <div class="col-sm-2">
-                    <label> </label>
-                    <div class="form-group">
-                        <x-layout.button :class="'btn-success'" :id="''" :onclick="'addToTable()'" :icon="'fa fa-search'"
-                            :name="'Submit'" />
-                    </div>
-                </div>
-            </div> --}}
-            {{-- <x-layout.table :id="'tableStore'">
-                <x-slot:thead>
-                    <tr>
-                        <th>Brand</th>
-                        <th>Type</th>
-                        <th>Size</th>
-                        <th>Qty</th>
-                        <th>Action</th>
-                    </tr>
-                </x-slot:thead>
-            </x-layout.table> --}}
             <x-modal.body :tipe="'number'" :label="'Qty'" :id="'qty'" />
         </x-slot:body>
         <x-slot:footer>
@@ -309,6 +258,11 @@
                     [50, 100, 500, -1],
                     [50, 100, 500, "All"]
                 ],
+                rowCallback: function(row, data) {
+                    if (data.stock < data.min_stock) {
+                        $(row).css('color', 'red');
+                    }
+                }
             });
             $('div.toolbar').html(
                 '<button class="btn btn-sm btn-success" onclick="add();"><i class="fal fa-circle-plus" /></i> New</button>'

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Models\MasterArea;
 use App\Models\MasterLine;
 use Carbon\Carbon;
@@ -23,6 +24,8 @@ class MasterLineController extends Controller
     {
         $page = 'admin_master_line';
         $title = 'ADMIN MASTER LINE';
+
+        HelperController::activityLog('OPEN ADMIN MASTER LINE', 'master_lines', 'read', $request->ip(), $request->userAgent());
 
         $admin_master = 'menu-open';
         $area = MasterArea::get();
@@ -66,6 +69,12 @@ class MasterLineController extends Controller
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("CREATE MASTER LINE", 'master_lines', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'master_area_id' => $master_area_id,
+                        'name' => $name,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]));
                 }
             } else {
                 $c = 0;
@@ -88,6 +97,13 @@ class MasterLineController extends Controller
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("UPDATE MASTER LINE", 'master_lines', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'master_area_id' => $master_area_id,
+                        'name' => $name,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
                 }
             }
 
@@ -105,7 +121,7 @@ class MasterLineController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -113,6 +129,7 @@ class MasterLineController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
+            HelperController::activityLog("DELETE MASTER LINE", 'master_lines', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {

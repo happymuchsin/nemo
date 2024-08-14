@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Models\MasterNeedle;
 use Carbon\Carbon;
 use Exception;
@@ -22,6 +23,8 @@ class MasterNeedleController extends Controller
     {
         $page = 'admin_master_needle';
         $title = 'ADMIN MASTER NEEDLE';
+
+        HelperController::activityLog('OPEN ADMIN MASTER NEEDLE', 'master_needles', 'read', $request->ip(), $request->userAgent());
 
         $admin_master = 'menu-open';
 
@@ -49,6 +52,7 @@ class MasterNeedleController extends Controller
         $size = strtoupper($request->size);
         $code = strtoupper($request->code);
         $machine = strtoupper($request->machine);
+        $min_stock = $request->min_stock;
 
         try {
             DB::beginTransaction();
@@ -64,9 +68,20 @@ class MasterNeedleController extends Controller
                         'size' => $size,
                         'code' => $code,
                         'machine' => $machine,
+                        'min_stock' => $min_stock,
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("CREATE MASTER NEEDLE", 'master_needles', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'brand' => $brand,
+                        'tipe' => $tipe,
+                        'size' => $size,
+                        'code' => $code,
+                        'machine' => $machine,
+                        'min_stock' => $min_stock,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]));
                 }
             } else {
                 $c = 0;
@@ -90,9 +105,21 @@ class MasterNeedleController extends Controller
                         'size' => $size,
                         'code' => $code,
                         'machine' => $machine,
+                        'min_stock' => $min_stock,
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("UPDATE MASTER NEEDLE", 'master_needles', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'brand' => $brand,
+                        'tipe' => $tipe,
+                        'size' => $size,
+                        'code' => $code,
+                        'machine' => $machine,
+                        'min_stock' => $min_stock,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
                 }
             }
 
@@ -110,7 +137,7 @@ class MasterNeedleController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -118,6 +145,7 @@ class MasterNeedleController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
+            HelperController::activityLog("DELETE MASTER NEEDLE", 'master_needles', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {

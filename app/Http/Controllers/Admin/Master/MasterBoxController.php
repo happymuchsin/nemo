@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Models\MasterCounter;
 use App\Models\MasterBox;
 use Carbon\Carbon;
@@ -23,6 +24,8 @@ class MasterBoxController extends Controller
     {
         $page = 'admin_master_box';
         $title = 'ADMIN MASTER BOX';
+
+        HelperController::activityLog('OPEN ADMIN MASTER BOX', 'master_boxes', 'read', $request->ip(), $request->userAgent());
 
         $admin_master = 'menu-open';
         $counter = MasterCounter::with(['area'])->get();
@@ -70,6 +73,13 @@ class MasterBoxController extends Controller
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("CREATE MASTER BOX", 'master_boxes', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'master_counter_id' => $master_counter_id,
+                        'name' => $name,
+                        'rfid' => $rfid,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => Carbon::now(),
+                    ]));
                 }
             } else {
                 $c = 0;
@@ -93,6 +103,14 @@ class MasterBoxController extends Controller
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
+                    HelperController::activityLog("UPDATE MASTER BOX", 'master_boxes', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'master_counter_id' => $master_counter_id,
+                        'name' => $name,
+                        'rfid' => $rfid,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
                 }
             }
 
@@ -110,7 +128,7 @@ class MasterBoxController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus($id)
+    public function hapus(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -118,6 +136,7 @@ class MasterBoxController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
+            HelperController::activityLog("DELETE MASTER BOX", 'master_boxes', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {

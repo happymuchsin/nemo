@@ -12,6 +12,7 @@
                         <th>Size</th>
                         <th>Code</th>
                         <th>Machine</th>
+                        <th>Min Stock</th>
                         <th>Action</th>
                     </tr>
                 </x-slot:thead>
@@ -27,6 +28,7 @@
             <x-modal.body :tipe="'text'" :label="'Size'" :id="'size'" />
             <x-modal.body :tipe="'text'" :label="'Code'" :id="'code'" />
             <x-modal.body :tipe="'text'" :label="'Machine'" :id="'machine'" />
+            <x-modal.body :tipe="'number'" :label="'Min Stock'" :id="'min_stock'" :min="'1'" />
         </x-slot:body>
         <x-slot:footer>
             <x-layout.button :class="'btn-primary'" :id="'save'" :onclick="'crup()'" :icon="'fa fa-save'"
@@ -63,6 +65,9 @@
                         data: 'machine'
                     },
                     {
+                        data: 'min_stock'
+                    },
+                    {
                         data: 'action'
                     },
                 ],
@@ -91,6 +96,7 @@
             $('#size').val('');
             $('#code').val('');
             $('#machine').val('');
+            $('#min_stock').val('');
             $('#key').val(0);
             $('#crupModal').modal('toggle');
         }
@@ -106,6 +112,8 @@
                 Swal.fire('Warning!', 'Please insert Code', 'warning');
             } else if ($('#machine').val() == '') {
                 Swal.fire('Warning!', 'Please insert Machine', 'warning');
+            } else if ($('#min_stock').val() == '') {
+                Swal.fire('Warning!', 'Please insert Min Stock', 'warning');
             } else {
                 $.ajaxSetup({
                     headers: {
@@ -122,6 +130,7 @@
                         'size': $('#size').val(),
                         'code': $('#code').val(),
                         'machine': $('#machine').val(),
+                        'min_stock': $('#min_stock').val(),
                     },
                     beforeSend: function() {
                         Swal.fire({
@@ -181,6 +190,7 @@
                     $('#size').val(response.size);
                     $('#code').val(response.code);
                     $('#machine').val(response.machine);
+                    $('#min_stock').val(response.min_stock);
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');
                 });

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
+use App\Models\MasterNeedle;
 use App\Models\MasterStatus;
 use App\Models\Needle;
 use App\Models\NeedleDetail;
@@ -10,6 +12,7 @@ use App\Models\Stock;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use stdClass;
 
 class DashboardController extends Controller
@@ -26,349 +29,133 @@ class DashboardController extends Controller
         $page = 'user_dashboard';
         $title = 'USER DASHBOARD';
 
+        HelperController::activityLog('OPEN USER DASHBOARD', null, 'read', $request->ip(), $request->userAgent());
+
         $user_dashboard = 'active';
 
-        $x = MasterStatus::get();
-        $master_status = [];
-        foreach ($x as $x) {
-            $d = new stdClass;
-            $d->id = $x->id;
-            $d->name = ucwords(strtolower($x->name));
-            $d->kolom = str_replace(' ', '_', strtolower($x->name));
-            $master_status[] = $d;
-        }
-
-        if (date('m') == '01' || date('m') == '02' || date('m') == '03') {
-            $quarter = 'Q1';
-        } else if (date('m') == '04' || date('m') == '05' || date('m') == '06') {
-            $quarter = 'Q2';
-        } else if (date('m') == '07' || date('m') == '08' || date('m') == '09') {
-            $quarter = 'Q3';
-        } else if (date('m') == '10' || date('m') == '11' || date('m') == '12') {
-            $quarter = 'Q4';
-        } else {
-            $quarter = '';
-        }
-
-        if (date('m') == '01' || date('m') == '02' || date('m') == '03' || date('m') == '04' || date('m') == '05' || date('m') == '06') {
-            $half = 'H1';
-        } else if (date('m') == '07' || date('m') == '08' || date('m') == '09' || date('m') == '10' || date('m') == '11' || date('m') == '12') {
-            $half = 'H2';
-        } else {
-            $half = '';
-        }
-
-        return view('User.Dashboard.index', compact('title', 'page', 'user_dashboard', 'master_status', 'quarter', 'half'));
+        return view('User.Dashboard.index', compact('title', 'page', 'user_dashboard'));
     }
 
     public function data(Request $request)
     {
-        $id = $request->id;
-        if ($id == 'dashboard_daily') {
-            $filter_date = $request->filter_date;
-            $data = NeedleDetail::with(['needle' => function ($q) {
-                $q->with(['user', 'line', 'needle']);
-            }, 'status'])
-                ->whereDate('created_at', $filter_date)
-                ->orderBy('created_at')
-                ->get();
-            return datatables()->of($data)
-                ->addColumn('time', function ($q) {
-                    return Carbon::parse($q->created_at)->format('H:i:s');
-                })
-                ->addColumn('line', function ($q) {
-                    return $q->needle->line->name;
-                })
-                ->addColumn('user', function ($q) {
-                    return $q->needle->user->username . ' - ' . $q->needle->user->name;
-                })
-                ->addColumn('brand', function ($q) {
-                    return $q->needle->needle->brand;
-                })
-                ->addColumn('tipe', function ($q) {
-                    return $q->needle->needle->tipe;
-                })
-                ->addColumn('size', function ($q) {
-                    return $q->needle->needle->size;
-                })
-                ->addColumn('remark', function ($q) {
-                    return $q->status->name;
-                })
-                ->make(true);
-        } else if ($id == 'dashboard_weekly') {
-            $filter_week = $request->filter_week;
-            $x = explode('-W', $filter_week);
-            $year = $x[0];
-            $week = $x[1];
-            $start = Carbon::now()->setISODate($year, $week)->startOfWeek();
-            $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
-            $period = CarbonPeriod::create($start, $end);
+        // Single Needle = DB X 1
+        // Double Needle = DP X 5
+        // Obras = DC X 27
+        // Kansai = UO X 113 & DV X 57
 
-            $ms = [];
-            $dms = MasterStatus::get();
-            foreach ($dms as $dms) {
-                $d = new stdClass;
-                $d->id = $dms->id;
-                $d->name = str_replace(' ', '_', strtolower($dms->name));
-                $ms[] = $d;
+        $bulan = date('n');
+        $tipe = $request->tipe;
+
+        $idSingleNeedle = [];
+        $idDoubleNeedle = [];
+        $idObras = [];
+        $idKansai = [];
+        $singleNeedle = MasterNeedle::where('tipe', 'like', '%DB X 1%')->get();
+        $doubleNeedle = MasterNeedle::where('tipe', 'like', '%DP X 5%')->get();
+        $obras = MasterNeedle::where('tipe', 'like', '%DC X 27%')->get();
+        $kansai = MasterNeedle::where('tipe', 'like', '%UO X 113%')->orWhere('tipe', 'like', '%DV X 57%')->get();
+        foreach ($singleNeedle as $sn) {
+            $idSingleNeedle[] = $sn->id;
+        }
+        foreach ($doubleNeedle as $dn) {
+            $idDoubleNeedle[] = $dn->id;
+        }
+        foreach ($obras as $o) {
+            $idObras[] = $o->id;
+        }
+        foreach ($kansai as $k) {
+            $idKansai[] = $k->id;
+        }
+
+        if ($tipe == 'outstanding') {
+            $h = '';
+            $notif = Auth::user()->unreadNotifications;
+            foreach ($notif as $n) {
+                $h .= '<li>
+                    <a href="' . $n->data['link'] . '" style="color:black;font-weight:bold;">
+                        ' . $n->data['title'] . '
+                    </a>
+                </li>';
+                break;
             }
-
-            $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start, $end])
-                ->orderBy('created_at')
+            $stock = Stock::join('master_areas as ma', 'ma.id', 'stocks.master_area_id')
+                ->join('master_counters as mc', 'mc.id', 'stocks.master_counter_id')
+                ->join('master_boxes as mb', 'mb.id', 'stocks.master_box_id')
+                ->join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')
+                ->selectRaw('stocks.id as id, ma.name as area, mc.name as counter, mb.name as box, mn.brand as brand, mn.tipe as tipe, mn.size as size, mn.code as code, mn.machine as machine, mn.min_stock as min_stock, stocks.`in` as `in`, stocks.`out` as `out`, stocks.is_clear as is_clear')
+                ->where('is_clear', 'not')
                 ->get();
-
-            $collectNeedleDetail = collect($dataNeedleDetail);
-
-            $dataStock = Stock::whereBetween('created_at', [$start, $end])
-                ->orderBy('created_at')
-                ->get();
-
-            $collectStock = collect($dataStock);
-
-            $data = [];
-            foreach ($period as $p) {
-                $d = new stdClass;
-                $tanggal = $p->toDateString();
-                $d->date = $tanggal;
-                foreach ($ms as $m) {
-                    $kol = $m->name;
-                    $id = $m->id;
-                    $d->$kol = $collectNeedleDetail
-                        ->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])
-                        ->where('master_status_id', $id)
-                        ->count();
+            $m = 0;
+            foreach ($stock as $s) {
+                $last = $s->in - $s->out;
+                if ($last < $s->min_stock) {
+                    $m = 1;
+                    break;
                 }
-                $in = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])->sum('in');
-                $out = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])->sum('out');
-                $d->stock = $in - $out;
-                $data[] = $d;
             }
-            return datatables()->of($data)
-                ->make(true);
-        } else if ($id == 'dashboard_monthly') {
-            $filter_month = $request->filter_month;
-            $x = explode('-', $filter_month);
-            $year = $x[0];
-            $month = $x[1];
-
-            $ms = [];
-            $dms = MasterStatus::get();
-            foreach ($dms as $dms) {
-                $d = new stdClass;
-                $d->id = $dms->id;
-                $d->name = str_replace(' ', '_', strtolower($dms->name));
-                $ms[] = $d;
+            if ($m == 1) {
+                $h .= '<li style="text-align:left;text-indent:-20px;padding-left:20px;">
+                    <a href="' . route('user.stock') . '" style="color:black;font-weight:bold;">
+                        There is stock that is below the minimum limit
+                    </a>
+                </li>';
             }
+            return response()->json($h, 200);
+        } else if ($tipe == 'box') {
+            $inSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereMonth('created_at', $bulan)->sum('in');
+            $outSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereMonth('created_at', $bulan)->sum('out');
+            $inDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereMonth('created_at', $bulan)->sum('in');
+            $outDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereMonth('created_at', $bulan)->sum('out');
+            $inObras = Stock::whereIn('master_needle_id', $idObras)->whereMonth('created_at', $bulan)->sum('in');
+            $outObras = Stock::whereIn('master_needle_id', $idObras)->whereMonth('created_at', $bulan)->sum('out');
+            $inKansai = Stock::whereIn('master_needle_id', $idKansai)->whereMonth('created_at', $bulan)->sum('in');
+            $outKansai = Stock::whereIn('master_needle_id', $idKansai)->whereMonth('created_at', $bulan)->sum('out');
 
-            $dataNeedleDetail = NeedleDetail::whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->orderBy('created_at')
-                ->get();
+            $ava_single_needle = $inSingleNeedle - $outSingleNeedle;
+            $ava_double_needle = $inDoubleNeedle - $outDoubleNeedle;
+            $ava_obras = $inObras - $outObras;
+            $ava_kansai = $inKansai - $outKansai;
+            $rep_single_needle = $outSingleNeedle;
+            $rep_double_needle = $outDoubleNeedle;
+            $rep_obras = $outObras;
+            $rep_kansai = $outKansai;
 
-            $collectNeedleDetail = collect($dataNeedleDetail);
-
-            $dataStock = Stock::whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->orderBy('created_at')
-                ->get();
-
-            $collectStock = collect($dataStock);
-
-            $data = [];
-            for ($i = 1; $i <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $i++) {
-                $d = new stdClass;
-                $tanggal = Carbon::parse("$year-$month-$i")->toDateString();
-                $d->date = $tanggal;
-                foreach ($ms as $m) {
-                    $kol = $m->name;
-                    $id = $m->id;
-                    $d->$kol = $collectNeedleDetail
-                        ->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])
-                        ->where('master_status_id', $id)
-                        ->count();
-                }
-                $in = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])->sum('in');
-                $out = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])->sum('out');
-                $d->stock = $in - $out;
-                $data[] = $d;
-            }
-            return datatables()->of($data)
-                ->make(true);
-        } else if ($id == 'dashboard_quarterly') {
-            $filter_year = $request->filter_year;
-            $filter_quarter = $request->filter_quarter;
-            $start = '';
-            $end = '';
-            if ($filter_quarter == 'Q1') {
-                $s = 1;
-                $e = 3;
-                $start = date('Y-m-d', strtotime($filter_year . '-01-01'));
-                $end = date('Y-m-d', strtotime($filter_year . '-03-31'));
-            } else if ($filter_quarter == 'Q2') {
-                $s = 4;
-                $e = 6;
-                $start = date('Y-m-d', strtotime($filter_year . '-04-01'));
-                $end = date('Y-m-d', strtotime($filter_year . '-06-30'));
-            } else if ($filter_quarter == 'Q3') {
-                $s = 7;
-                $e = 9;
-                $start = date('Y-m-d', strtotime($filter_year . '-07-01'));
-                $end = date('Y-m-d', strtotime($filter_year . '-09-30'));
-            } else if ($filter_quarter == 'Q4') {
-                $s = 10;
-                $e = 12;
-                $start = date('Y-m-d', strtotime($filter_year . '-10-01'));
-                $end = date('Y-m-d', strtotime($filter_year . '-12-31'));
-            }
-
-            $ms = [];
-            $dms = MasterStatus::get();
-            foreach ($dms as $dms) {
-                $d = new stdClass;
-                $d->id = $dms->id;
-                $d->name = str_replace(' ', '_', strtolower($dms->name));
-                $ms[] = $d;
-            }
-
-            $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
-                ->orderBy('created_at')
-                ->get();
-
-            $collectNeedleDetail = collect($dataNeedleDetail);
-
-            $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
-                ->orderBy('created_at')
-                ->get();
-
-            $collectStock = collect($dataStock);
-
-            $data = [];
-            for ($i = $s; $i <= $e; $i++) {
-                $d = new stdClass;
-                $start = Carbon::now()->setMonth($i)->startOfMonth();
-                $end = Carbon::now()->setMonth($i)->endOfMonth();
-                $d->date = date('F', strtotime($filter_year . '-' . $i . '-01'));
-                foreach ($ms as $m) {
-                    $kol = $m->name;
-                    $id = $m->id;
-                    $d->$kol = $collectNeedleDetail
-                        ->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])
-                        ->where('master_status_id', $id)
-                        ->count();
-                }
-                $in = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('in');
-                $out = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('out');
-                $d->stock = $in - $out;
-                $data[] = $d;
-            }
-            return datatables()->of($data)
-                ->make(true);
-        } else if ($id == 'dashboard_half') {
-            $filter_year = $request->filter_year;
-            $filter_half = $request->filter_half;
-            $start = '';
-            $end = '';
-            if ($filter_half == 'H1') {
-                $s = 1;
-                $e = 6;
-                $start = date('Y-m-d', strtotime($filter_year . '-01-01'));
-                $end = date('Y-m-d', strtotime($filter_year . '-06-30'));
-            } else if ($filter_half == 'H2') {
-                $s = 7;
-                $e = 12;
-                $start = date('Y-m-d', strtotime($filter_year . '-07-01'));
-                $end = date('Y-m-d', strtotime($filter_year . '-12-31'));
-            }
-
-            $ms = [];
-            $dms = MasterStatus::get();
-            foreach ($dms as $dms) {
-                $d = new stdClass;
-                $d->id = $dms->id;
-                $d->name = str_replace(' ', '_', strtolower($dms->name));
-                $ms[] = $d;
-            }
-
-            $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
-                ->orderBy('created_at')
-                ->get();
-
-            $collectNeedleDetail = collect($dataNeedleDetail);
-
-            $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
-                ->orderBy('created_at')
-                ->get();
-
-            $collectStock = collect($dataStock);
-
-            $data = [];
-            for ($i = $s; $i <= $e; $i++) {
-                $d = new stdClass;
-                $start = Carbon::now()->setMonth($i)->startOfMonth();
-                $end = Carbon::now()->setMonth($i)->endOfMonth();
-                $d->date = date('F', strtotime($filter_year . '-' . $i . '-01'));
-                foreach ($ms as $m) {
-                    $kol = $m->name;
-                    $id = $m->id;
-                    $d->$kol = $collectNeedleDetail
-                        ->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])
-                        ->where('master_status_id', $id)
-                        ->count();
-                }
-                $in = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('in');
-                $out = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('out');
-                $d->stock = $in - $out;
-                $data[] = $d;
-            }
-            return datatables()->of($data)
-                ->make(true);
-        } else if ($id == 'dashboard_yearly') {
-            $filter_year = $request->filter_year;
-            $start = Carbon::now()->setYear($filter_year)->startOfYear();
-            $end = Carbon::now()->setYear($filter_year)->endOfYear();
-
-            $ms = [];
-            $dms = MasterStatus::get();
-            foreach ($dms as $dms) {
-                $d = new stdClass;
-                $d->id = $dms->id;
-                $d->name = str_replace(' ', '_', strtolower($dms->name));
-                $ms[] = $d;
-            }
-
-            $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
-                ->orderBy('created_at')
-                ->get();
-
-            $collectNeedleDetail = collect($dataNeedleDetail);
-
-            $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
-                ->orderBy('created_at')
-                ->get();
-
-            $collectStock = collect($dataStock);
-
+            return response()->json([
+                'ava_single_needle' => $ava_single_needle,
+                'ava_obras' => $ava_obras,
+                'ava_double_needle' => $ava_double_needle,
+                'ava_kansai' => $ava_kansai,
+                'rep_single_needle' => $rep_single_needle,
+                'rep_obras' => $rep_obras,
+                'rep_double_needle' => $rep_double_needle,
+                'rep_kansai' => $rep_kansai,
+            ], 200);
+        } else if ($tipe == 'chart') {
             $data = [];
             for ($i = 1; $i <= 12; $i++) {
+                $inSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereMonth('created_at', $i)->sum('in');
+                $outSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereMonth('created_at', $i)->sum('out');
+                $inDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereMonth('created_at', $i)->sum('in');
+                $outDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereMonth('created_at', $i)->sum('out');
+                $inObras = Stock::whereIn('master_needle_id', $idObras)->whereMonth('created_at', $i)->sum('in');
+                $outObras = Stock::whereIn('master_needle_id', $idObras)->whereMonth('created_at', $i)->sum('out');
+                $inKansai = Stock::whereIn('master_needle_id', $idKansai)->whereMonth('created_at', $i)->sum('in');
+                $outKansai = Stock::whereIn('master_needle_id', $idKansai)->whereMonth('created_at', $i)->sum('out');
+
                 $d = new stdClass;
-                $start = Carbon::now()->setMonth($i)->startOfMonth();
-                $end = Carbon::now()->setMonth($i)->endOfMonth();
-                $d->date = date('F', strtotime($filter_year . '-' . $i . '-01'));
-                foreach ($ms as $m) {
-                    $kol = $m->name;
-                    $id = $m->id;
-                    $d->$kol = $collectNeedleDetail
-                        ->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])
-                        ->where('master_status_id', $id)
-                        ->count();
-                }
-                $in = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('in');
-                $out = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('out');
-                $d->stock = $in - $out;
-                $data[] = $d;
+                $d->date = date('M', strtotime(date('Y-' . $i . '-01')));
+                $d->ava_single_needle = $inSingleNeedle - $outSingleNeedle;
+                $d->ava_double_needle = $inDoubleNeedle - $outDoubleNeedle;
+                $d->ava_obras = $inObras - $outObras;
+                $d->ava_kansai = $inKansai - $outKansai;
+                $d->rep_single_needle = $outSingleNeedle;
+                $d->rep_double_needle = $outDoubleNeedle;
+                $d->rep_obras = $outObras;
+                $d->rep_kansai = $outKansai;
+                $data[$i] = $d;
             }
-            return datatables()->of($data)
-                ->make(true);
+
+            return response()->json($data, 200);
         }
     }
 }
