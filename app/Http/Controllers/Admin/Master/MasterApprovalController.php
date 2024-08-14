@@ -29,7 +29,7 @@ class MasterApprovalController extends Controller
 
         $admin_master = 'menu-open';
 
-        $user = User::where('name', '!=', 'developer')->get();
+        $user = User::permission('user-approval')->where('name', '!=', 'developer')->get();
 
         return view('Admin.Master.Approval.index', compact('title', 'page', 'admin_master', 'user'));
     }
