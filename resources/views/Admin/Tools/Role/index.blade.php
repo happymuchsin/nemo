@@ -169,7 +169,7 @@
                                 }
                             },
                             columns: [{
-                                    data: 'name',
+                                    data: 'ket',
                                 },
                                 {
                                     data: 'action',
@@ -197,7 +197,7 @@
                                     return {
                                         results: $.map(data, function(item) {
                                             return {
-                                                text: item.name,
+                                                text: item.description,
                                                 id: item.id,
                                             };
                                         }),

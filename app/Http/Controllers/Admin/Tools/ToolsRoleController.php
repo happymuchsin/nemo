@@ -129,7 +129,7 @@ class ToolsRoleController extends Controller
     public function data_permission(Request $request)
     {
         $role_id = $request->role_id;
-        $data = Role::selectRaw('p.id as id, p.name as name')
+        $data = Role::selectRaw('p.id as id, p.name as name, p.description as ket')
             ->join('role_has_permissions as rhp', 'roles.id', 'rhp.role_id')
             ->join('permissions as p', 'p.id', 'rhp.permission_id')
             ->when($role_id != 0, function ($q) use ($role_id) {
