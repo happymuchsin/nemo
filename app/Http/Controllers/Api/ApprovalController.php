@@ -35,9 +35,11 @@ class ApprovalController extends Controller
                             ->where('name', 'REPLACEMENT');
                     });
             })
-            ->orWhere('status', '!=', 'DONE')
+            ->whereNotNull('needle_id')
+            ->where('status', '!=', 'DONE')
             ->get();
         foreach ($s as $s) {
+            // if ($s->needle) {
             $d = new stdClass;
             $d->id = $s->id;
             $d->username = $s->user->username;
@@ -61,6 +63,7 @@ class ApprovalController extends Controller
             }
             $d->gambar = base64_encode(file_get_contents("assets/uploads/needle/$created_at->year/$month/$s->needle_id/$s->id.$s->ext"));
             $data[] = $d;
+            // }
         }
 
         return new ApiResource(200, 'success', $data);

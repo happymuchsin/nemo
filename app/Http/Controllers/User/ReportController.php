@@ -31,7 +31,7 @@ class ReportController extends Controller
 
         $user_report = 'active';
 
-        $x = MasterStatus::get();
+        $x = MasterStatus::where('name', '!=', 'RETURN')->get();
         $master_status = [];
         foreach ($x as $x) {
             $d = new stdClass;
@@ -67,6 +67,16 @@ class ReportController extends Controller
     public function data(Request $request)
     {
         $id = $request->id;
+
+        $ms = [];
+        $dms = MasterStatus::where('name', '!=', 'RETURN')->get();
+        foreach ($dms as $dms) {
+            $d = new stdClass;
+            $d->id = $dms->id;
+            $d->name = str_replace(' ', '_', strtolower($dms->name));
+            $ms[] = $d;
+        }
+
         if ($id == 'report_daily') {
             $filter_date = $request->filter_date;
             $data = NeedleDetail::with(['needle' => function ($q) {
@@ -107,15 +117,6 @@ class ReportController extends Controller
             $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
             $period = CarbonPeriod::create($start, $end);
 
-            $ms = [];
-            $dms = MasterStatus::get();
-            foreach ($dms as $dms) {
-                $d = new stdClass;
-                $d->id = $dms->id;
-                $d->name = str_replace(' ', '_', strtolower($dms->name));
-                $ms[] = $d;
-            }
-
             $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start, $end])
                 ->orderBy('created_at')
                 ->get();
@@ -153,15 +154,6 @@ class ReportController extends Controller
             $x = explode('-', $filter_month);
             $year = $x[0];
             $month = $x[1];
-
-            $ms = [];
-            $dms = MasterStatus::get();
-            foreach ($dms as $dms) {
-                $d = new stdClass;
-                $d->id = $dms->id;
-                $d->name = str_replace(' ', '_', strtolower($dms->name));
-                $ms[] = $d;
-            }
 
             $dataNeedleDetail = NeedleDetail::whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
@@ -224,15 +216,6 @@ class ReportController extends Controller
                 $end = date('Y-m-d', strtotime($filter_year . '-12-31'));
             }
 
-            $ms = [];
-            $dms = MasterStatus::get();
-            foreach ($dms as $dms) {
-                $d = new stdClass;
-                $d->id = $dms->id;
-                $d->name = str_replace(' ', '_', strtolower($dms->name));
-                $ms[] = $d;
-            }
-
             $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')
                 ->get();
@@ -283,15 +266,6 @@ class ReportController extends Controller
                 $end = date('Y-m-d', strtotime($filter_year . '-12-31'));
             }
 
-            $ms = [];
-            $dms = MasterStatus::get();
-            foreach ($dms as $dms) {
-                $d = new stdClass;
-                $d->id = $dms->id;
-                $d->name = str_replace(' ', '_', strtolower($dms->name));
-                $ms[] = $d;
-            }
-
             $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')
                 ->get();
@@ -329,15 +303,6 @@ class ReportController extends Controller
             $filter_year = $request->filter_year;
             $start = Carbon::now()->setYear($filter_year)->startOfYear();
             $end = Carbon::now()->setYear($filter_year)->endOfYear();
-
-            $ms = [];
-            $dms = MasterStatus::get();
-            foreach ($dms as $dms) {
-                $d = new stdClass;
-                $d->id = $dms->id;
-                $d->name = str_replace(' ', '_', strtolower($dms->name));
-                $ms[] = $d;
-            }
 
             $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')

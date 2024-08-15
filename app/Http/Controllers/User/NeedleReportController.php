@@ -87,7 +87,7 @@ class NeedleReportController extends Controller
             $data = [];
             $s = Stock::join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')
                 ->join('master_boxes as mb', 'mb.id', 'stocks.master_box_id')
-                ->selectRaw('mb.name as box, brand, tipe, size, sum(`in`) as `in`, sum(`out`) as `out`')
+                ->selectRaw('mb.name as box, brand, mn.tipe, size, sum(`in`) as `in`, sum(`out`) as `out`')
                 ->where('stocks.master_counter_id', $filter_counter)
                 ->where('stocks.is_clear', 'not')
                 ->groupBy('master_box_id')

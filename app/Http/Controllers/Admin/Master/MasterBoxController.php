@@ -56,6 +56,8 @@ class MasterBoxController extends Controller
         $id = $request->id;
         $master_counter_id = $request->master_counter_id;
         $name = strtoupper($request->name);
+        $tipe = strtoupper($request->tipe);
+        $status = strtoupper($request->status);
         $rfid = $request->rfid;
 
         try {
@@ -70,6 +72,8 @@ class MasterBoxController extends Controller
                         'master_counter_id' => $master_counter_id,
                         'name' => $name,
                         'rfid' => $rfid,
+                        'tipe' => $tipe,
+                        'status' => $status,
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
@@ -77,6 +81,8 @@ class MasterBoxController extends Controller
                         'master_counter_id' => $master_counter_id,
                         'name' => $name,
                         'rfid' => $rfid,
+                        'tipe' => $tipe,
+                        'status' => $status,
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]));
@@ -100,6 +106,8 @@ class MasterBoxController extends Controller
                         'master_counter_id' => $master_counter_id,
                         'name' => $name,
                         'rfid' => $rfid,
+                        'tipe' => $tipe,
+                        'status' => $status,
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
@@ -108,6 +116,8 @@ class MasterBoxController extends Controller
                         'master_counter_id' => $master_counter_id,
                         'name' => $name,
                         'rfid' => $rfid,
+                        'tipe' => $tipe,
+                        'status' => $status,
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]), $id);

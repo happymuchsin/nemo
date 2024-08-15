@@ -10,6 +10,8 @@
                         <th>Counter</th>
                         <th>Name</th>
                         <th>RFID</th>
+                        <th>Type</th>
+                        <th>Status</th>
                         <th>Action</th>
                     </tr>
                 </x-slot:thead>
@@ -29,6 +31,18 @@
             </x-modal.body>
             <x-modal.body :tipe="'text'" :label="'Name'" :id="'name'" />
             <x-modal.body :tipe="'text'" :label="'RFID'" :id="'rfid'" />
+            <x-modal.body :tipe="'select'" :label="'Type'" :id="'tipe'">
+                <x-slot:option>
+                    <option value="NORMAL">NORMAL</option>
+                    <option value="RETURN">RETURN</option>
+                </x-slot:option>
+            </x-modal.body>
+            <x-modal.body :tipe="'select'" :label="'Status'" :id="'status'" :disable="'disabled'">
+                <x-slot:option>
+                    <option value="OK">OK</option>
+                    <option value="NG">NG</option>
+                </x-slot:option>
+            </x-modal.body>
         </x-slot:body>
         <x-slot:footer>
             <x-layout.button :class="'btn-primary'" :id="'save'" :onclick="'crup()'" :icon="'fa fa-save'"
@@ -43,6 +57,23 @@
         $(document).ready(function() {
             $('#master_counter_id').select2({
                 placeholder: "Select Counter",
+                dropdownParent: $('#crupModal'),
+                width: '100%',
+            });
+            $('#tipe').select2({
+                placeholder: "Select Type",
+                dropdownParent: $('#crupModal'),
+                width: '100%',
+            });
+            $('#tipe').on('change', function() {
+                if ($(this).val() == 'RETURN') {
+                    $('#status').prop('disabled', false);
+                } else {
+                    $('#status').prop('disabled', true);
+                }
+            });
+            $('#status').select2({
+                placeholder: "Select Status",
                 dropdownParent: $('#crupModal'),
                 width: '100%',
             });
@@ -62,6 +93,12 @@
                     },
                     {
                         data: 'rfid'
+                    },
+                    {
+                        data: 'tipe'
+                    },
+                    {
+                        data: 'status'
                     },
                     {
                         data: 'action'
@@ -90,6 +127,8 @@
             $('#master_counter_id').val('').trigger('change');
             $('#name').val('');
             $('#rfid').val('');
+            $('#tipe').val('').trigger('change');
+            $('#status').val('').trigger('change');
             $('#key').val(0);
             $('#crupModal').modal('toggle');
         }
@@ -99,6 +138,10 @@
                 Swal.fire('Warning!', 'Please select Counter', 'warning');
             } else if ($('#name').val() == '') {
                 Swal.fire('Warning!', 'Please insert Name', 'warning');
+            } else if ($('#tipe').val() == '') {
+                Swal.fire('Warning!', 'Please select Type', 'warning');
+            } else if ($('#tipe').val() == 'RETURN' && $('#status').val() == '') {
+                Swal.fire('Warning!', 'Please select Status', 'warning');
             } else {
                 $.ajaxSetup({
                     headers: {
@@ -113,6 +156,8 @@
                         'master_counter_id': $('#master_counter_id').val(),
                         'name': $('#name').val(),
                         'rfid': $('#rfid').val(),
+                        'tipe': $('#tipe').val(),
+                        'status': $('#status').val(),
                     },
                     beforeSend: function() {
                         Swal.fire({
@@ -170,6 +215,8 @@
                     $('#master_counter_id').val(response.master_counter_id).trigger('change');
                     $('#name').val(response.name);
                     $('#rfid').val(response.rfid);
+                    $('#tipe').val(response.tipe).trigger('change');
+                    $('#status').val(response.status).trigger('change');
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');
                 });

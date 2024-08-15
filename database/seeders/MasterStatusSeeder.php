@@ -48,5 +48,15 @@ class MasterStatusSeeder extends Seeder
             'name' => 'REPLACEMENT',
             'created_by' => 'developer'
         ]);
+        MasterStatus::firstOrCreate([
+            'id' => 8,
+            'name' => 'RETURN OK',
+            'created_by' => 'developer'
+        ]);
+        MasterStatus::firstOrCreate([
+            'id' => 9,
+            'name' => 'RETURN NG',
+            'created_by' => 'developer'
+        ]);
     }
 }

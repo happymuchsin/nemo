@@ -7,7 +7,9 @@
         </li>
     </ul>
 
-    <img class="mr-auto ml-auto" src="{{ asset('assets/img/anggun.png') }}" alt="" width="180">
+    @if (env('APP_ENV') == 'production')
+        <img class="mr-auto ml-auto" src="{{ asset('assets/img/anggun.png') }}" alt="" width="180">
+    @endif
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">

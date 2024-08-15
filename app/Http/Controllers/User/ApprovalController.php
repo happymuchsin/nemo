@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\Approval;
+use App\Models\Needle;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -33,9 +34,7 @@ class ApprovalController extends Controller
     {
         $bulan = $request->bulan;
         $tahun = $request->tahun;
-        $data = Approval::with(['user', 'needle' => function ($q) {
-            $q->with(['line', 'needle']);
-        }])
+        $data = Approval::with(['user', 'needle', 'master_needle', 'master_line', 'master_style'])
             ->where('approval_id', Auth::user()->id)
             ->whereYear('tanggal', $tahun)
             ->when($bulan != 'all', function ($q) use ($bulan) {
@@ -51,22 +50,38 @@ class ApprovalController extends Controller
             ->editColumn('needle_status', function ($q) {
                 return strtoupper($q->needle_status);
             })
-            ->addColumn('brand', function ($q) {
-                return $q->needle->needle->brand;
+            ->addColumn('needleBrand', function ($q) {
+                return $q->master_needle->brand;
             })
-            ->addColumn('tipe', function ($q) {
-                return $q->needle->needle->tipe;
+            ->addColumn('needleTipe', function ($q) {
+                return $q->master_needle->tipe;
             })
-            ->addColumn('size', function ($q) {
-                return $q->needle->needle->size;
+            ->addColumn('needleSize', function ($q) {
+                return $q->master_needle->size;
             })
             ->addColumn('line', function ($q) {
-                return $q->needle->line->name;
+                return $q->master_line->name;
+            })
+            ->addColumn('style', function ($q) {
+                return $q->master_style->name;
             })
             ->addColumn('requestor', function ($q) {
                 return $q->user->username . ' - ' . $q->user->name;
             })
+            ->editColumn('tipe', function ($q) {
+                if ($q->tipe == 'request-new') {
+                    return 'REQUEST NEW NEEDLE';
+                } else if ($q->tipe == 'missing-fragment') {
+                    return 'MISSING FRAGMENT';
+                }
+            })
+            ->editColumn('remark', function ($q) {
+                return strtoupper($q->remark);
+            })
             ->addColumn('gambar', function ($q) {
+                if ($q->tipe == 'request-new') {
+                    return '';
+                }
                 $c = Carbon::parse($q->tanggal);
                 if (strlen($c->month) == 1) {
                     $month = '0' . $c->month;
@@ -97,6 +112,8 @@ class ApprovalController extends Controller
         try {
             DB::beginTransaction();
 
+            $s = Approval::where('id', $id)->first();
+
             $now = Carbon::now();
             Approval::where('id', $id)->update([
                 'status' => strtoupper($status),
@@ -112,6 +129,21 @@ class ApprovalController extends Controller
                 'updated_by' => Auth::user()->username,
                 'updated_at' => $now,
             ]), $id);
+
+            if ($s->tipe == 'request-new') {
+                Needle::where('user_id', $s->user_id)->where('status', 'new')->update([
+                    'status' => 'return',
+                    'updated_by' => Auth::user()->username,
+                    'updated_at' => $now,
+                ]);
+
+                HelperController::activityLog("UPDATE NEEDLE", 'needles', 'update', $request->ip(), $request->userAgent(), json_encode([
+                    'user_id' => $s->user_id,
+                    'status' => 'return',
+                    'updated_by' => Auth::user()->username,
+                    'updated_at' => $now,
+                ]), $id);
+            }
 
             HelperController::emitEvent('nemo', [
                 'event' => 'nemoReload',

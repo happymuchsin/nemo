@@ -21,7 +21,10 @@
                         <th>Type</th>
                         <th>Size</th>
                         <th>Line</th>
+                        <th>Style</th>
                         <th>Requestor</th>
+                        <th>Request Type</th>
+                        <th>Remark</th>
                         <th>Fragment</th>
                         <th>Image</th>
                         <th>Action</th>
@@ -60,19 +63,28 @@
                         data: 'created_at'
                     },
                     {
-                        data: 'brand'
+                        data: 'needleBrand'
                     },
                     {
-                        data: 'tipe'
+                        data: 'needleTipe'
                     },
                     {
-                        data: 'size'
+                        data: 'needleSize'
                     },
                     {
                         data: 'line'
                     },
                     {
+                        data: 'style'
+                    },
+                    {
                         data: 'requestor'
+                    },
+                    {
+                        data: 'tipe'
+                    },
+                    {
+                        data: 'remark'
                     },
                     {
                         data: 'needle_status'

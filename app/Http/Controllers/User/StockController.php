@@ -37,7 +37,7 @@ class StockController extends Controller
         $needle = MasterNeedle::get();
 
         $counter = MasterCounter::get();
-        $box = MasterBox::get();
+        $box = MasterBox::where('tipe', 'NORMAL')->get();
 
         return view('User.Stock.index', compact('title', 'page', 'area', 'needle', 'counter', 'box'));
     }
@@ -96,7 +96,7 @@ class StockController extends Controller
             foreach ($s as $s) {
                 $x[] = $s->master_box_id;
             }
-            $x = MasterBox::where('master_counter_id', $master_counter_id)->whereNotIn('id', $x)->get();
+            $x = MasterBox::where('master_counter_id', $master_counter_id)->whereNotIn('id', $x)->where('tipe', 'NORMAL')->get();
         } else {
             $x = [];
         }

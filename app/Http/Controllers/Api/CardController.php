@@ -23,26 +23,28 @@ class CardController extends Controller
             $u = User::where('rfid', $rfid)->first();
             if ($u) {
                 $tipe = $request->tipe;
-                if ($tipe == 'return') {
-                    $s = Needle::with(['line', 'style', 'box', 'needle'])
-                        ->where('user_id', $u->id)
-                        ->where('status', 'new')
-                        ->orderBy('created_at', 'desc')
-                        ->first();
-                    if ($s) {
-                        return new ApiResource(200, 'success', [
-                            'user' => $u,
-                            'needle' => $s,
-                        ]);
-                    } else {
-                        return new ApiResource(422, 'No returnable needles', '');
-                    }
-                } else if ($tipe == 'approval') {
+                // if ($tipe == 'return') {
+                //     $s = Needle::with(['line', 'style', 'box', 'needle'])
+                //         ->where('user_id', $u->id)
+                //         ->where('status', 'new')
+                //         ->orderBy('created_at', 'desc')
+                //         ->first();
+                //     if ($s) {
+                //         return new ApiResource(200, 'success', [
+                //             'user' => $u,
+                //             'needle' => $s,
+                //         ]);
+                //     } else {
+                //         return new ApiResource(422, 'No returnable needles', '');
+                //     }
+                // } 
+                if ($tipe == 'approval') {
                     $area_id = $request->area_id;
                     $lokasi_id = $request->lokasi_id;
                     $s = Approval::with(['user', 'needle' => function ($q) {
                         $q->with(['line', 'style', 'box', 'needle']);
                     }])
+                        ->whereNotNull('needle_id')
                         ->where('user_id', $u->id)
                         ->where('master_area_id', $area_id)
                         ->where('master_counter_id', $lokasi_id)
@@ -55,7 +57,7 @@ class CardController extends Controller
                                         ->where('name', 'REPLACEMENT');
                                 });
                         })
-                        ->orWhere('status', '!=', 'DONE')
+                        ->where('status', '!=', 'DONE')
                         ->first();
                     $d = new stdClass;
                     $d->id = $s->id;
@@ -97,22 +99,33 @@ class CardController extends Controller
         $rfid = $request->rfid;
 
         if ($rfid) {
+            $tipe = $request->tipe;
             $b = MasterBox::where('rfid', $rfid)->first();
             if ($b) {
-                $s = Stock::with(['needle'])->where('master_box_id', $b->id)->where('is_clear', 'not')->first();
-                if ($s) {
-                    $in = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('in');
-                    $out = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('out');
-                    if ($in <= $out) {
-                        return new ApiResource(422, 'Box is Empty', '');
+                if ($tipe == 'return') {
+                    if ($b->tipe != 'RETURN') {
+                        return new ApiResource(422, 'This is not Box Return', '');
                     }
 
                     return new ApiResource(200, 'success', [
                         'box' => $b,
-                        'stock' => $s,
                     ]);
                 } else {
-                    return new ApiResource(422, 'Stock in Box is Empty', '');
+                    $s = Stock::with(['needle'])->where('master_box_id', $b->id)->where('is_clear', 'not')->first();
+                    if ($s) {
+                        $in = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('in');
+                        $out = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('out');
+                        if ($in <= $out) {
+                            return new ApiResource(422, 'Box is Empty', '');
+                        }
+
+                        return new ApiResource(200, 'success', [
+                            'box' => $b,
+                            'stock' => $s,
+                        ]);
+                    } else {
+                        return new ApiResource(422, 'Stock in Box is Empty', '');
+                    }
                 }
             } else {
                 return new ApiResource(422, 'RFID not found', '');

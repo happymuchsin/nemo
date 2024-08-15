@@ -27,6 +27,7 @@ class NeedleController extends Controller
 {
     public function save(Request $request)
     {
+        $tipe = $request->tipe;
         $idCard = $request->idCard;
         $line = $request->line;
         $style = $request->style;
@@ -47,30 +48,54 @@ class NeedleController extends Controller
         try {
             $user = User::where('rfid', $idCard)->first();
             $box = MasterBox::where('rfid', $boxCard)->first();
-            $stat = MasterStatus::where('name', $status)->first();
-
-            $s = Needle::where('user_id', $user->id)->where('master_needle_id', $needle)->where('status', 'new')->first();
-            if ($s) {
-                if ($status == 'REQUEST NEW') {
-                    return new ApiResource(422, 'User cannot request again !!!', '');
+            if ($status == 'RETURN') {
+                if ($box->tipe == 'RETURN') {
+                    $ss = $box->status;
                 }
-
-                $needle_id = $s->id;
+                $stat = MasterStatus::where('name', $status . ' ' . $ss)->first();
             } else {
-                if ($status != 'REQUEST NEW') {
-                    return new ApiResource(422, 'User does not have a needle !!!', '');
-                }
+                $stat = MasterStatus::where('name', $status)->first();
+            }
 
+            if ($status == 'RETURN') {
                 $needle_id = null;
+            } else {
+                $s = Needle::where('user_id', $user->id)->where('status', 'new')->first();
+                if ($s) {
+                    if ($status == 'REQUEST NEW') {
+                        $a = Approval::where('user_id', $user->id)->where('tipe', 'request-new')->first();
+                        if ($a) {
+                            if ($a->status == 'WAITING') {
+                                return new ApiResource(422, 'Waiting Approval Request', '');
+                            } else if ($a->status == 'REJECT') {
+                                return new ApiResource(422, 'Previous Request Rejected, Create New Approval Request', 'approval');
+                            } else {
+                                return new ApiResource(422, 'User cannot request again, Create Approval Request', 'approval');
+                            }
+                        } else {
+                            return new ApiResource(422, 'User cannot request again, Create Approval Request', 'approval');
+                        }
+                    }
+
+                    $needle_id = $s->id;
+                } else {
+                    if ($status != 'REQUEST NEW') {
+                        return new ApiResource(422, 'User does not have a needle !!!', '');
+                    }
+
+                    $needle_id = null;
+                }
             }
 
             DB::beginTransaction();
 
-            $in = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->where('is_clear', 'not')->sum('in');
-            $out = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->where('is_clear', 'not')->sum('out');
+            if ($status != 'RETURN') {
+                $in = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->where('is_clear', 'not')->sum('in');
+                $out = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->where('is_clear', 'not')->sum('out');
 
-            if ($in <= $out) {
-                return new ApiResource(422, 'Stock in Box is empty !!!', '');
+                if ($in <= $out) {
+                    return new ApiResource(422, 'Stock in Box is empty !!!', '');
+                }
             }
 
             if ($status == 'RETURN') {
@@ -127,36 +152,36 @@ class NeedleController extends Controller
             $stock = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
 
             if ($status == 'RETURN') {
-                $a = Approval::where('needle_id', $needle_id)->where('status', '!=', 'DONE')->first();
-                if ($a) {
-                    DB::rollBack();
-                    return new ApiResource(422, 'There are needles that are still in the REPLACEMENT process', '');
-                }
+                // $a = Approval::where('needle_id', $needle_id)->where('status', '!=', 'DONE')->first();
+                // if ($a) {
+                //     DB::rollBack();
+                //     return new ApiResource(422, 'There are needles that are still in the REPLACEMENT process', '');
+                // }
 
-                Needle::where('id', $needle_id)->where('status', 'new')->update([
-                    'status' => 'return',
-                    'updated_by' => $username,
-                    'updated_at' => $now,
-                ]);
+                // Needle::where('id', $needle_id)->where('status', 'new')->update([
+                //     'status' => 'return',
+                //     'updated_by' => $username,
+                //     'updated_at' => $now,
+                // ]);
 
-                HelperController::activityLog("ANDROID UPDATE NEEDLE", 'needles', 'update', $request->ip(), $request->userAgent(), json_encode([
-                    'id' => $needle_id,
-                    'status' => 'return',
-                    'updated_by' => $username,
-                    'updated_at' => $now,
-                ]), $needle_id, $username);
+                // HelperController::activityLog("ANDROID UPDATE NEEDLE", 'needles', 'update', $request->ip(), $request->userAgent(), json_encode([
+                //     'id' => $needle_id,
+                //     'status' => 'return',
+                //     'updated_by' => $username,
+                //     'updated_at' => $now,
+                // ]), $needle_id, $username);
 
-                Stock::where('id', $stock->id)->update([
-                    'out' => DB::raw("`out` - 1"),
-                    'updated_by' => $username,
-                    'updated_at' => $now,
-                ]);
-                HelperController::activityLog("ANDROID UPDATE STOCK", 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
-                    'id' => $stock->id,
-                    'out' => 'out - 1',
-                    'updated_by' => $username,
-                    'updated_at' => $now,
-                ]), $stock->id, $username);
+                // Stock::where('id', $stock->id)->update([
+                //     'out' => DB::raw("`out` - 1"),
+                //     'updated_by' => $username,
+                //     'updated_at' => $now,
+                // ]);
+                // HelperController::activityLog("ANDROID UPDATE STOCK", 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
+                //     'id' => $stock->id,
+                //     'out' => 'out - 1',
+                //     'updated_by' => $username,
+                //     'updated_at' => $now,
+                // ]), $stock->id, $username);
             } else {
                 Stock::where('id', $stock->id)->update([
                     'out' => DB::raw("`out` + 1"),
@@ -216,6 +241,7 @@ class NeedleController extends Controller
 
     public function approval(Request $request)
     {
+        $tipe = $request->tipe;
         $needle_status = $request->needleStatus;
         $idCard = $request->idCard;
         $approval = $request->approval;
@@ -226,6 +252,10 @@ class NeedleController extends Controller
         $filename = $request->filename;
         $ext = $request->ext;
         $gambar = base64_decode($request->gambar);
+        $line = $request->line;
+        $style = $request->style;
+        $boxCard = $request->boxCard;
+        $remark = $request->remark;
         $now = Carbon::now();
 
         try {
@@ -244,9 +274,25 @@ class NeedleController extends Controller
                 $lokasi = $s->name;
             }
 
-            $needle = Needle::where('user_id', $user_id)->where('status', 'new')->first();
-            if (!$needle) {
-                return new ApiResource(422, 'User does not have a needle !!!', '');
+            if ($tipe == 'missing-fragment') {
+                $needle = Needle::with(['line', 'style'])->where('user_id', $user_id)->where('status', 'new')->first();
+                if (!$needle) {
+                    return new ApiResource(422, 'User does not have a needle !!!', '');
+                }
+                $needle_id = $needle->id;
+                $master_needle_id = $needle->master_needle_id;
+                $master_line_id = $needle->master_line_id;
+                $master_style_id = $needle->master_style_id;
+            } else if ($tipe == 'request-new') {
+                $box = MasterBox::where('rfid', $boxCard)->first();
+                $stock = Stock::where('master_box_id', $box->id)->where('is_clear', 'not')->first();
+                if (!$stock) {
+                    return new ApiResource(422, 'Stock in Box is Empty !!!', '');
+                }
+                $needle_id = null;
+                $master_needle_id = $stock->master_needle_id;
+                $master_line_id = $line;
+                $master_style_id = $style;
             }
 
             if ($reff == 'line') {
@@ -260,11 +306,16 @@ class NeedleController extends Controller
                 'id' => $id,
                 'tanggal' => $now->today(),
                 'user_id' => $user_id,
-                'needle_id' => $needle->id,
+                'master_needle_id' => $master_needle_id,
+                'master_line_id' => $master_line_id,
+                'master_style_id' => $master_style_id,
+                'needle_id' => $needle_id,
                 'approval_id' => $approval,
                 'master_area_id' => $area_id,
                 'master_counter_id' => $lokasi_id,
                 'needle_status' => $needle_status,
+                'tipe' => $tipe,
+                'remark' => $remark,
                 'status' => 'WAITING',
                 'filename' => $filename,
                 'ext' => $ext,
@@ -275,11 +326,16 @@ class NeedleController extends Controller
                 'id' => $id,
                 'tanggal' => $now->today(),
                 'user_id' => $user_id,
-                'needle_id' => $needle->id,
+                'master_needle_id' => $master_needle_id,
+                'master_line_id' => $master_line_id,
+                'master_style_id' => $master_style_id,
+                'needle_id' => $needle_id,
                 'approval_id' => $approval,
                 'master_area_id' => $area_id,
                 'master_counter_id' => $lokasi_id,
                 'needle_status' => $needle_status,
+                'tipe' => $tipe,
+                'remark' => $remark,
                 'status' => 'WAITING',
                 'filename' => $filename,
                 'ext' => $ext,
@@ -293,8 +349,14 @@ class NeedleController extends Controller
                 $month = $now->month;
             }
 
+            if ($tipe == 'missing-fragment') {
+                $t = 'Missing Fragment';
+            } else if ($tipe == 'request-new') {
+                $t = 'Request New Needle';
+            }
+
             $title = 'New Approval';
-            $message = "You have a new Outstanding Approval Missing Fragment. \nWith data:\n Requester: {$name}\n Division: {$division}\n Position: {$position}\n Location: {$lokasi}\n DateTime: {$now}";
+            $message = "You have a new Outstanding Approval $t. \nWith data:\n Requester: {$name}\n Division: {$division}\n Position: {$position}\n Location: {$lokasi}\n DateTime: {$now}";
             $link = route('notif-clicked', ['tipe' => 'approval']);
 
             $data = [
@@ -321,12 +383,14 @@ class NeedleController extends Controller
                 'tipe' => 'reload',
             ]);
 
-            $path = "assets/uploads/needle/$now->year/$month/$needle->id";
-            if (!file_exists($path)) {
-                mkdir($path, 0777, true);
-            }
+            if ($tipe == 'missing-fragment') {
+                $path = "assets/uploads/needle/$now->year/$month/$needle->id";
+                if (!file_exists($path)) {
+                    mkdir($path, 0777, true);
+                }
 
-            file_put_contents("$path/$id.$ext", $gambar);
+                file_put_contents("$path/$id.$ext", $gambar);
+            }
 
             DB::commit();
             return new ApiResource(200, 'Save Successfully', '');
@@ -347,7 +411,7 @@ class NeedleController extends Controller
         $data = [];
         $s = Stock::join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')
             ->join('master_boxes as mb', 'mb.id', 'stocks.master_box_id')
-            ->selectRaw('mb.name as box, brand, tipe, size, sum(`in`) as `in`, sum(`out`) as `out`')
+            ->selectRaw('mb.name as box, brand, mn.tipe, size, sum(`in`) as `in`, sum(`out`) as `out`')
             ->where('stocks.master_area_id', $area_id)
             ->where('stocks.master_counter_id', $lokasi_id)
             ->where('stocks.is_clear', 'not')

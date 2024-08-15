@@ -22,4 +22,19 @@ class Approval extends Model
     {
         return $this->belongsTo(Needle::class, 'needle_id', 'id');
     }
+
+    public function master_needle()
+    {
+        return $this->belongsTo(MasterNeedle::class, 'master_needle_id', 'id');
+    }
+
+    public function master_line()
+    {
+        return $this->belongsTo(MasterLine::class, 'master_line_id', 'id');
+    }
+
+    public function master_style()
+    {
+        return $this->belongsTo(MasterStyle::class, 'master_style_id', 'id');
+    }
 }
