@@ -49,7 +49,7 @@ class MasterApprovalController extends Controller
             })
             ->addColumn('action', function ($q) {
                 return view('includes.admin.action', [
-                    'hapus' => route('admin.master.area.hapus', ['id' => $q->id]),
+                    'hapus' => route('admin.master.approval.hapus', ['id' => $q->id]),
                 ]);
             })
             ->make(true);
