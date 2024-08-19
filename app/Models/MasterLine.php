@@ -14,6 +14,6 @@ class MasterLine extends Model
 
     public function area()
     {
-        return $this->belongsTo(MasterArea::class, 'master_area_id', 'id');
+        return $this->belongsTo(MasterArea::class, 'master_area_id', 'id')->whereNull('deleted_at');
     }
 }
