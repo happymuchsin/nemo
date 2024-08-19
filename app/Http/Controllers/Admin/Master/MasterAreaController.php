@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\MasterArea;
+use App\Models\MasterBox;
+use App\Models\MasterCounter;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -117,6 +119,14 @@ class MasterAreaController extends Controller
     {
         try {
             DB::beginTransaction();
+            MasterCounter::where('master_area_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
+            MasterBox::where('master_area_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
             MasterArea::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
