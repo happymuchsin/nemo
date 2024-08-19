@@ -7,6 +7,7 @@ use App\Http\Controllers\HelperController;
 use App\Models\MasterArea;
 use App\Models\MasterBox;
 use App\Models\MasterCounter;
+use App\Models\MasterPlacement;
 use App\Models\Stock;
 use Carbon\Carbon;
 use Exception;
@@ -132,6 +133,10 @@ class MasterCounterController extends Controller
                 'deleted_at' => Carbon::now(),
             ]);
             Stock::where('master_counter_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
+            MasterPlacement::where('reff', 'counter')->where('location_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);

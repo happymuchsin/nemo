@@ -8,6 +8,7 @@ use App\Models\MasterArea;
 use App\Models\MasterBox;
 use App\Models\MasterCounter;
 use App\Models\MasterLine;
+use App\Models\MasterPlacement;
 use App\Models\Stock;
 use Carbon\Carbon;
 use Exception;
@@ -121,6 +122,13 @@ class MasterAreaController extends Controller
     {
         try {
             DB::beginTransaction();
+            $s = MasterLine::where('master_area_id', $id)->get();
+            foreach ($s as $s) {
+                MasterPlacement::where('reff', 'line')->where('location_id', $s->id)->update([
+                    'deleted_by' => Auth::user()->username,
+                    'deleted_at' => Carbon::now(),
+                ]);
+            }
             MasterLine::where('master_area_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
@@ -128,6 +136,10 @@ class MasterAreaController extends Controller
             $s = MasterCounter::where('master_area_id', $id)->get();
             foreach ($s as $s) {
                 MasterBox::where('master_counter_id', $s->id)->update([
+                    'deleted_by' => Auth::user()->username,
+                    'deleted_at' => Carbon::now(),
+                ]);
+                MasterPlacement::where('reff', 'counter')->where('location_id', $s->id)->update([
                     'deleted_by' => Auth::user()->username,
                     'deleted_at' => Carbon::now(),
                 ]);

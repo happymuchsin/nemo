@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\MasterArea;
 use App\Models\MasterLine;
+use App\Models\MasterPlacement;
 use App\Models\Needle;
 use App\Models\NeedleDetail;
 use Carbon\Carbon;
@@ -135,6 +136,10 @@ class MasterLineController extends Controller
                 ]);
             }
             Needle::where('master_line_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
+            MasterPlacement::where('reff', 'line')->where('location_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
