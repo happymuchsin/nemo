@@ -266,6 +266,9 @@ class NeedleController extends Controller
             $position = $requester->position->name;
 
             $mp = MasterPlacement::where('user_id', $requester->id)->first();
+            if (!$mp) {
+                return new ApiResource(422, 'Please set User Placement First !!!', '');
+            }
             if ($mp->reff == 'line') {
                 $s = MasterLine::where('id', $mp->location_id)->first();
                 $lokasi = $s->name;

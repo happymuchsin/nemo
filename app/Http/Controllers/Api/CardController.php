@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResource;
 use App\Models\Approval;
 use App\Models\MasterBox;
+use App\Models\MasterPlacement;
 use App\Models\Needle;
 use App\Models\Stock;
 use App\Models\User;
@@ -22,6 +23,10 @@ class CardController extends Controller
         if ($rfid) {
             $u = User::where('rfid', $rfid)->first();
             if ($u) {
+                $placement = MasterPlacement::where('user_id', $u->id)->first();
+                if (!$placement) {
+                    return new ApiResource(422, 'Please assign Placement First !!!', '');
+                }
                 $tipe = $request->tipe;
                 // if ($tipe == 'return') {
                 //     $s = Needle::with(['line', 'style', 'box', 'needle'])
