@@ -7,6 +7,7 @@ use App\Http\Controllers\HelperController;
 use App\Models\MasterArea;
 use App\Models\MasterBox;
 use App\Models\MasterCounter;
+use App\Models\MasterLine;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -119,14 +120,22 @@ class MasterAreaController extends Controller
     {
         try {
             DB::beginTransaction();
+            MasterLine::where('master_area_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
+            $s = MasterCounter::where('master_area_id', $id)->get();
+            foreach ($s as $s) {
+                MasterBox::where('master_counter_id', $s->id)->update([
+                    'deleted_by' => Auth::user()->username,
+                    'deleted_at' => Carbon::now(),
+                ]);
+            }
             MasterCounter::where('master_area_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
-            MasterBox::where('master_area_id', $id)->update([
-                'deleted_by' => Auth::user()->username,
-                'deleted_at' => Carbon::now(),
-            ]);
+
             MasterArea::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
