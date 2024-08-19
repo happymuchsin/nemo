@@ -396,7 +396,8 @@ class NeedleController extends Controller
             return new ApiResource(200, 'Save Successfully', '');
         } catch (Exception $e) {
             DB::rollBack();
-            return new ApiResource(422, 'Save Failed', '');
+            // return new ApiResource(422, 'Save Failed', '');
+            return new ApiResource(422, $e->getMessage(), '');
         }
     }
 
