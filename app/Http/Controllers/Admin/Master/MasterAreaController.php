@@ -8,6 +8,7 @@ use App\Models\MasterArea;
 use App\Models\MasterBox;
 use App\Models\MasterCounter;
 use App\Models\MasterLine;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -135,7 +136,10 @@ class MasterAreaController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
-
+            Stock::where('master_area_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
             MasterArea::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),

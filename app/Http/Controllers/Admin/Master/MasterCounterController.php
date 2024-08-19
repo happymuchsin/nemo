@@ -7,6 +7,7 @@ use App\Http\Controllers\HelperController;
 use App\Models\MasterArea;
 use App\Models\MasterBox;
 use App\Models\MasterCounter;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -126,11 +127,15 @@ class MasterCounterController extends Controller
     {
         try {
             DB::beginTransaction();
-            MasterCounter::where('id', $id)->update([
+            MasterBox::where('master_counter_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
-            MasterBox::where('master_counter_id', $id)->update([
+            Stock::where('master_counter_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
+            MasterCounter::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);

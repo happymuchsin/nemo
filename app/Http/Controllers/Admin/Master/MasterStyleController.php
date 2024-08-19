@@ -10,6 +10,8 @@ use App\Models\MasterFabric;
 use App\Models\MasterSample;
 use App\Models\MasterStyle;
 use App\Models\MasterSubCategory;
+use App\Models\Needle;
+use App\Models\NeedleDetail;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -205,6 +207,17 @@ class MasterStyleController extends Controller
     {
         try {
             DB::beginTransaction();
+            $n = Needle::where('master_style_id', $id)->get();
+            foreach ($n as $n) {
+                NeedleDetail::where('needle_id', $n->id)->update([
+                    'deleted_by' => Auth::user()->username,
+                    'deleted_at' => Carbon::now(),
+                ]);
+            }
+            Needle::where('master_style_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
             MasterStyle::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),

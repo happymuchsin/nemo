@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\MasterCounter;
 use App\Models\MasterBox;
+use App\Models\Needle;
+use App\Models\NeedleDetail;
+use App\Models\Stock;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -142,6 +145,21 @@ class MasterBoxController extends Controller
     {
         try {
             DB::beginTransaction();
+            Stock::where('master_box_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
+            $n = Needle::where('master_box_id', $id)->get();
+            foreach ($n as $n) {
+                NeedleDetail::where('needle_id', $n->id)->update([
+                    'deleted_by' => Auth::user()->username,
+                    'deleted_at' => Carbon::now(),
+                ]);
+            }
+            Needle::where('master_box_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
             MasterBox::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),

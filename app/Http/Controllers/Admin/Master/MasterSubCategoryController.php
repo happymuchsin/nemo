@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
+use App\Models\MasterStyle;
 use App\Models\MasterSubCategory;
 use Carbon\Carbon;
 use Exception;
@@ -115,6 +116,10 @@ class MasterSubCategoryController extends Controller
     {
         try {
             DB::beginTransaction();
+            MasterStyle::where('master_sub_category_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
             MasterSubCategory::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),

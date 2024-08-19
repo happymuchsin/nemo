@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\MasterArea;
 use App\Models\MasterLine;
+use App\Models\Needle;
+use App\Models\NeedleDetail;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -125,6 +127,17 @@ class MasterLineController extends Controller
     {
         try {
             DB::beginTransaction();
+            $n = Needle::where('master_line_id', $id)->get();
+            foreach ($n as $n) {
+                NeedleDetail::where('needle_id', $n->id)->update([
+                    'deleted_by' => Auth::user()->username,
+                    'deleted_at' => Carbon::now(),
+                ]);
+            }
+            Needle::where('master_line_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
             MasterLine::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),

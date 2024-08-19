@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\MasterBuyer;
+use App\Models\MasterStyle;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -115,6 +116,10 @@ class MasterBuyerController extends Controller
     {
         try {
             DB::beginTransaction();
+            MasterStyle::where('master_buyer_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => Carbon::now(),
+            ]);
             MasterBuyer::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
