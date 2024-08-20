@@ -97,6 +97,28 @@ class StockController extends Controller
                 $x[] = $s->master_box_id;
             }
             $x = MasterBox::where('master_counter_id', $master_counter_id)->whereNotIn('id', $x)->where('tipe', 'NORMAL')->get();
+        } else if ($tipe == 'needle') {
+            $needle_category = $request->needle_category;
+            $x = [];
+            $mn = MasterNeedle::when($needle_category == 'single', function ($q) {
+                $q->where('tipe', 'like', '%DB X 1%');
+            })
+                ->when($needle_category == 'double', function ($q) {
+                    $q->where('tipe', 'like', '%DP X 5%');
+                })
+                ->when($needle_category == 'obras', function ($q) {
+                    $q->where('tipe', 'like', '%DC X 27%')->get();
+                })
+                ->when($needle_category == 'kansai', function ($q) {
+                    $q->where('tipe', 'like', '%UO X 113%')->orWhere('tipe', 'like', '%DV X 57%')->get();
+                })
+                ->get();
+            foreach ($mn as $m) {
+                $d = new stdClass;
+                $d->id = $m->id;
+                $d->name = "$m->brand - $m->tipe - $m->size - $m->code - $m->machine";
+                $x[] = $d;
+            }
         } else {
             $x = [];
         }

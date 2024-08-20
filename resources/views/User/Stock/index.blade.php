@@ -36,14 +36,24 @@
             </x-modal.body>
             <x-modal.body :tipe="'select'" :label="'Counter'" :id="'master_counter_id'" />
             <x-modal.body :tipe="'select'" :label="'Box'" :id="'master_box_id'" />
-            <x-modal.body :tipe="'select'" :label="'Needle'" :id="'master_needle_id'">
+            <x-modal.body :tipe="'select'" :label="'Needle Category'" :id="'needle_category'" :defaultOption="false">
+                <x-slot:option>
+                    <option value="all">All</option>
+                    <option value="single">Single Needle</option>
+                    <option value="double">Double Needle</option>
+                    <option value="obras">Obras</option>
+                    <option value="kansai">Kansai</option>
+                </x-slot:option>
+            </x-modal.body>
+            <x-modal.body :tipe="'select'" :label="'Needle'" :id="'master_needle_id'" />
+            {{-- <x-modal.body :tipe="'select'" :label="'Needle'" :id="'master_needle_id'">
                 <x-slot:option>
                     @foreach ($needle as $d)
                         <option value="{{ $d->id }}">{{ "$d->brand - $d->tipe - $d->size - $d->code - $d->machine" }}
                         </option>
                     @endforeach
                 </x-slot:option>
-            </x-modal.body>
+            </x-modal.body> --}}
             <x-modal.body :tipe="'number'" :label="'Qty'" :id="'qty'" />
         </x-slot:body>
         <x-slot:footer>
@@ -197,6 +207,30 @@
                 dropdownParent: $('#storeModal'),
                 width: '100%',
             });
+            $('#needle_category').select2({
+                placeholder: "Select Needle Category",
+                dropdownParent: $('#storeModal'),
+                width: '100%',
+            });
+            $('#needle_category').on('change', function() {
+                $.ajax({
+                    url: "{{ route('user.stock.spinner') }}",
+                    type: "POST",
+                    cache: false,
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        tipe: 'needle',
+                        needle_category: $(this).val(),
+                    },
+                    success: function(data) {
+                        $('#master_needle_id').html('<option value=""></option>');
+                        $.each(data, function(k, v) {
+                            $('#master_needle_id').append('<option value="' + v.id +
+                                '">' + v.name + '</option>')
+                        })
+                    }
+                })
+            })
             $('#master_needle_id').select2({
                 placeholder: "Select Needle",
                 dropdownParent: $('#storeModal'),
@@ -297,6 +331,7 @@
             $('#master_counter_id').val('').trigger('change');
             $('#master_box_id').val('').trigger('change');
             $('#master_needle_id').val('').trigger('change');
+            $('#needle_category').val('all').trigger('change');
             $('#qty').val('');
             $('#storeModal').modal('toggle');
         }

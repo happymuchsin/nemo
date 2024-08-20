@@ -37,12 +37,7 @@
                     <option value="RETURN">RETURN</option>
                 </x-slot:option>
             </x-modal.body>
-            <x-modal.body :tipe="'select'" :label="'Status'" :id="'status'" :disable="'disabled'">
-                <x-slot:option>
-                    <option value="OK">OK</option>
-                    <option value="NG">NG</option>
-                </x-slot:option>
-            </x-modal.body>
+            <x-modal.body :tipe="'select'" :label="'Status'" :id="'status'" />
         </x-slot:body>
         <x-slot:footer>
             <x-layout.button :class="'btn-primary'" :id="'save'" :onclick="'crup()'" :icon="'fa fa-save'"
@@ -66,10 +61,17 @@
                 width: '100%',
             });
             $('#tipe').on('change', function() {
+                $('#status').html('');
                 if ($(this).val() == 'RETURN') {
-                    $('#status').prop('disabled', false);
+                    $('#status').append(`
+                        <option value=""></option>
+                        <option value="OK">OK</option>
+                        <option value="NG">NG</option>
+                    `);
                 } else {
-                    $('#status').prop('disabled', true);
+                    $('#status').append(`
+                        <option value="NEW">NEW</option>
+                    `);
                 }
             });
             $('#status').select2({
@@ -140,7 +142,7 @@
                 Swal.fire('Warning!', 'Please insert Name', 'warning');
             } else if ($('#tipe').val() == '') {
                 Swal.fire('Warning!', 'Please select Type', 'warning');
-            } else if ($('#tipe').val() == 'RETURN' && $('#status').val() == '') {
+            } else if ($('#status').val() == '') {
                 Swal.fire('Warning!', 'Please select Status', 'warning');
             } else {
                 $.ajaxSetup({
