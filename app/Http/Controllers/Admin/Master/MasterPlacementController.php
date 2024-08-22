@@ -55,6 +55,19 @@ class MasterPlacementController extends Controller
                     return '';
                 }
             })
+            ->addColumn('counter', function ($q) {
+                $s = MasterPlacement::where('user_id', $q->id)->first();
+                if ($s) {
+                    $h = '';
+                    $x = MasterCounter::with(['area'])->where('id', $s->counter_id)->first();
+                    if ($x) {
+                        $h = $x->area->name . ' - ' . $x->name;
+                    }
+                    return $h;
+                } else {
+                    return '';
+                }
+            })
             ->addColumn('division', function ($q) {
                 return $q->division->name;
             })
@@ -72,13 +85,22 @@ class MasterPlacementController extends Controller
 
     public function spinner(Request $request)
     {
+        $tipe = $request->tipe;
         $reff = $request->reff;
-        if ($reff == 'line') {
-            $item = MasterLine::with(['area'])->get();
-        } else if ($reff == 'counter') {
-            $item = MasterCounter::with(['area'])->get();
-        } else {
-            $item = [];
+        if ($tipe == 'reff') {
+            if ($reff == 'line') {
+                $item = MasterLine::with(['area'])->get();
+            } else if ($reff == 'counter') {
+                $item = MasterCounter::with(['area'])->get();
+            } else {
+                $item = [];
+            }
+        } else if ($tipe == 'lokasi') {
+            $lokasi = $request->lokasi;
+            if ($reff == 'line') {
+                $line = MasterLine::where('id', $lokasi)->first();
+                $item = MasterCounter::with(['area'])->where('master_area_id', $line->master_area_id)->get();
+            }
         }
         return response()->json($item, 200);
     }
@@ -88,6 +110,7 @@ class MasterPlacementController extends Controller
         $id = $request->id;
         $reff = $request->reff;
         $lokasi = $request->lokasi;
+        $counter = $request->counter;
 
         try {
             DB::beginTransaction();
@@ -96,6 +119,7 @@ class MasterPlacementController extends Controller
             if ($s) {
                 $s->reff = $reff;
                 $s->location_id = $lokasi;
+                $s->counter_id = $counter;
                 $s->updated_by = Auth::user()->username;
                 $s->updated_at = Carbon::now();
                 $s->save();
@@ -103,6 +127,7 @@ class MasterPlacementController extends Controller
                     'user_id' => $id,
                     'reff' => $reff,
                     'location_id' => $lokasi,
+                    'counter_id' => $counter,
                     'updated_by' => Auth::user()->username,
                     'updated_at' => Carbon::now(),
                 ]), $id);
@@ -111,6 +136,7 @@ class MasterPlacementController extends Controller
                     'user_id' => $id,
                     'reff' => $reff,
                     'location_id' => $lokasi,
+                    'counter_id' => $counter,
                     'created_by' => Auth::user()->username,
                     'created_at' => Carbon::now(),
                 ]);
@@ -118,6 +144,7 @@ class MasterPlacementController extends Controller
                     'user_id' => $id,
                     'reff' => $reff,
                     'location_id' => $lokasi,
+                    'counter_id' => $counter,
                     'created_by' => Auth::user()->username,
                     'created_at' => Carbon::now(),
                 ]));
@@ -142,6 +169,7 @@ class MasterPlacementController extends Controller
         if ($p) {
             $d->reff = $p->reff;
             $d->lokasi = $p->location_id;
+            $d->counter = $p->counter_id;
         }
         return response()->json($d, 200);
     }

@@ -12,6 +12,7 @@
                         <th>Division</th>
                         <th>Position</th>
                         <th>Location</th>
+                        <th>Counter</th>
                         <th>Action</th>
                     </tr>
                 </x-slot:thead>
@@ -29,6 +30,9 @@
                 </x-slot:option>
             </x-modal.body>
             <x-modal.body :tipe="'select'" :label="'Location'" :id="'lokasi'" />
+            <div id="divKounter">
+                <x-modal.body :tipe="'select'" :label="'Counter'" :id="'kounter'" />
+            </div>
         </x-slot:body>
         <x-slot:footer>
             <x-layout.button :class="'btn-primary'" :id="'save'" :onclick="'crup()'" :icon="'fa fa-save'"
@@ -53,19 +57,53 @@
                     cache: false,
                     data: {
                         _token: "{{ csrf_token() }}",
+                        tipe: 'reff',
                         reff: $(this).val(),
                     },
                     success: function(data) {
+                        if ($('#reff').val() == 'line') {
+                            $('#divKounter').prop('hidden', false);
+                        } else {
+                            $('#divKounter').prop('hidden', true);
+                        }
                         $('#lokasi').html('<option value=""></option>');
                         $.each(data, function(k, v) {
                             $('#lokasi').append('<option value="' + v.id + '">' + v.area
                                 .name + ' - ' + v.name + '</option>')
                         })
+                        $('#kounter').html('');
                     }
                 })
             });
             $('#lokasi').select2({
                 placeholder: "Select Location",
+                dropdownParent: $('#crupModal'),
+                width: '100%',
+            });
+            $('#lokasi').on('change', function() {
+                if ($('#reff').val() == 'line') {
+                    $.ajax({
+                        url: "{{ route('admin.master.placement.spinner') }}",
+                        type: "POST",
+                        cache: false,
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            tipe: 'lokasi',
+                            reff: $('#reff').val(),
+                            lokasi: $(this).val(),
+                        },
+                        success: function(data) {
+                            $('#kounter').html('<option value=""></option>');
+                            $.each(data, function(k, v) {
+                                $('#kounter').append('<option value="' + v.id + '">' + v
+                                    .area.name + ' - ' + v.name + '</option>')
+                            })
+                        }
+                    })
+                }
+            });
+            $('#kounter').select2({
+                placeholder: "Select Counter",
                 dropdownParent: $('#crupModal'),
                 width: '100%',
             });
@@ -93,6 +131,9 @@
                         data: 'lokasi'
                     },
                     {
+                        data: 'counter'
+                    },
+                    {
                         data: 'action'
                     },
                 ],
@@ -105,6 +146,9 @@
             if ($('#lokasi').val() == '') {
                 Swal.fire('Warning!', 'Please select Location', 'warning');
             } else {
+                if ($('#lokasi').val() == 'line' && $('#kounter').val() == '') {
+                    Swal.fire('Warning!', 'Please select Counter', 'warning');
+                }
                 $.ajaxSetup({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -117,6 +161,7 @@
                         'id': $('#key').val(),
                         'reff': $('#reff').val(),
                         'lokasi': $('#lokasi').val(),
+                        'counter': $('#kounter').val(),
                     },
                     beforeSend: function() {
                         Swal.fire({
@@ -175,6 +220,7 @@
                     $('#reff').val(response.reff).trigger('change');
                     setTimeout(() => {
                         $('#lokasi').val(response.lokasi).trigger('change');
+                        $('#kounter').val(response.counter).trigger('change');
                     }, 500);
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');

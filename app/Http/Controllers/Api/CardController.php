@@ -19,6 +19,8 @@ class CardController extends Controller
     public function person(Request $request)
     {
         $rfid = $request->rfid;
+        $area_id = $request->area_id;
+        $lokasi_id = $request->lokasi_id;
 
         if ($rfid) {
             $u = User::where('rfid', $rfid)->first();
@@ -44,8 +46,6 @@ class CardController extends Controller
                 //     }
                 // } 
                 if ($tipe == 'approval') {
-                    $area_id = $request->area_id;
-                    $lokasi_id = $request->lokasi_id;
                     $s = Approval::with(['user', 'needle' => function ($q) {
                         $q->with(['line', 'style', 'box', 'needle']);
                     }])
@@ -89,7 +89,15 @@ class CardController extends Controller
 
                     return new ApiResource(200, 'success', $d);
                 } else {
-                    return new ApiResource(200, 'success', $u);
+                    if ($placement->reff == 'line') {
+                        if ($lokasi_id != $placement->counter_id) {
+                            return new ApiResource(422, 'Please go to the listed Counter', '');
+                        } else {
+                            return new ApiResource(200, 'success', $u);
+                        }
+                    } else {
+                        return new ApiResource(422, 'For Placement Line Only', '');
+                    }
                 }
             } else {
                 return new ApiResource(422, 'RFID not found', '');
