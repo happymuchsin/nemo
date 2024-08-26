@@ -17,6 +17,11 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use stdClass;
 
 class MasterStyleController extends Controller
@@ -96,6 +101,354 @@ class MasterStyleController extends Controller
                 ]);
             })
             ->make(true);
+    }
+
+    public function template(Request $request)
+    {
+        HelperController::activityLog("DOWNLOAD TEMPLATE MASTER STYLE", null, 'download', $request->ip(), $request->userAgent());
+
+        $sp = new Spreadsheet;
+        $wsBuyer = $sp->getActiveSheet();
+        $wsBuyer->setTitle('Master Buyer');
+        $protect = $wsBuyer->getProtection();
+        $protect->setPassword('qwe123');
+        $protect->setAutoFilter(false);
+        $protect->setSort(true);
+        $protect->setSheet(true);
+
+        $wsBuyer->getStyle('A1:B1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $wsBuyer->getStyle('A1:B1')->getFont()->setBold(true);
+        $wsBuyer->getStyle('A1:B1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $wsBuyer->getCell('A1')->setValue('No');
+        $wsBuyer->getCell('B1')->setValue('Name');
+
+        $k = 1;
+        $i = 0;
+        $data = MasterBuyer::get();
+        foreach ($data as $d) {
+            $k++;
+            $i++;
+
+            $wsBuyer->getStyle("A$k:B$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $wsBuyer->getCell("A$k")->setValue($i);
+            $wsBuyer->getCell("B$k")->setValue($d->name);
+        }
+
+        foreach ($wsBuyer->getColumnIterator() as $column) {
+            $wsBuyer->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+        }
+
+        $wsBuyer->setAutoFilter($wsBuyer->calculateWorksheetDimension());
+
+        $wsSample = $sp->createSheet();
+        $wsSample->setTitle('Master Sample');
+        $protect = $wsSample->getProtection();
+        $protect->setPassword('qwe123');
+        $protect->setAutoFilter(false);
+        $protect->setSort(true);
+        $protect->setSheet(true);
+
+        $wsSample->getStyle('A1:B1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $wsSample->getStyle('A1:B1')->getFont()->setBold(true);
+        $wsSample->getStyle('A1:B1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $wsSample->getCell('A1')->setValue('No');
+        $wsSample->getCell('B1')->setValue('Name');
+
+        $k = 1;
+        $i = 0;
+        $data = MasterSample::get();
+        foreach ($data as $d) {
+            $k++;
+            $i++;
+
+            $wsSample->getStyle("A$k:B$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $wsSample->getCell("A$k")->setValue($i);
+            $wsSample->getCell("B$k")->setValue($d->name);
+        }
+
+        foreach ($wsSample->getColumnIterator() as $column) {
+            $wsSample->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+        }
+
+        $wsSample->setAutoFilter($wsSample->calculateWorksheetDimension());
+
+        $wsCategory = $sp->createSheet();
+        $wsCategory->setTitle('Master Category');
+        $protect = $wsCategory->getProtection();
+        $protect->setPassword('qwe123');
+        $protect->setAutoFilter(false);
+        $protect->setSort(true);
+        $protect->setSheet(true);
+
+        $wsCategory->getStyle('A1:B1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $wsCategory->getStyle('A1:B1')->getFont()->setBold(true);
+        $wsCategory->getStyle('A1:B1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $wsCategory->getCell('A1')->setValue('No');
+        $wsCategory->getCell('B1')->setValue('Name');
+
+        $k = 1;
+        $i = 0;
+        $data = MasterCategory::get();
+        foreach ($data as $d) {
+            $k++;
+            $i++;
+
+            $wsCategory->getStyle("A$k:B$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $wsCategory->getCell("A$k")->setValue($i);
+            $wsCategory->getCell("B$k")->setValue($d->name);
+        }
+
+        foreach ($wsCategory->getColumnIterator() as $column) {
+            $wsCategory->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+        }
+
+        $wsCategory->setAutoFilter($wsCategory->calculateWorksheetDimension());
+
+        $wsSubCategory = $sp->createSheet();
+        $wsSubCategory->setTitle('Master Sub Category');
+        $protect = $wsSubCategory->getProtection();
+        $protect->setPassword('qwe123');
+        $protect->setAutoFilter(false);
+        $protect->setSort(true);
+        $protect->setSheet(true);
+
+        $wsSubCategory->getStyle('A1:B1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $wsSubCategory->getStyle('A1:B1')->getFont()->setBold(true);
+        $wsSubCategory->getStyle('A1:B1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $wsSubCategory->getCell('A1')->setValue('No');
+        $wsSubCategory->getCell('B1')->setValue('Name');
+
+        $k = 1;
+        $i = 0;
+        $data = MasterSubCategory::get();
+        foreach ($data as $d) {
+            $k++;
+            $i++;
+
+            $wsSubCategory->getStyle("A$k:B$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $wsSubCategory->getCell("A$k")->setValue($i);
+            $wsSubCategory->getCell("B$k")->setValue($d->name);
+        }
+
+        foreach ($wsSubCategory->getColumnIterator() as $column) {
+            $wsSubCategory->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+        }
+
+        $wsSubCategory->setAutoFilter($wsSubCategory->calculateWorksheetDimension());
+
+        $wsFabric = $sp->createSheet();
+        $wsFabric->setTitle('Master Fabric');
+        $protect = $wsFabric->getProtection();
+        $protect->setPassword('qwe123');
+        $protect->setAutoFilter(false);
+        $protect->setSort(true);
+        $protect->setSheet(true);
+
+        $wsFabric->getStyle('A1:B1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $wsFabric->getStyle('A1:B1')->getFont()->setBold(true);
+        $wsFabric->getStyle('A1:B1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $wsFabric->getCell('A1')->setValue('No');
+        $wsFabric->getCell('B1')->setValue('Name');
+
+        $k = 1;
+        $i = 0;
+        $data = MasterFabric::get();
+        foreach ($data as $d) {
+            $k++;
+            $i++;
+
+            $wsFabric->getStyle("A$k:B$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $wsFabric->getCell("A$k")->setValue($i);
+            $wsFabric->getCell("B$k")->setValue($d->name);
+        }
+
+        foreach ($wsFabric->getColumnIterator() as $column) {
+            $wsFabric->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+        }
+
+        $wsFabric->setAutoFilter($wsFabric->calculateWorksheetDimension());
+
+        $wsInstruction = $sp->createSheet();
+        $wsInstruction->setTitle('Instruction');
+        $protect = $wsInstruction->getProtection();
+        $protect->setPassword('qwe123');
+        $protect->setSort(true);
+        $protect->setSheet(true);
+
+        $wsInstruction->getStyle('A1:K1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $wsInstruction->getStyle('A1:K1')->getFont()->setBold(true);
+        $wsInstruction->getStyle('A1:K1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $wsInstruction->getCell('A1')->setValue('No');
+        $wsInstruction->getCell('B1')->setValue('SRF No');
+        $wsInstruction->getCell('C1')->setValue('Buyer');
+        $wsInstruction->getCell('D1')->setValue('Style');
+        $wsInstruction->getCell('E1')->setValue('Sample Type');
+        $wsInstruction->getCell('F1')->setValue('Category');
+        $wsInstruction->getCell('G1')->setValue('Sub Category');
+        $wsInstruction->getCell('H1')->setValue('Fabric');
+        $wsInstruction->getCell('I1')->setValue('Season');
+        $wsInstruction->getCell('J1')->setValue('Start');
+        $wsInstruction->getCell('K1')->setValue('End');
+
+        $wsInstruction->getCell('A2')->setValue('1, 2, 3, .. (REQUIRED)');
+        $wsInstruction->getCell('B2')->setValue('Free Text (REQUIRED)');
+        $wsInstruction->getCell('C2')->setValue('You can copy from Master Buyer Sheet at column Name (REQUIRED)');
+        $wsInstruction->getCell('D2')->setValue('Free Text (REQUIRED)');
+        $wsInstruction->getCell('E2')->setValue('You can copy from Master Sample Sheet at column Name (REQUIRED)');
+        $wsInstruction->getCell('F2')->setValue('You can copy from Master Category Sheet at column Name (REQUIRED)');
+        $wsInstruction->getCell('G2')->setValue('You can copy from Master Sub Category Sheet at column Name (REQUIRED)');
+        $wsInstruction->getCell('H2')->setValue('You can copy from Master Fabric Sheet at column Name (REQUIRED)');
+        $wsInstruction->getCell('I2')->setValue('Free Text (REQUIRED)');
+        $wsInstruction->getCell('J2')->setValue('Format Y-m-d (REQUIRED)');
+        $wsInstruction->getCell('K2')->setValue('Format Y-m-d (REQUIRED)');
+
+        foreach ($wsInstruction->getColumnIterator() as $column) {
+            $wsInstruction->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+        }
+
+        $ws = $sp->createSheet();
+        $ws->setTitle('Upload');
+        $ws->getStyle('A1:K1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $ws->getStyle('A1:K1')->getFont()->setBold(true);
+        $ws->getStyle('A1:K1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $ws->getCell('A1')->setValue('No');
+        $ws->getCell('B1')->setValue('SRF No');
+        $ws->getCell('C1')->setValue('Buyer');
+        $ws->getCell('D1')->setValue('Style');
+        $ws->getCell('E1')->setValue('Sample Type');
+        $ws->getCell('F1')->setValue('Category');
+        $ws->getCell('G1')->setValue('Sub Category');
+        $ws->getCell('H1')->setValue('Fabric');
+        $ws->getCell('I1')->setValue('Season');
+        $ws->getCell('J1')->setValue('Start');
+        $ws->getCell('K1')->setValue('End');
+
+        foreach ($ws->getColumnIterator() as $column) {
+            $ws->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($sp);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="Template Master Style.xlsx"');
+        $writer->save('php://output');
+        exit();
+    }
+
+    public function import(Request $request)
+    {
+        try {
+            $now = Carbon::now();
+            $path = $request->file('excel')->getRealPath();
+            $sp = IOFactory::load($path);
+            $sheet = $sp->setActiveSheetIndex(6);
+            $rows = $sheet->toArray();
+            $first = 1;
+            DB::beginTransaction();
+            $warning = [];
+            foreach ($rows as $r) {
+                if ($first > 1) {
+                    if (
+                        $r[1] != "" &&
+                        $r[2] != "" &&
+                        $r[3] != "" &&
+                        $r[4] != "" &&
+                        $r[5] != "" &&
+                        $r[6] != "" &&
+                        $r[7] != "" &&
+                        $r[8] != "" &&
+                        $r[9] != "" &&
+                        $r[10] != ""
+                    ) {
+                        $d = new stdClass;
+                        $no = $r[0];
+                        $srf = $r[1];
+                        $buyer = strtoupper($r[2]);
+                        $name = strtoupper($r[3]);
+                        $sample = strtoupper($r[4]);
+                        $category = strtoupper($r[5]);
+                        $sub_category = strtoupper($r[6]);
+                        $fabric = strtoupper($r[7]);
+                        $season = strtoupper($r[8]);
+                        $start = date('Y-m-d', strtotime($r[9]));
+                        $end = date('Y-m-d', strtotime($r[10]));
+
+                        $masterBuyer = MasterBuyer::where('name', $buyer)->first();
+                        if (!$masterBuyer) {
+                            $d->warning = "Master Buyer not found! at Number $no, Please refer to Instruction Sheet";
+                            $warning[] = $d;
+                            continue;
+                        }
+
+                        $masterSample = MasterSample::where('name', $sample)->first();
+                        if (!$masterSample) {
+                            $d->warning = "Master Sample not found! at Number $no, Please refer to Instruction Sheet";
+                            $warning[] = $d;
+                            continue;
+                        }
+
+                        $masterCategory = MasterCategory::where('name', $category)->first();
+                        if (!$masterCategory) {
+                            $d->warning = "Master Category not found! at Number $no, Please refer to Instruction Sheet";
+                            $warning[] = $d;
+                            continue;
+                        }
+
+                        $masterSubCategory = MasterSubCategory::where('name', $sub_category)->first();
+                        if (!$masterSubCategory) {
+                            $d->warning = "Master Sub Category not found! at Number $no, Please refer to Instruction Sheet";
+                            $warning[] = $d;
+                            continue;
+                        }
+
+                        $masterFabric = MasterFabric::where('name', $fabric)->first();
+                        if (!$masterFabric) {
+                            $d->warning = "Master Fabric not found! at Number $no, Please refer to Instruction Sheet";
+                            $warning[] = $d;
+                            continue;
+                        }
+
+                        MasterStyle::create([
+                            'master_buyer_id' => $masterBuyer->id,
+                            'master_category_id' => $masterCategory->id,
+                            'master_sub_category_id' => $masterSubCategory->id,
+                            'master_sample_id' => $masterSample->id,
+                            'master_fabric_id' => $masterFabric->id,
+                            'srf' => $srf,
+                            'season' => $season,
+                            'name' => $name,
+                            'start' => $start,
+                            'end' => $end,
+                            'created_by' => Auth::user()->username,
+                            'created_at' => $now,
+                        ]);
+                        HelperController::activityLog("CREATE MASTER STYLE", 'master_styles', 'create', $request->ip(), $request->userAgent(), json_encode([
+                            'master_buyer_id' => $masterBuyer->id,
+                            'master_category_id' => $masterCategory->id,
+                            'master_sub_category_id' => $masterSubCategory->id,
+                            'master_sample_id' => $masterSample->id,
+                            'master_fabric_id' => $masterFabric->id,
+                            'srf' => $srf,
+                            'season' => $season,
+                            'name' => $name,
+                            'start' => $start,
+                            'end' => $end,
+                            'created_by' => Auth::user()->username,
+                            'created_at' => $now,
+                        ]));
+                    }
+                }
+                $first++;
+            }
+            if ($warning) {
+                DB::rollBack();
+                return response()->json($warning, 422);
+            }
+            DB::commit();
+            return response()->json('Import Successfully', 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json('Import Failed', 422);
+        }
     }
 
     public function crup(Request $request)
