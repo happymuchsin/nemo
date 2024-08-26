@@ -26,7 +26,7 @@
             <x-modal.body :tipe="'select'" :label="'Type'" :id="'reff'">
                 <x-slot:option>
                     <option value="line">Line</option>
-                    <option value="counter">Counter</option>
+                    <option value="counter">Admin Counter</option>
                 </x-slot:option>
             </x-modal.body>
             <x-modal.body :tipe="'select'" :label="'Location'" :id="'lokasi'" />
