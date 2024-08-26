@@ -88,7 +88,7 @@
                     <x-modal.body :tipe="'text'" :label="'Style'" :id="'name'" />
                 </div>
                 <div class="col-sm-6">
-                    <x-modal.body :tipe="'select'" :label="'Sample'" :id="'master_sample_id'">
+                    <x-modal.body :tipe="'select'" :label="'Sample Type'" :id="'master_sample_id'">
                         <x-slot:option>
                             @foreach ($sample as $d)
                                 <option value="{{ $d->id }}">{{ $d->name }}</option>
@@ -136,6 +136,18 @@
                 :name="'Save'" />
             <x-layout.button :class="'btn-primary'" :id="'update'" :onclick="'crup()'" :icon="'fa fa-save'"
                 :name="'Update'" />
+        </x-slot:footer>
+    </x-modal.modal>
+
+    <x-modal.modal :name="'imp'">
+        <x-slot:body>
+            <x-modal.body :tipe="'file'" :label="'File Format Excel'" :id="'excel'" :accept="'.xlsx'" />
+        </x-slot:body>
+        <x-slot:footer>
+            <a class="btn btn-sm btn-warning" href="{{ route('admin.master.style.template') }}"><i
+                    class="fa fa-file-download"></i> Template</a>
+            <x-layout.button :class="'btn-primary'" :id="''" :onclick="'Import()'" :icon="'fa fa-upload'"
+                :name="'Import'" />
         </x-slot:footer>
     </x-modal.modal>
 
@@ -252,9 +264,60 @@
                 ],
             });
             $('div.toolbar').html(
-                '<button class="btn btn-sm btn-success" onclick="add();"><i class="fa fa-circle-plus" /></i> New</button>'
+                '<button class="btn btn-sm btn-success" onclick="add();"><i class="fa fa-circle-plus" /></i> New</button> <button class="btn btn-sm btn-success" onclick="btnImport();"><i class="fa fa-file-excel" /></i> Import</button>'
             );
         })
+
+        function btnImport() {
+            $('#impJudul').html('<h5 class="modal-title"><i class="fa fa-file-excel"></i> Import</h5>');
+            $('#impHeader').addClass('bg-success');
+            $('#impHeader').removeClass('bg-info');
+            $('#excel').val('');
+            $('#excel').text('');
+            $('#impModal').modal('toggle');
+        }
+
+        function Import() {
+            var data = new FormData();
+            data.append('excel', $('#excel')[0].files[0]);
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                url: "{{ route('admin.master.style.import') }}",
+                type: "POST",
+                cache: false,
+                data: data,
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    Swal.fire({
+                        iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
+                        title: "Please wait ...",
+                        html: "Fetching your data ...",
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                    });
+                    Swal.showLoading();
+                },
+                complete: function() {
+                    // Swal.close();
+                },
+                success: function(response) {
+                    $('#impModal').modal('toggle');
+                    Swal.fire('Success!', response, 'success');
+                    setTimeout(() => {
+                        Swal.close();
+                    }, 1000);
+                    table.ajax.reload();
+                },
+                error: function(response) {
+                    Swal.fire('Warning!', response.responseText, 'warning');
+                }
+            });
+        }
 
         function add() {
             $('#crupJudul').html('<h5 class="modal-title"><i class="fa fa-file-plus"></i> Input</h5>');
