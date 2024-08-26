@@ -381,6 +381,10 @@ Route::group(['middleware' => ['auth']], function () {
                                 ->name('admin.master.style.edit');
                             Route::get('hapus/{id?}', [MasterStyleController::class, 'hapus'])
                                 ->name('admin.master.style.hapus');
+                            Route::get('template', [MasterStyleController::class, 'template'])
+                                ->name('admin.master.style.template');
+                            Route::post('import', [MasterStyleController::class, 'import'])
+                                ->name('admin.master.style.import');
                         });
                 });
 

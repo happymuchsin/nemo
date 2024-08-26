@@ -264,8 +264,11 @@
                 ],
             });
             $('div.toolbar').html(
-                '<button class="btn btn-sm btn-success" onclick="add();"><i class="fa fa-circle-plus" /></i> New</button> <button class="btn btn-sm btn-success" onclick="btnImport();"><i class="fa fa-file-excel" /></i> Import</button>'
+                '<button class="btn btn-sm btn-success" onclick="add();"><i class="fa fa-circle-plus" /></i> New</button>'
             );
+            // $('div.toolbar').html(
+            //     '<button class="btn btn-sm btn-success" onclick="add();"><i class="fa fa-circle-plus" /></i> New</button> <button class="btn btn-sm btn-success" onclick="btnImport();"><i class="fa fa-file-excel" /></i> Import</button>'
+            // );
         })
 
         function btnImport() {
