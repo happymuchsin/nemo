@@ -51,13 +51,13 @@
             <x-layout.table :id="'table'">
                 <x-slot:thead>
                     <tr>
+                        <th>SRF No</th>
                         <th>Buyer</th>
+                        <th>Style</th>
+                        <th>Sample Type</th>
                         <th>Category</th>
                         <th>Sub Category</th>
-                        <th>Sample</th>
                         <th>Fabric</th>
-                        <th>Name</th>
-                        <th>SRF No</th>
                         <th>Season</th>
                         <th>Start</th>
                         <th>End</th>
@@ -73,9 +73,24 @@
             <input type="hidden" name="key" id="key">
             <div class="row">
                 <div class="col-sm-6">
+                    <x-modal.body :tipe="'text'" :label="'SRF No'" :id="'srf'" :upper="false" />
+                </div>
+                <div class="col-sm-6">
                     <x-modal.body :tipe="'select'" :label="'Buyer'" :id="'master_buyer_id'">
                         <x-slot:option>
                             @foreach ($buyer as $d)
+                                <option value="{{ $d->id }}">{{ $d->name }}</option>
+                            @endforeach
+                        </x-slot:option>
+                    </x-modal.body>
+                </div>
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'text'" :label="'Style'" :id="'name'" />
+                </div>
+                <div class="col-sm-6">
+                    <x-modal.body :tipe="'select'" :label="'Sample'" :id="'master_sample_id'">
+                        <x-slot:option>
+                            @foreach ($sample as $d)
                                 <option value="{{ $d->id }}">{{ $d->name }}</option>
                             @endforeach
                         </x-slot:option>
@@ -100,15 +115,6 @@
                     </x-modal.body>
                 </div>
                 <div class="col-sm-6">
-                    <x-modal.body :tipe="'select'" :label="'Sample'" :id="'master_sample_id'">
-                        <x-slot:option>
-                            @foreach ($sample as $d)
-                                <option value="{{ $d->id }}">{{ $d->name }}</option>
-                            @endforeach
-                        </x-slot:option>
-                    </x-modal.body>
-                </div>
-                <div class="col-sm-6">
                     <x-modal.body :tipe="'select'" :label="'Fabric'" :id="'master_fabric_id'">
                         <x-slot:option>
                             @foreach ($fabric as $d)
@@ -116,12 +122,6 @@
                             @endforeach
                         </x-slot:option>
                     </x-modal.body>
-                </div>
-                <div class="col-sm-6">
-                    <x-modal.body :tipe="'text'" :label="'Name'" :id="'name'" />
-                </div>
-                <div class="col-sm-6">
-                    <x-modal.body :tipe="'text'" :label="'SRF No'" :id="'srf'" :upper="false" />
                 </div>
                 <div class="col-sm-6">
                     <x-modal.body :tipe="'text'" :label="'Season'" :id="'season'" />
@@ -209,7 +209,16 @@
                     }
                 },
                 columns: [{
+                        data: 'srf'
+                    },
+                    {
                         data: 'buyer'
+                    },
+                    {
+                        data: 'name'
+                    },
+                    {
+                        data: 'sample'
                     },
                     {
                         data: 'category'
@@ -218,16 +227,7 @@
                         data: 'sub_category'
                     },
                     {
-                        data: 'sample'
-                    },
-                    {
                         data: 'fabric'
-                    },
-                    {
-                        data: 'name'
-                    },
-                    {
-                        data: 'srf'
                     },
                     {
                         data: 'season'
