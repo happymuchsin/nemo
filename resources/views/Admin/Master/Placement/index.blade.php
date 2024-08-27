@@ -12,7 +12,7 @@
                         <th>Division</th>
                         <th>Position</th>
                         <th>Location</th>
-                        <th>Counter</th>
+                        <th>Counter Member</th>
                         <th>Action</th>
                     </tr>
                 </x-slot:thead>
@@ -31,7 +31,7 @@
             </x-modal.body>
             <x-modal.body :tipe="'select'" :label="'Location'" :id="'lokasi'" />
             <div id="divKounter">
-                <x-modal.body :tipe="'select'" :label="'Counter'" :id="'kounter'" />
+                <x-modal.body :tipe="'select'" :label="'Counter Member'" :id="'kounter'" />
             </div>
         </x-slot:body>
         <x-slot:footer>
