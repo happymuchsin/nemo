@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResource;
 use App\Models\Approval;
 use App\Models\MasterBox;
+use App\Models\MasterLine;
 use App\Models\MasterPlacement;
 use App\Models\Needle;
 use App\Models\Stock;
@@ -93,7 +94,13 @@ class CardController extends Controller
                         if ($lokasi_id != $placement->counter_id) {
                             return new ApiResource(422, 'Please go to the listed Counter', '');
                         } else {
-                            return new ApiResource(200, 'success', $u);
+                            $lokasi = MasterLine::where('id', $placement->location_id)->first();
+                            $x = new stdClass;
+                            $x->username = $u->username;
+                            $x->name = $u->name;
+                            $x->rfid = $u->rfid;
+                            $x->line = $lokasi->name;
+                            return new ApiResource(200, 'success', $x);
                         }
                     } else {
                         return new ApiResource(422, 'For Placement Line Only', '');

@@ -275,32 +275,30 @@ class MasterStyleController extends Controller
         $protect->setSort(true);
         $protect->setSheet(true);
 
-        $wsInstruction->getStyle('A1:K1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $wsInstruction->getStyle('A1:K1')->getFont()->setBold(true);
-        $wsInstruction->getStyle('A1:K1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $wsInstruction->getStyle('A1:J1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $wsInstruction->getStyle('A1:J1')->getFont()->setBold(true);
+        $wsInstruction->getStyle('A1:J1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $wsInstruction->getCell('A1')->setValue('No');
-        $wsInstruction->getCell('B1')->setValue('SRF No');
-        $wsInstruction->getCell('C1')->setValue('Buyer');
-        $wsInstruction->getCell('D1')->setValue('Style');
-        $wsInstruction->getCell('E1')->setValue('Sample Type');
-        $wsInstruction->getCell('F1')->setValue('Category');
-        $wsInstruction->getCell('G1')->setValue('Sub Category');
-        $wsInstruction->getCell('H1')->setValue('Fabric');
-        $wsInstruction->getCell('I1')->setValue('Season');
-        $wsInstruction->getCell('J1')->setValue('Start');
-        $wsInstruction->getCell('K1')->setValue('End');
+        $wsInstruction->getCell('B1')->setValue('Buyer');
+        $wsInstruction->getCell('C1')->setValue('Style');
+        $wsInstruction->getCell('D1')->setValue('Sample Type');
+        $wsInstruction->getCell('E1')->setValue('Category');
+        $wsInstruction->getCell('F1')->setValue('Sub Category');
+        $wsInstruction->getCell('G1')->setValue('Fabric');
+        $wsInstruction->getCell('H1')->setValue('Season');
+        $wsInstruction->getCell('I1')->setValue('Start');
+        $wsInstruction->getCell('J1')->setValue('End');
 
         $wsInstruction->getCell('A2')->setValue('1, 2, 3, .. (REQUIRED)');
-        $wsInstruction->getCell('B2')->setValue('Free Text (REQUIRED)');
-        $wsInstruction->getCell('C2')->setValue('You can copy from Master Buyer Sheet at column Name (REQUIRED)');
-        $wsInstruction->getCell('D2')->setValue('Free Text (REQUIRED)');
-        $wsInstruction->getCell('E2')->setValue('You can copy from Master Sample Sheet at column Name (REQUIRED)');
-        $wsInstruction->getCell('F2')->setValue('You can copy from Master Category Sheet at column Name (REQUIRED)');
-        $wsInstruction->getCell('G2')->setValue('You can copy from Master Sub Category Sheet at column Name (REQUIRED)');
-        $wsInstruction->getCell('H2')->setValue('You can copy from Master Fabric Sheet at column Name (REQUIRED)');
-        $wsInstruction->getCell('I2')->setValue('Free Text (REQUIRED)');
+        $wsInstruction->getCell('B2')->setValue('You can copy from Master Buyer Sheet at column Name (REQUIRED)');
+        $wsInstruction->getCell('C2')->setValue('Free Text (REQUIRED)');
+        $wsInstruction->getCell('D2')->setValue('You can copy from Master Sample Sheet at column Name (REQUIRED)');
+        $wsInstruction->getCell('E2')->setValue('You can copy from Master Category Sheet at column Name (REQUIRED)');
+        $wsInstruction->getCell('F2')->setValue('You can copy from Master Sub Category Sheet at column Name (REQUIRED)');
+        $wsInstruction->getCell('G2')->setValue('You can copy from Master Fabric Sheet at column Name (REQUIRED)');
+        $wsInstruction->getCell('H2')->setValue('Free Text (REQUIRED)');
+        $wsInstruction->getCell('I2')->setValue('Format Y-m-d (REQUIRED)');
         $wsInstruction->getCell('J2')->setValue('Format Y-m-d (REQUIRED)');
-        $wsInstruction->getCell('K2')->setValue('Format Y-m-d (REQUIRED)');
 
         foreach ($wsInstruction->getColumnIterator() as $column) {
             $wsInstruction->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
@@ -308,20 +306,19 @@ class MasterStyleController extends Controller
 
         $ws = $sp->createSheet();
         $ws->setTitle('Upload');
-        $ws->getStyle('A1:K1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $ws->getStyle('A1:K1')->getFont()->setBold(true);
-        $ws->getStyle('A1:K1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $ws->getStyle('A1:J1')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $ws->getStyle('A1:J1')->getFont()->setBold(true);
+        $ws->getStyle('A1:J1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $ws->getCell('A1')->setValue('No');
-        $ws->getCell('B1')->setValue('SRF No');
-        $ws->getCell('C1')->setValue('Buyer');
-        $ws->getCell('D1')->setValue('Style');
-        $ws->getCell('E1')->setValue('Sample Type');
-        $ws->getCell('F1')->setValue('Category');
-        $ws->getCell('G1')->setValue('Sub Category');
-        $ws->getCell('H1')->setValue('Fabric');
-        $ws->getCell('I1')->setValue('Season');
-        $ws->getCell('J1')->setValue('Start');
-        $ws->getCell('K1')->setValue('End');
+        $ws->getCell('B1')->setValue('Buyer');
+        $ws->getCell('C1')->setValue('Style');
+        $ws->getCell('D1')->setValue('Sample Type');
+        $ws->getCell('E1')->setValue('Category');
+        $ws->getCell('F1')->setValue('Sub Category');
+        $ws->getCell('G1')->setValue('Fabric');
+        $ws->getCell('H1')->setValue('Season');
+        $ws->getCell('I1')->setValue('Start');
+        $ws->getCell('J1')->setValue('End');
 
         foreach ($ws->getColumnIterator() as $column) {
             $ws->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
@@ -356,21 +353,19 @@ class MasterStyleController extends Controller
                         $r[6] != "" &&
                         $r[7] != "" &&
                         $r[8] != "" &&
-                        $r[9] != "" &&
-                        $r[10] != ""
+                        $r[9] != ""
                     ) {
                         $d = new stdClass;
                         $no = $r[0];
-                        $srf = $r[1];
-                        $buyer = strtoupper($r[2]);
-                        $name = strtoupper($r[3]);
-                        $sample = strtoupper($r[4]);
-                        $category = strtoupper($r[5]);
-                        $sub_category = strtoupper($r[6]);
-                        $fabric = strtoupper($r[7]);
-                        $season = strtoupper($r[8]);
-                        $start = date('Y-m-d', strtotime($r[9]));
-                        $end = date('Y-m-d', strtotime($r[10]));
+                        $buyer = strtoupper($r[1]);
+                        $name = strtoupper($r[2]);
+                        $sample = strtoupper($r[3]);
+                        $category = strtoupper($r[4]);
+                        $sub_category = strtoupper($r[5]);
+                        $fabric = strtoupper($r[6]);
+                        $season = strtoupper($r[7]);
+                        $start = date('Y-m-d', strtotime($r[8]));
+                        $end = date('Y-m-d', strtotime($r[9]));
 
                         $masterBuyer = MasterBuyer::where('name', $buyer)->first();
                         if (!$masterBuyer) {
@@ -406,6 +401,8 @@ class MasterStyleController extends Controller
                             $warning[] = $d;
                             continue;
                         }
+
+                        $srf = self::number();
 
                         MasterStyle::create([
                             'master_buyer_id' => $masterBuyer->id,
@@ -459,7 +456,8 @@ class MasterStyleController extends Controller
         $master_sub_category_id = $request->master_sub_category_id;
         $master_sample_id = $request->master_sample_id;
         $master_fabric_id = $request->master_fabric_id;
-        $srf = $request->srf;
+        // $srf = $request->srf;
+        $srf = self::number();
         $season = strtoupper($request->season);
         $name = strtoupper($request->name);
         $range_date = explode(' - ', $request->range_date);
@@ -582,5 +580,30 @@ class MasterStyleController extends Controller
             DB::rollBack();
             return response()->json('Delete Failed', 422);
         }
+    }
+
+    static function number()
+    {
+        $Y = date('Y');
+        $y = date('y');
+        $m = date('m');
+        $M = strtoupper(date('M'));
+        $s = MasterStyle::whereYear('created_at', $Y)->whereMonth('created_at', $m)->orderBy('srf', 'desc')->first();
+        if ($s) {
+            $explode = explode($M . $y, $s->srf);
+            $no = intval($explode[0]);
+            $next = $no + 1;
+            if (strlen($next) == 1) {
+                $isi = '00' . $next;
+            } else if (strlen($next) == 2) {
+                $isi = '0' . $next;
+            } else {
+                $isi = $next;
+            }
+            $code = $isi . $M . $y;
+        } else {
+            $code = '001' . $M . $y;
+        }
+        return $code;
     }
 }

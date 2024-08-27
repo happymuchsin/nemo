@@ -29,7 +29,6 @@ class NeedleController extends Controller
     {
         $tipe = $request->tipe;
         $idCard = $request->idCard;
-        $line = $request->line;
         $style = $request->style;
         $boxCard = $request->boxCard;
         $needle = $request->needle;
@@ -47,6 +46,8 @@ class NeedleController extends Controller
 
         try {
             $user = User::where('rfid', $idCard)->first();
+            $master_placement = MasterPlacement::where('user_id', $user->id)->first();
+            $line = MasterLine::where('id', $master_placement->location_id)->first()->id;
             $box = MasterBox::where('rfid', $boxCard)->first();
             if ($status == 'RETURN') {
                 if ($box->tipe == 'RETURN') {
@@ -252,7 +253,6 @@ class NeedleController extends Controller
         $filename = $request->filename;
         $ext = $request->ext;
         $gambar = base64_decode($request->gambar);
-        $line = $request->line;
         $style = $request->style;
         $boxCard = $request->boxCard;
         $remark = $request->remark;
@@ -272,9 +272,11 @@ class NeedleController extends Controller
             if ($mp->reff == 'line') {
                 $s = MasterLine::where('id', $mp->location_id)->first();
                 $lokasi = $s->name;
+                $line = $s->id;
             } else if ($mp->reff == 'counter') {
                 $s = MasterCounter::where('id', $mp->location_id)->first();
                 $lokasi = $s->name;
+                $line = null;
             }
 
             if ($tipe == 'missing-fragment') {
