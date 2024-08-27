@@ -11,6 +11,7 @@
                         <th>Name</th>
                         <th>Division</th>
                         <th>Position</th>
+                        <th>Type</th>
                         <th>Location</th>
                         <th>Counter Member</th>
                         <th>Action</th>
@@ -126,6 +127,9 @@
                     },
                     {
                         data: 'position'
+                    },
+                    {
+                        data: 'tipe'
                     },
                     {
                         data: 'lokasi'

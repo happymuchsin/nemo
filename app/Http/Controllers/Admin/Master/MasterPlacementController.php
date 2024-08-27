@@ -74,6 +74,16 @@ class MasterPlacementController extends Controller
             ->addColumn('position', function ($q) {
                 return $q->position->name;
             })
+            ->addColumn('tipe', function ($q) {
+                $s = MasterPlacement::where('user_id', $q->id)->first();
+                if ($s) {
+                    $h = '';
+                    $h = strtoupper($s->reff);
+                    return $h;
+                } else {
+                    return '';
+                }
+            })
             ->addColumn('action', function ($q) {
                 return view('includes.admin.action', [
                     'edit' => route('admin.master.placement.edit', ['id' => $q->id]),
