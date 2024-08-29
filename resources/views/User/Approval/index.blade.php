@@ -57,7 +57,20 @@
                     data: function(d) {
                         d.bulan = $('#bulan').val();
                         d.tahun = $('#tahun').val();
-                    }
+                    },
+                    beforeSend: function() {
+                        Swal.fire({
+                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
+                            title: 'Please Wait',
+                            html: 'Fetching your data..',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                        });
+                        Swal.showLoading();
+                    },
+                    complete: function() {
+                        Swal.close();
+                    },
                 },
                 columns: [{
                         data: 'created_at'

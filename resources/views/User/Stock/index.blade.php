@@ -247,7 +247,20 @@
                         d.filter_area = $('#filter_area').val();
                         d.filter_counter = $('#filter_counter').val();
                         d.filter_box = $('#filter_box').val();
-                    }
+                    },
+                    beforeSend: function() {
+                        Swal.fire({
+                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
+                            title: 'Please Wait',
+                            html: 'Fetching your data..',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                        });
+                        Swal.showLoading();
+                    },
+                    complete: function() {
+                        Swal.close();
+                    },
                 },
                 columns: [{
                         data: 'area'

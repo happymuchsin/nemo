@@ -122,7 +122,20 @@
                                 d.id = id;
                                 d.filter_date = $('#filter_date').val();
                                 d.filter_line = $('#filter_line').val();
-                            }
+                            },
+                            beforeSend: function() {
+                                Swal.fire({
+                                    iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
+                                    title: 'Please Wait',
+                                    html: 'Fetching your data..',
+                                    allowOutsideClick: false,
+                                    allowEscapeKey: false,
+                                });
+                                Swal.showLoading();
+                            },
+                            complete: function() {
+                                Swal.close();
+                            },
                         },
                         columns: [{
                                 data: 'time'
@@ -184,7 +197,20 @@
                             data: function(d) {
                                 d.id = id;
                                 d.filter_counter = $('#filter_counter').val();
-                            }
+                            },
+                            beforeSend: function() {
+                                Swal.fire({
+                                    iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
+                                    title: 'Please Wait',
+                                    html: 'Fetching your data..',
+                                    allowOutsideClick: false,
+                                    allowEscapeKey: false,
+                                });
+                                Swal.showLoading();
+                            },
+                            complete: function() {
+                                Swal.close();
+                            },
                         },
                         columns: [{
                                 data: 'boxName'
