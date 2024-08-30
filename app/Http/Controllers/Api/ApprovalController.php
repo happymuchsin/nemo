@@ -26,15 +26,15 @@ class ApprovalController extends Controller
         }])
             ->where('master_area_id', $area_id)
             ->where('master_counter_id', $lokasi_id)
-            ->whereNotIn('needle_id', function ($q) {
-                $q->from('needle_details')
-                    ->select('needle_id')
-                    ->whereIn('master_status_id', function ($q1) {
-                        $q1->from('master_statuses')
-                            ->select('id')
-                            ->where('name', 'REPLACEMENT');
-                    });
-            })
+            // ->whereNotIn('needle_id', function ($q) {
+            //     $q->from('needle_details')
+            //         ->select('needle_id')
+            //         ->whereIn('master_status_id', function ($q1) {
+            //             $q1->from('master_statuses')
+            //                 ->select('id')
+            //                 ->where('name', 'REPLACEMENT');
+            //         });
+            // })
             ->whereNotNull('needle_id')
             ->where('status', '!=', 'DONE')
             ->get();
@@ -48,7 +48,7 @@ class ApprovalController extends Controller
             $d->idCard = $s->user->rfid;
             $d->line = $s->needle->line->name;
             $d->lineId = $s->needle->line->id;
-            $d->style = $s->needle->style->name;
+            $d->style = $s->needle->style->srf . ' - ' . $s->needle->style->name;
             $d->styleId = $s->needle->style->id;
             $d->brand = $s->needle->needle->brand;
             $d->tipe = $s->needle->needle->tipe;

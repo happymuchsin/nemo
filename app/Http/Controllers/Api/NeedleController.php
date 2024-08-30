@@ -91,6 +91,10 @@ class NeedleController extends Controller
             DB::beginTransaction();
 
             if ($status != 'RETURN') {
+                if ($box->tipe == 'RETURN') {
+                    return new ApiResource(422, 'This is not Box Normal', '');
+                }
+
                 $in = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->where('is_clear', 'not')->sum('in');
                 $out = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->where('is_clear', 'not')->sum('out');
 
@@ -321,7 +325,8 @@ class NeedleController extends Controller
                 'needle_status' => $needle_status,
                 'tipe' => $tipe,
                 'remark' => $remark,
-                'status' => 'WAITING',
+                'status' => $needle_status == 'complete' ? 'APPROVE' : 'WAITING',
+                'approve' => $needle_status == 'complete' ? $now : null,
                 'filename' => $filename,
                 'ext' => $ext,
                 'created_by' => $username,
@@ -341,7 +346,8 @@ class NeedleController extends Controller
                 'needle_status' => $needle_status,
                 'tipe' => $tipe,
                 'remark' => $remark,
-                'status' => 'WAITING',
+                'status' => $needle_status == 'complete' ? 'APPROVE' : 'WAITING',
+                'approve' => $needle_status == 'complete' ? $now : null,
                 'filename' => $filename,
                 'ext' => $ext,
                 'created_by' => $username,
@@ -360,28 +366,30 @@ class NeedleController extends Controller
                 $t = 'Request New Needle';
             }
 
-            $title = 'New Approval';
-            $message = "You have a new Outstanding Approval $t. \nWith data:\n Requester: {$name}\n Division: {$division}\n Position: {$position}\n Location: {$lokasi}\n DateTime: {$now}";
-            $link = route('notif-clicked', ['tipe' => 'approval']);
+            if ($needle_status == 'incomplete') {
+                $title = 'New Approval';
+                $message = "You have a new Outstanding Approval $t. \nWith data:\n Requester: {$name}\n Division: {$division}\n Position: {$position}\n Location: {$lokasi}\n DateTime: {$now}";
+                $link = route('notif-clicked', ['tipe' => 'approval']);
 
-            $data = [
-                'title' => $title,
-                'message' => $message,
-                'link' => $link,
-            ];
+                $data = [
+                    'title' => $title,
+                    'message' => $message,
+                    'link' => $link,
+                ];
 
-            $user = User::where('id', $approval)->first();
-            $user->notify(new ApprovalNotification($data));
+                $user = User::where('id', $approval)->first();
+                $user->notify(new ApprovalNotification($data));
 
-            HelperController::emitEvent('nemo', [
-                'kategori' => 'username',
-                'untuk' => $user->username,
-                'event' => 'nemoNewNotification',
-                'tipe' => 'notif',
-                'title' => 'You Have ' . $title,
-                'message' => $message,
-                'link' => $link,
-            ]);
+                HelperController::emitEvent('nemo', [
+                    'kategori' => 'username',
+                    'untuk' => $user->username,
+                    'event' => 'nemoNewNotification',
+                    'tipe' => 'notif',
+                    'title' => 'You Have ' . $title,
+                    'message' => $message,
+                    'link' => $link,
+                ]);
+            }
 
             HelperController::emitEvent('nemo', [
                 'event' => 'nemoReload',

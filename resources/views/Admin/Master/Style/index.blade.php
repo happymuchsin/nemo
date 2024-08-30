@@ -73,8 +73,7 @@
             <input type="hidden" name="key" id="key">
             <div class="row">
                 <div class="col-sm-6">
-                    <x-modal.body :tipe="'text'" :label="'SRF No'" :id="'srf'" :upper="false"
-                        :disable="'disabled'" />
+                    <x-modal.body :tipe="'text'" :label="'SRF No'" :id="'srf'" />
                 </div>
                 <div class="col-sm-6">
                     <x-modal.body :tipe="'select'" :label="'Buyer'" :id="'master_buyer_id'">
@@ -340,7 +339,9 @@
         }
 
         function crup() {
-            if ($('#master_buyer_id').val() == '') {
+            if ($('#srf').val() == '') {
+                Swal.fire('Warning!', 'Please insert SRF No', 'warning');
+            } else if ($('#master_buyer_id').val() == '') {
                 Swal.fire('Warning!', 'Please select Buyer', 'warning');
             } else if ($('#master_category_id').val() == '') {
                 Swal.fire('Warning!', 'Please select Category', 'warning');
@@ -352,11 +353,7 @@
                 Swal.fire('Warning!', 'Please select Fabric', 'warning');
             } else if ($('#name').val() == '') {
                 Swal.fire('Warning!', 'Please insert Name', 'warning');
-            }
-            // else if ($('#srf').val() == '') {
-            //     Swal.fire('Warning!', 'Please insert SRF No', 'warning');
-            // } 
-            else if ($('#season').val() == '') {
+            } else if ($('#season').val() == '') {
                 Swal.fire('Warning!', 'Please insert Season', 'warning');
             } else if ($('#range_date').val() == '') {
                 Swal.fire('Warning!', 'Please select Start - End', 'warning');
@@ -372,7 +369,7 @@
                     data: {
                         'id': $('#key').val(),
                         'name': $('#name').val(),
-                        // 'srf': $('#srf').val(),
+                        'srf': $('#srf').val(),
                         'season': $('#season').val(),
                         'range_date': $('#range_date').val(),
                         'master_buyer_id': $('#master_buyer_id').val(),

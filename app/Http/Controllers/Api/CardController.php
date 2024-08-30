@@ -54,15 +54,15 @@ class CardController extends Controller
                         ->where('user_id', $u->id)
                         ->where('master_area_id', $area_id)
                         ->where('master_counter_id', $lokasi_id)
-                        ->whereNotIn('needle_id', function ($q) {
-                            $q->from('needle_details')
-                                ->select('needle_id')
-                                ->whereIn('master_status_id', function ($q1) {
-                                    $q1->from('master_statuses')
-                                        ->select('id')
-                                        ->where('name', 'REPLACEMENT');
-                                });
-                        })
+                        // ->whereNotIn('needle_id', function ($q) {
+                        //     $q->from('needle_details')
+                        //         ->select('needle_id')
+                        //         ->whereIn('master_status_id', function ($q1) {
+                        //             $q1->from('master_statuses')
+                        //                 ->select('id')
+                        //                 ->where('name', 'REPLACEMENT');
+                        //         });
+                        // })
                         ->where('status', '!=', 'DONE')
                         ->first();
                     $d = new stdClass;
@@ -131,6 +131,10 @@ class CardController extends Controller
                         'box' => $b,
                     ]);
                 } else {
+                    if ($b->tipe == 'RETURN') {
+                        return new ApiResource(422, 'This is not Box Normal', '');
+                    }
+
                     $s = Stock::with(['needle'])->where('master_box_id', $b->id)->where('is_clear', 'not')->first();
                     if ($s) {
                         $in = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('in');

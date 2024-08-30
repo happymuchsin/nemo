@@ -24,7 +24,7 @@ class SpinnerController extends Controller
         if ($tipe == 'line') {
             $data = MasterLine::selectRaw('id, name')->where('master_area_id', $area_id)->get();
         } else if ($tipe == 'style') {
-            $data = MasterStyle::selectRaw('id, name')->get();
+            $data = MasterStyle::selectRaw('id, CONCAT(srf, " - ", name) as name')->get();
         } else if ($tipe == 'approval') {
             $data = [];
             if (Config::get('app.env') == 'local') {
