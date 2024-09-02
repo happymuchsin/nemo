@@ -91,7 +91,7 @@
                         <div class="col-sm-4">
                             <select id="belakang">
                                 <option value=""></option>
-                                @for ($x = date('y'); $x >= 23; $x--)
+                                @for ($x = date('y') + 1; $x >= 23; $x--)
                                     <option value="{{ $x }}">{{ $x }}</option>
                                 @endfor
                             </select>
