@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResource;
 use App\Models\MasterApproval;
+use App\Models\MasterBuyer;
 use App\Models\MasterLine;
 use App\Models\MasterNeedle;
 use App\Models\MasterPlacement;
@@ -23,8 +24,10 @@ class SpinnerController extends Controller
         $x = $request->x;
         if ($tipe == 'line') {
             $data = MasterLine::selectRaw('id, name')->where('master_area_id', $area_id)->get();
+        } else if ($tipe == 'buyer') {
+            $data = MasterBuyer::selectRaw('id, name')->get();
         } else if ($tipe == 'style') {
-            $data = MasterStyle::selectRaw('id, CONCAT(srf, " - ", name) as name')->get();
+            $data = MasterStyle::selectRaw('id, CONCAT(srf, " - ", name) as name')->where('master_buyer_id', $x)->get();
         } else if ($tipe == 'approval') {
             $data = [];
             if (Config::get('app.env') == 'local') {

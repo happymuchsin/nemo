@@ -22,7 +22,9 @@ class ApprovalController extends Controller
 
         $data = [];
         $s = Approval::with(['user', 'needle' => function ($q) {
-            $q->with(['line', 'style', 'box', 'needle']);
+            $q->with(['line', 'style' => function ($q1) {
+                $q1->with(['buyer']);
+            }, 'box', 'needle']);
         }])
             ->where('master_area_id', $area_id)
             ->where('master_counter_id', $lokasi_id)
@@ -48,6 +50,7 @@ class ApprovalController extends Controller
             $d->idCard = $s->user->rfid;
             $d->line = $s->needle->line->name;
             $d->lineId = $s->needle->line->id;
+            $d->buyer = $s->needle->style->buyer->name;
             $d->style = $s->needle->style->srf . ' - ' . $s->needle->style->name;
             $d->styleId = $s->needle->style->id;
             $d->brand = $s->needle->needle->brand;
