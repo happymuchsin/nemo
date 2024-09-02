@@ -163,18 +163,18 @@ class NeedleController extends Controller
                 //     return new ApiResource(422, 'There are needles that are still in the REPLACEMENT process', '');
                 // }
 
-                // Needle::where('id', $needle_id)->where('status', 'new')->update([
-                //     'status' => 'return',
-                //     'updated_by' => $username,
-                //     'updated_at' => $now,
-                // ]);
+                Needle::where('user_id', $user->id)->where('master_needle_id', $needle)->where('status', 'new')->update([
+                    'status' => 'return',
+                    'updated_by' => $username,
+                    'updated_at' => $now,
+                ]);
 
-                // HelperController::activityLog("ANDROID UPDATE NEEDLE", 'needles', 'update', $request->ip(), $request->userAgent(), json_encode([
-                //     'id' => $needle_id,
-                //     'status' => 'return',
-                //     'updated_by' => $username,
-                //     'updated_at' => $now,
-                // ]), $needle_id, $username);
+                HelperController::activityLog("ANDROID UPDATE NEEDLE", 'needles', 'update', $request->ip(), $request->userAgent(), json_encode([
+                    'id' => $needle_id,
+                    'status' => 'return',
+                    'updated_by' => $username,
+                    'updated_at' => $now,
+                ]), $needle_id, $username);
 
                 // Stock::where('id', $stock->id)->update([
                 //     'out' => DB::raw("`out` - 1"),

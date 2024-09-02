@@ -51,7 +51,8 @@ class ApprovalController extends Controller
             $d->line = $s->needle->line->name;
             $d->lineId = $s->needle->line->id;
             $d->buyer = $s->needle->style->buyer->name;
-            $d->style = $s->needle->style->srf . ' - ' . $s->needle->style->name;
+            $d->srf = $s->needle->style->srf;
+            $d->style = $s->needle->style->name;
             $d->styleId = $s->needle->style->id;
             $d->brand = $s->needle->needle->brand;
             $d->tipe = $s->needle->needle->tipe;

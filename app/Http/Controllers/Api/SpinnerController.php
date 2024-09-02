@@ -27,7 +27,24 @@ class SpinnerController extends Controller
         } else if ($tipe == 'buyer') {
             $data = MasterBuyer::selectRaw('id, name')->get();
         } else if ($tipe == 'style') {
-            $data = MasterStyle::selectRaw('id, CONCAT(srf, " - ", name) as name')->where('master_buyer_id', $x)->get();
+            $data = [];
+            $ms = MasterStyle::where('master_buyer_id', $x)->groupBy('name')->get();
+            foreach ($ms as $ms) {
+                $d = new stdClass;
+                $d->id = $ms->name;
+                $d->name = $ms->name;
+                $data[] = $d;
+            }
+        } else if ($tipe == 'srf') {
+            $buyer = $request->buyer;
+            $data = [];
+            $ms = MasterStyle::selectRaw('id, srf as name')->where('master_buyer_id', $buyer)->where('name', $x)->get();
+            foreach ($ms as $ms) {
+                $d = new stdClass;
+                $d->id = $ms->id;
+                $d->name = $ms->name;
+                $data[] = $d;
+            }
         } else if ($tipe == 'approval') {
             $data = [];
             if (Config::get('app.env') == 'local') {
