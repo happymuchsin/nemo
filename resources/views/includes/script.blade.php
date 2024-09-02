@@ -62,6 +62,17 @@
         display: flex;
     }
 
+    /* Menghilangkan tombol panah pada input type number */
+    .no-spin::-webkit-inner-spin-button,
+    .no-spin::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .no-spin {
+        -moz-appearance: textfield;
+    }
+
     .toolbar {
         float: left;
     }

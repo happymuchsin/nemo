@@ -73,7 +73,30 @@
             <input type="hidden" name="key" id="key">
             <div class="row">
                 <div class="col-sm-6">
-                    <x-modal.body :tipe="'text'" :label="'SRF No'" :id="'srf'" />
+                    <label>SRF No</label>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <input type="number" min="1" max="999" class="form-control no-spin" id="depan"
+                                autocomplete="off">
+                        </div>
+                        <div class="col-sm-4">
+                            <select id="tengah">
+                                <option value=""></option>
+                                @for ($mm = 1; $mm <= 12; $mm++)
+                                    <option value="{{ strtoupper(date('M', mktime(0, 0, 0, $mm, 1))) }}">
+                                        {{ strtoupper(date('M', mktime(0, 0, 0, $mm, 1))) }}</option>;
+                                @endfor
+                            </select>
+                        </div>
+                        <div class="col-sm-4">
+                            <select id="belakang">
+                                <option value=""></option>
+                                @for ($x = date('y'); $x >= 23; $x--)
+                                    <option value="{{ $x }}">{{ $x }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-sm-6">
                     <x-modal.body :tipe="'select'" :label="'Buyer'" :id="'master_buyer_id'">
@@ -178,6 +201,28 @@
                     'YYYY-MM-DD'));
             });
 
+            $('#depan').on('input', function() {
+                var value = parseInt($(this).val());
+                if (isNaN(value)) {
+                    $(this).val(1);
+                } else {
+                    if (value < 1) {
+                        $(this).val(1);
+                    } else if (value > 999) {
+                        $(this).val(999);
+                    }
+                }
+            });
+            $('#tengah').select2({
+                placeholder: "Select Month",
+                dropdownParent: $('#crupModal'),
+                width: '100%',
+            });
+            $('#belakang').select2({
+                placeholder: "Select Year",
+                dropdownParent: $('#crupModal'),
+                width: '100%',
+            });
             $('#master_buyer_id').select2({
                 placeholder: "Select Buyer",
                 dropdownParent: $('#crupModal'),
@@ -331,7 +376,10 @@
             $('#master_sample_id').val('').trigger('change');
             $('#master_fabric_id').val('').trigger('change');
             $('#name').val('');
-            $('#srf').val('');
+            // $('#srf').val('');
+            $('#depan').val('');
+            $('#tengah').val('').trigger('change');
+            $('#belakang').val('').trigger('change');
             $('#season').val('');
             $('#range_date').val('');
             $('#key').val(0);
@@ -339,7 +387,7 @@
         }
 
         function crup() {
-            if ($('#srf').val() == '') {
+            if ($('#depan').val() == '' || $('#tengah').val() == '' || $('#belakang').val() == '') {
                 Swal.fire('Warning!', 'Please insert SRF No', 'warning');
             } else if ($('#master_buyer_id').val() == '') {
                 Swal.fire('Warning!', 'Please select Buyer', 'warning');
@@ -358,6 +406,14 @@
             } else if ($('#range_date').val() == '') {
                 Swal.fire('Warning!', 'Please select Start - End', 'warning');
             } else {
+                var depan = $('#depan').val();
+                if (depan.length == 1) {
+                    depan = '00' + depan;
+                } else if (depan.length == 2) {
+                    depan = '0' + depan;
+                } else {
+                    depan = depan;
+                }
                 $.ajaxSetup({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -369,7 +425,7 @@
                     data: {
                         'id': $('#key').val(),
                         'name': $('#name').val(),
-                        'srf': $('#srf').val(),
+                        'srf': depan + $('#tengah').val() + $('#belakang').val(),
                         'season': $('#season').val(),
                         'range_date': $('#range_date').val(),
                         'master_buyer_id': $('#master_buyer_id').val(),
