@@ -23,7 +23,12 @@ return new class extends Migration
             $table->foreign('master_box_id')->references('id')->on('master_boxes')->onUpdate('cascade')->onDelete('cascade');
             $table->unsignedBigInteger('master_needle_id')->nullable();
             $table->foreign('master_needle_id')->references('id')->on('master_needles')->onUpdate('cascade')->onDelete('cascade');
+            $table->unsignedBigInteger('master_status_id')->nullable();
+            $table->foreign('master_status_id')->references('id')->on('master_statuses')->onUpdate('cascade')->onDelete('cascade');
             $table->string('status')->nullable();
+            $table->text('remark')->nullable();
+            $table->string('filename')->nullable();
+            $table->string('ext')->nullable();
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->string('deleted_by')->nullable();

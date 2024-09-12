@@ -76,7 +76,7 @@
                     <label>SRF No</label>
                     <div class="row">
                         <div class="col-sm-4">
-                            <input type="number" min="1" max="999" class="form-control no-spin" id="depan"
+                            <input type="number" min="0" max="999" class="form-control no-spin" id="depan"
                                 autocomplete="off">
                         </div>
                         <div class="col-sm-4">
@@ -204,10 +204,10 @@
             $('#depan').on('input', function() {
                 var value = parseInt($(this).val());
                 if (isNaN(value)) {
-                    $(this).val(1);
+                    $(this).val(0);
                 } else {
-                    if (value < 1) {
-                        $(this).val(1);
+                    if (value < 0) {
+                        $(this).val(0);
                     } else if (value > 999) {
                         $(this).val(999);
                     }
@@ -378,8 +378,8 @@
             $('#name').val('');
             // $('#srf').val('');
             $('#depan').val('');
-            $('#tengah').val('').trigger('change');
-            $('#belakang').val('').trigger('change');
+            $('#tengah').val("{{ strtoupper(date('M')) }}").trigger('change');
+            $('#belakang').val("{{ date('y') }}").trigger('change');
             $('#season').val('');
             $('#range_date').val('');
             $('#key').val(0);

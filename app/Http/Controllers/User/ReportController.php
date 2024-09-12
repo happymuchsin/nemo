@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\MasterStatus;
 use App\Models\Needle;
-use App\Models\NeedleDetail;
 use App\Models\Stock;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -79,9 +78,7 @@ class ReportController extends Controller
 
         if ($id == 'report_daily') {
             $filter_date = $request->filter_date;
-            $data = NeedleDetail::with(['needle' => function ($q) {
-                $q->with(['user', 'line', 'needle']);
-            }, 'status'])
+            $data = Needle::with(['user', 'line', 'needle', 'master_status'])
                 ->whereDate('created_at', $filter_date)
                 ->orderBy('created_at')
                 ->get();
@@ -90,22 +87,22 @@ class ReportController extends Controller
                     return Carbon::parse($q->created_at)->format('H:i:s');
                 })
                 ->addColumn('line', function ($q) {
-                    return $q->needle->line->name;
+                    return $q->line->name;
                 })
                 ->addColumn('user', function ($q) {
-                    return $q->needle->user->username . ' - ' . $q->needle->user->name;
+                    return $q->user->username . ' - ' . $q->user->name;
                 })
                 ->addColumn('brand', function ($q) {
-                    return $q->needle->needle->brand;
+                    return $q->needle->brand;
                 })
                 ->addColumn('tipe', function ($q) {
-                    return $q->needle->needle->tipe;
+                    return $q->needle->tipe;
                 })
                 ->addColumn('size', function ($q) {
-                    return $q->needle->needle->size;
+                    return $q->needle->size;
                 })
                 ->addColumn('remark', function ($q) {
-                    return $q->status->name;
+                    return $q->master_status->name;
                 })
                 ->make(true);
         } else if ($id == 'report_weekly') {
@@ -117,11 +114,11 @@ class ReportController extends Controller
             $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
             $period = CarbonPeriod::create($start, $end);
 
-            $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start, $end])
+            $dataNeedle = Needle::whereBetween('created_at', [$start, $end])
                 ->orderBy('created_at')
                 ->get();
 
-            $collectNeedleDetail = collect($dataNeedleDetail);
+            $collectNeedle = collect($dataNeedle);
 
             $dataStock = Stock::whereBetween('created_at', [$start, $end])
                 ->orderBy('created_at')
@@ -137,7 +134,7 @@ class ReportController extends Controller
                 foreach ($ms as $m) {
                     $kol = $m->name;
                     $id = $m->id;
-                    $d->$kol = $collectNeedleDetail
+                    $d->$kol = $collectNeedle
                         ->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])
                         ->where('master_status_id', $id)
                         ->count();
@@ -155,12 +152,12 @@ class ReportController extends Controller
             $year = $x[0];
             $month = $x[1];
 
-            $dataNeedleDetail = NeedleDetail::whereYear('created_at', $year)
+            $dataNeedle = Needle::whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->orderBy('created_at')
                 ->get();
 
-            $collectNeedleDetail = collect($dataNeedleDetail);
+            $collectNeedle = collect($dataNeedle);
 
             $dataStock = Stock::whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
@@ -177,7 +174,7 @@ class ReportController extends Controller
                 foreach ($ms as $m) {
                     $kol = $m->name;
                     $id = $m->id;
-                    $d->$kol = $collectNeedleDetail
+                    $d->$kol = $collectNeedle
                         ->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])
                         ->where('master_status_id', $id)
                         ->count();
@@ -216,11 +213,11 @@ class ReportController extends Controller
                 $end = date('Y-m-d', strtotime($filter_year . '-12-31'));
             }
 
-            $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
+            $dataNeedle = Needle::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')
                 ->get();
 
-            $collectNeedleDetail = collect($dataNeedleDetail);
+            $collectNeedle = collect($dataNeedle);
 
             $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')
@@ -237,7 +234,7 @@ class ReportController extends Controller
                 foreach ($ms as $m) {
                     $kol = $m->name;
                     $id = $m->id;
-                    $d->$kol = $collectNeedleDetail
+                    $d->$kol = $collectNeedle
                         ->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])
                         ->where('master_status_id', $id)
                         ->count();
@@ -266,11 +263,11 @@ class ReportController extends Controller
                 $end = date('Y-m-d', strtotime($filter_year . '-12-31'));
             }
 
-            $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
+            $dataNeedle = Needle::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')
                 ->get();
 
-            $collectNeedleDetail = collect($dataNeedleDetail);
+            $collectNeedle = collect($dataNeedle);
 
             $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')
@@ -287,7 +284,7 @@ class ReportController extends Controller
                 foreach ($ms as $m) {
                     $kol = $m->name;
                     $id = $m->id;
-                    $d->$kol = $collectNeedleDetail
+                    $d->$kol = $collectNeedle
                         ->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])
                         ->where('master_status_id', $id)
                         ->count();
@@ -304,11 +301,11 @@ class ReportController extends Controller
             $start = Carbon::now()->setYear($filter_year)->startOfYear();
             $end = Carbon::now()->setYear($filter_year)->endOfYear();
 
-            $dataNeedleDetail = NeedleDetail::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
+            $dataNeedle = Needle::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')
                 ->get();
 
-            $collectNeedleDetail = collect($dataNeedleDetail);
+            $collectNeedle = collect($dataNeedle);
 
             $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')
@@ -325,7 +322,7 @@ class ReportController extends Controller
                 foreach ($ms as $m) {
                     $kol = $m->name;
                     $id = $m->id;
-                    $d->$kol = $collectNeedleDetail
+                    $d->$kol = $collectNeedle
                         ->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])
                         ->where('master_status_id', $id)
                         ->count();

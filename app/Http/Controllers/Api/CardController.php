@@ -3,16 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\HelperController;
 use App\Http\Resources\ApiResource;
 use App\Models\Approval;
 use App\Models\MasterBox;
 use App\Models\MasterLine;
 use App\Models\MasterPlacement;
+use App\Models\MasterStatus;
 use App\Models\Needle;
 use App\Models\Stock;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use stdClass;
 
 class CardController extends Controller
@@ -22,6 +25,8 @@ class CardController extends Controller
         $rfid = $request->rfid;
         $area_id = $request->area_id;
         $lokasi_id = $request->lokasi_id;
+        $approval = $request->approval;
+        $now = Carbon::now();
 
         if ($rfid) {
             $u = User::where('rfid', $rfid)->first();
@@ -31,68 +36,22 @@ class CardController extends Controller
                     return new ApiResource(422, 'Please assign Placement First !!!', '');
                 }
                 $tipe = $request->tipe;
-                // if ($tipe == 'return') {
-                //     $s = Needle::with(['line', 'style', 'box', 'needle'])
-                //         ->where('user_id', $u->id)
-                //         ->where('status', 'new')
-                //         ->orderBy('created_at', 'desc')
-                //         ->first();
-                //     if ($s) {
-                //         return new ApiResource(200, 'success', [
-                //             'user' => $u,
-                //             'needle' => $s,
-                //         ]);
-                //     } else {
-                //         return new ApiResource(422, 'No returnable needles', '');
-                //     }
-                // } 
                 if ($tipe == 'approval') {
-                    $s = Approval::with(['user', 'needle' => function ($q) {
-                        $q->with(['line', 'style' => function ($q1) {
-                            $q1->with(['buyer']);
-                        }, 'box', 'needle']);
-                    }])
-                        ->whereNotNull('needle_id')
-                        ->where('user_id', $u->id)
-                        ->where('master_area_id', $area_id)
-                        ->where('master_counter_id', $lokasi_id)
-                        // ->whereNotIn('needle_id', function ($q) {
-                        //     $q->from('needle_details')
-                        //         ->select('needle_id')
-                        //         ->whereIn('master_status_id', function ($q1) {
-                        //             $q1->from('master_statuses')
-                        //                 ->select('id')
-                        //                 ->where('name', 'REPLACEMENT');
-                        //         });
-                        // })
-                        ->where('status', '!=', 'DONE')
-                        ->first();
-                    $d = new stdClass;
-                    $d->id = $s->id;
-                    $d->username = $s->user->username;
-                    $d->name = $s->user->name;
-                    $d->status = $s->status;
-                    $d->idCard = $s->user->rfid;
-                    $d->line = $s->needle->line->name;
-                    $d->lineId = $s->needle->line->id;
-                    $d->buyer = $s->needle->style->buyer->name;
-                    $d->srf = $s->needle->style->srf;
-                    $d->style = $s->needle->style->name;
-                    $d->styleId = $s->needle->style->id;
-                    $d->brand = $s->needle->needle->brand;
-                    $d->tipe = $s->needle->needle->tipe;
-                    $d->size = $s->needle->needle->size;
-                    $d->boxCard = $s->needle->box->rfid;
-                    $d->needleId = $s->needle->needle->id;
-                    $created_at = Carbon::parse($s->created_at);
-                    if (strlen($created_at->month) == 1) {
-                        $month = '0' . $created_at->month;
+                    $s = Approval::with(['approval'])->where('id', $approval)->first();
+                    if ($s) {
+                        if ($s->approval->user_id != $u->id) {
+                            return new ApiResource(422, 'User Approval not registered in this Data', '');
+                        } else {
+                            $s->status = 'APPROVE';
+                            $s->approve = $now;
+                            $s->updated_by = $u->username;
+                            $s->updated_at = $now;
+                            $s->save();
+                            return new ApiResource(200, 'success', '');
+                        }
                     } else {
-                        $month = $created_at->month;
+                        return new ApiResource(422, 'Approval not found', '');
                     }
-                    $d->gambar = base64_encode(file_get_contents("assets/uploads/needle/$created_at->year/$month/$s->needle_id/$s->id.$s->ext"));
-
-                    return new ApiResource(200, 'success', $d);
                 } else {
                     if ($placement->reff == 'line') {
                         if ($lokasi_id != $placement->counter_id) {
@@ -121,12 +80,83 @@ class CardController extends Controller
     public function box(Request $request)
     {
         $rfid = $request->rfid;
+        $now = Carbon::now();
 
         if ($rfid) {
             $tipe = $request->tipe;
             $b = MasterBox::where('rfid', $rfid)->first();
             if ($b) {
-                if ($tipe == 'return') {
+                if ($tipe == 'approval') {
+                    $approval = $request->approval;
+                    $username = $request->username;
+                    $s = Approval::where('id', $approval)->first();
+                    if ($s) {
+                        if ($s->status == 'APPROVE') {
+                            DB::beginTransaction();
+
+                            $stat = MasterStatus::where('name', 'BROKEN MISSING FRAGMENT')->first();
+
+                            $in = Stock::where('master_box_id', $b->id)->where('master_needle_id', $s->master_needle_id)->where('is_clear', 'not')->sum('in');
+                            $out = Stock::where('master_box_id', $b->id)->where('master_needle_id', $s->master_needle_id)->where('is_clear', 'not')->sum('out');
+
+                            if ($in <= $out) {
+                                return new ApiResource(422, 'Stock in Box is empty !!!', '');
+                            }
+
+                            Needle::create([
+                                'user_id' => $s->user_id,
+                                'master_line_id' => $s->master_line_id,
+                                'master_style_id' => $s->master_style_id,
+                                'master_box_id' => $b->id,
+                                'master_needle_id' => $s->master_needle_id,
+                                'master_status_id' => $stat->id,
+                                'status' => '',
+                                'remark' => '',
+                                'created_by' => $username,
+                                'created_at' => $now,
+                            ]);
+                            HelperController::activityLog("ANDROID CREATE NEEDLE", 'needles', 'create', $request->ip(), $request->userAgent(), json_encode([
+                                'user_id' => $s->user_id,
+                                'master_line_id' => $s->master_line_id,
+                                'master_style_id' => $s->master_style_id,
+                                'master_box_id' => $b->id,
+                                'master_needle_id' => $s->master_needle_id,
+                                'master_status_id' => $stat->id,
+                                'status' => '',
+                                'remark' => '',
+                                'created_by' => $username,
+                                'created_at' => $now,
+                            ]), null, $username);
+
+                            $stock = Stock::where('master_box_id', $b->id)->where('master_needle_id', $s->master_needle_id)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
+
+                            Stock::where('id', $stock->id)->update([
+                                'out' => DB::raw("`out` + 1"),
+                                'updated_by' => $username,
+                                'updated_at' => $now,
+                            ]);
+                            HelperController::activityLog("ANDROID UPDATE STOCK", 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
+                                'id' => $stock->id,
+                                'out' => 'out + 1',
+                                'updated_by' => $username,
+                                'updated_at' => $now,
+                            ]), $stock->id, $username);
+
+                            $s->status = 'DONE';
+                            $s->updated_at = $now;
+                            $s->updated_by = $username;
+                            $s->save();
+
+                            DB::commit();
+
+                            return new ApiResource(200, 'Successfully', '');
+                        } else {
+                            return new ApiResource(422, 'Need Approval', '');
+                        }
+                    } else {
+                        return new ApiResource(422, 'Approval not found', '');
+                    }
+                } else if ($tipe == 'return') {
                     if ($b->tipe != 'RETURN') {
                         return new ApiResource(422, 'This is not Box Return', '');
                     }

@@ -25,49 +25,57 @@ class ApprovalController extends Controller
             $q->with(['line', 'style' => function ($q1) {
                 $q1->with(['buyer']);
             }, 'box', 'needle']);
+        }, 'approval' => function ($q) {
+            $q->with(['user']);
         }])
             ->where('master_area_id', $area_id)
             ->where('master_counter_id', $lokasi_id)
-            // ->whereNotIn('needle_id', function ($q) {
-            //     $q->from('needle_details')
-            //         ->select('needle_id')
-            //         ->whereIn('master_status_id', function ($q1) {
-            //             $q1->from('master_statuses')
-            //                 ->select('id')
-            //                 ->where('name', 'REPLACEMENT');
-            //         });
-            // })
-            ->whereNotNull('needle_id')
             ->where('status', '!=', 'DONE')
             ->get();
         foreach ($s as $s) {
-            // if ($s->needle) {
             $d = new stdClass;
             $d->id = $s->id;
             $d->username = $s->user->username;
             $d->name = $s->user->name;
             $d->status = $s->status;
             $d->idCard = $s->user->rfid;
-            $d->line = $s->needle->line->name;
-            $d->lineId = $s->needle->line->id;
-            $d->buyer = $s->needle->style->buyer->name;
-            $d->srf = $s->needle->style->srf;
-            $d->style = $s->needle->style->name;
-            $d->styleId = $s->needle->style->id;
-            $d->brand = $s->needle->needle->brand;
-            $d->tipe = $s->needle->needle->tipe;
-            $d->size = $s->needle->needle->size;
-            $d->boxCard = $s->needle->box->rfid;
-            $d->needleId = $s->needle->needle->id;
+            if ($s->needle) {
+                $d->line = $s->needle->line->name;
+                $d->lineId = $s->needle->line->id;
+                $d->buyer = $s->needle->style->buyer->name;
+                $d->srf = $s->needle->style->srf;
+                $d->style = $s->needle->style->name;
+                $d->styleId = $s->needle->style->id;
+                $d->brand = $s->needle->needle->brand;
+                $d->tipe = $s->needle->needle->tipe;
+                $d->size = $s->needle->needle->size;
+                $d->boxCard = $s->needle->box->rfid;
+                $d->needleId = $s->needle->needle->id;
+            } else {
+                $d->line = '';
+                $d->lineId = '';
+                $d->buyer = '';
+                $d->srf = '';
+                $d->style = '';
+                $d->styleId = '';
+                $d->brand = '';
+                $d->tipe = '';
+                $d->size = '';
+                $d->boxCard = '';
+                $d->needleId = '';
+            }
+            $d->requestDate = date('Y-m-d', strtotime($s->created_at));
+            $d->requestTime = date('H:i:s', strtotime($s->created_at));
+            $d->approvalName = $s->approval->user->name;
+            $d->approvalUsername = $s->approval->user->username;
             $created_at = Carbon::parse($s->created_at);
             if (strlen($created_at->month) == 1) {
                 $month = '0' . $created_at->month;
             } else {
                 $month = $created_at->month;
             }
-            $d->gambar = base64_encode(file_get_contents("assets/uploads/needle/$created_at->year/$month/$s->needle_id/$s->id.$s->ext"));
+            $d->gambar = base64_encode(file_get_contents("assets/uploads/needle/$created_at->year/$month/$s->id.$s->ext"));
             $data[] = $d;
-            // }
         }
 
         return new ApiResource(200, 'success', $data);

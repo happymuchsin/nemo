@@ -15,22 +15,22 @@ class MasterStatusSeeder extends Seeder
     {
         MasterStatus::firstOrCreate([
             'id' => 1,
-            'name' => 'BROKEN',
-            'created_by' => 'developer'
-        ]);
-        MasterStatus::firstOrCreate([
-            'id' => 2,
             'name' => 'DEFORMED',
             'created_by' => 'developer'
         ]);
         MasterStatus::firstOrCreate([
+            'id' => 2,
+            'name' => 'ROUTINE CHANGE',
+            'created_by' => 'developer'
+        ]);
+        MasterStatus::firstOrCreate([
             'id' => 3,
-            'name' => 'ROUTINE NEEDLE EXCHANGE',
+            'name' => 'CHANGE STYLE OR MATERIAL',
             'created_by' => 'developer'
         ]);
         MasterStatus::firstOrCreate([
             'id' => 4,
-            'name' => 'CHANGE STYLE OR MATERIAL',
+            'name' => 'BROKEN MISSING FRAGMENT',
             'created_by' => 'developer'
         ]);
         MasterStatus::firstOrCreate([
@@ -41,21 +41,6 @@ class MasterStatusSeeder extends Seeder
         MasterStatus::firstOrCreate([
             'id' => 6,
             'name' => 'RETURN',
-            'created_by' => 'developer'
-        ]);
-        MasterStatus::firstOrCreate([
-            'id' => 7,
-            'name' => 'REPLACEMENT',
-            'created_by' => 'developer'
-        ]);
-        MasterStatus::firstOrCreate([
-            'id' => 8,
-            'name' => 'RETURN OK',
-            'created_by' => 'developer'
-        ]);
-        MasterStatus::firstOrCreate([
-            'id' => 9,
-            'name' => 'RETURN NG',
             'created_by' => 'developer'
         ]);
     }

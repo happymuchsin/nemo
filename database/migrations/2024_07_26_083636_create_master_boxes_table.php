@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreign('master_counter_id')->references('id')->on('master_counters')->onUpdate('cascade')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->string('rfid')->nullable();
+            $table->string('tipe')->nullable();
+            $table->string('status')->nullable();
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->string('deleted_by')->nullable();

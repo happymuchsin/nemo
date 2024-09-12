@@ -35,7 +35,7 @@ class ApprovalController extends Controller
         $bulan = $request->bulan;
         $tahun = $request->tahun;
         $data = Approval::with(['user', 'needle', 'master_needle', 'master_line', 'master_style'])
-            ->where('approval_id', Auth::user()->id)
+            ->where('master_approval_id', Auth::user()->id)
             ->whereYear('tanggal', $tahun)
             ->when($bulan != 'all', function ($q) use ($bulan) {
                 $q->whereMonth('tanggal', $bulan);
@@ -47,9 +47,9 @@ class ApprovalController extends Controller
             ->editColumn('created_at', function ($q) {
                 return Carbon::parse($q->created_at)->format('Y-m-d H:i:s');
             })
-            ->editColumn('needle_status', function ($q) {
-                return strtoupper($q->needle_status);
-            })
+            // ->editColumn('needle_status', function ($q) {
+            //     return strtoupper($q->needle_status);
+            // })
             ->addColumn('needleBrand', function ($q) {
                 return $q->master_needle->brand;
             })
@@ -69,15 +69,16 @@ class ApprovalController extends Controller
                 return $q->user->username . ' - ' . $q->user->name;
             })
             ->editColumn('tipe', function ($q) {
-                if ($q->tipe == 'request-new') {
-                    return 'REQUEST NEW NEEDLE';
-                } else if ($q->tipe == 'missing-fragment') {
-                    return 'MISSING FRAGMENT';
-                }
+                return strtoupper($q->needle_status);
+                // if ($q->tipe == 'request-new') {
+                //     return 'REQUEST NEW NEEDLE';
+                // } else if ($q->tipe == 'missing-fragment') {
+                //     return 'MISSING FRAGMENT';
+                // }
             })
-            ->editColumn('remark', function ($q) {
-                return strtoupper($q->remark);
-            })
+            // ->editColumn('remark', function ($q) {
+            //     return strtoupper($q->remark);
+            // })
             ->addColumn('gambar', function ($q) {
                 if ($q->tipe == 'request-new') {
                     return '';
@@ -112,8 +113,6 @@ class ApprovalController extends Controller
         try {
             DB::beginTransaction();
 
-            $s = Approval::where('id', $id)->first();
-
             $now = Carbon::now();
             Approval::where('id', $id)->update([
                 'status' => strtoupper($status),
@@ -129,21 +128,6 @@ class ApprovalController extends Controller
                 'updated_by' => Auth::user()->username,
                 'updated_at' => $now,
             ]), $id);
-
-            if ($s->tipe == 'request-new') {
-                Needle::where('user_id', $s->user_id)->where('status', 'new')->update([
-                    'status' => 'return',
-                    'updated_by' => Auth::user()->username,
-                    'updated_at' => $now,
-                ]);
-
-                HelperController::activityLog("UPDATE NEEDLE", 'needles', 'update', $request->ip(), $request->userAgent(), json_encode([
-                    'user_id' => $s->user_id,
-                    'status' => 'return',
-                    'updated_by' => Auth::user()->username,
-                    'updated_at' => $now,
-                ]), $id);
-            }
 
             HelperController::emitEvent('nemo', [
                 'event' => 'nemoReload',

@@ -7,7 +7,6 @@ use App\Http\Controllers\HelperController;
 use App\Models\MasterCounter;
 use App\Models\MasterBox;
 use App\Models\Needle;
-use App\Models\NeedleDetail;
 use App\Models\Stock;
 use Carbon\Carbon;
 use Exception;
@@ -60,7 +59,7 @@ class MasterBoxController extends Controller
         $master_counter_id = $request->master_counter_id;
         $name = strtoupper($request->name);
         $tipe = strtoupper($request->tipe);
-        $status = strtoupper($request->status);
+        // $status = strtoupper($request->status);
         $rfid = $request->rfid;
 
         try {
@@ -76,7 +75,7 @@ class MasterBoxController extends Controller
                         'name' => $name,
                         'rfid' => $rfid,
                         'tipe' => $tipe,
-                        'status' => $status,
+                        // 'status' => $status,
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]);
@@ -85,7 +84,7 @@ class MasterBoxController extends Controller
                         'name' => $name,
                         'rfid' => $rfid,
                         'tipe' => $tipe,
-                        'status' => $status,
+                        // 'status' => $status,
                         'created_by' => Auth::user()->username,
                         'created_at' => Carbon::now(),
                     ]));
@@ -110,7 +109,7 @@ class MasterBoxController extends Controller
                         'name' => $name,
                         'rfid' => $rfid,
                         'tipe' => $tipe,
-                        'status' => $status,
+                        // 'status' => $status,
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]);
@@ -120,7 +119,7 @@ class MasterBoxController extends Controller
                         'name' => $name,
                         'rfid' => $rfid,
                         'tipe' => $tipe,
-                        'status' => $status,
+                        // 'status' => $status,
                         'updated_by' => Auth::user()->username,
                         'updated_at' => Carbon::now(),
                     ]), $id);
@@ -149,13 +148,6 @@ class MasterBoxController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
-            $n = Needle::where('master_box_id', $id)->get();
-            foreach ($n as $n) {
-                NeedleDetail::where('needle_id', $n->id)->update([
-                    'deleted_by' => Auth::user()->username,
-                    'deleted_at' => Carbon::now(),
-                ]);
-            }
             Needle::where('master_box_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),

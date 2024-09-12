@@ -38,5 +38,14 @@ class DatabaseSeeder extends Seeder
             MasterSampleSeeder::class,
             MasterFabricSeeder::class,
         ]);
+
+        if (env('APP_ENV') == 'local') {
+            $this->call([
+                MasterCounterSeeder::class,
+                MasterBoxSeeder::class,
+                MasterStyleSeeder::class,
+                StockSeeder::class,
+            ]);
+        }
     }
 }

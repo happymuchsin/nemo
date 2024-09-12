@@ -24,8 +24,8 @@
                         <th>Style</th>
                         <th>Requestor</th>
                         <th>Request Type</th>
-                        <th>Remark</th>
-                        <th>Fragment</th>
+                        {{-- <th>Remark</th> --}}
+                        {{-- <th>Fragment</th> --}}
                         <th>Image</th>
                         <th>Action</th>
                     </tr>
@@ -96,12 +96,12 @@
                     {
                         data: 'tipe'
                     },
-                    {
-                        data: 'remark'
-                    },
-                    {
-                        data: 'needle_status'
-                    },
+                    // {
+                    //     data: 'remark'
+                    // },
+                    // {
+                    //     data: 'needle_status'
+                    // },
                     {
                         data: 'gambar'
                     },

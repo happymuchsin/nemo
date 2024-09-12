@@ -11,7 +11,7 @@
                         <th>Name</th>
                         <th>RFID</th>
                         <th>Type</th>
-                        <th>Status</th>
+                        {{-- <th>Status</th> --}}
                         <th>Action</th>
                     </tr>
                 </x-slot:thead>
@@ -37,7 +37,7 @@
                     <option value="RETURN">RETURN</option>
                 </x-slot:option>
             </x-modal.body>
-            <x-modal.body :tipe="'select'" :label="'Status'" :id="'status'" />
+            {{-- <x-modal.body :tipe="'select'" :label="'Status'" :id="'status'" /> --}}
         </x-slot:body>
         <x-slot:footer>
             <x-layout.button :class="'btn-primary'" :id="'save'" :onclick="'crup()'" :icon="'fa fa-save'"
@@ -60,25 +60,25 @@
                 dropdownParent: $('#crupModal'),
                 width: '100%',
             });
-            $('#tipe').on('change', function() {
-                $('#status').html('');
-                if ($(this).val() == 'RETURN') {
-                    $('#status').append(`
-                        <option value=""></option>
-                        <option value="OK">OK</option>
-                        <option value="NG">NG</option>
-                    `);
-                } else {
-                    $('#status').append(`
-                        <option value="NEW">NEW</option>
-                    `);
-                }
-            });
-            $('#status').select2({
-                placeholder: "Select Status",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
+            // $('#tipe').on('change', function() {
+            //     $('#status').html('');
+            //     if ($(this).val() == 'RETURN') {
+            //         $('#status').append(`
+        //             <option value=""></option>
+        //             <option value="OK">OK</option>
+        //             <option value="NG">NG</option>
+        //         `);
+            //     } else {
+            //         $('#status').append(`
+        //             <option value="NEW">NEW</option>
+        //         `);
+            //     }
+            // });
+            // $('#status').select2({
+            //     placeholder: "Select Status",
+            //     dropdownParent: $('#crupModal'),
+            //     width: '100%',
+            // });
             table = $('#table').DataTable({
                 dom: '<"toolbar">flrtip',
                 scrollY: screen.height * 0.6,
@@ -99,9 +99,9 @@
                     {
                         data: 'tipe'
                     },
-                    {
-                        data: 'status'
-                    },
+                    // {
+                    //     data: 'status'
+                    // },
                     {
                         data: 'action'
                     },
@@ -130,7 +130,7 @@
             $('#name').val('');
             $('#rfid').val('');
             $('#tipe').val('').trigger('change');
-            $('#status').val('').trigger('change');
+            // $('#status').val('').trigger('change');
             $('#key').val(0);
             $('#crupModal').modal('toggle');
         }
@@ -142,9 +142,11 @@
                 Swal.fire('Warning!', 'Please insert Name', 'warning');
             } else if ($('#tipe').val() == '') {
                 Swal.fire('Warning!', 'Please select Type', 'warning');
-            } else if ($('#status').val() == '') {
-                Swal.fire('Warning!', 'Please select Status', 'warning');
-            } else {
+            }
+            // else if ($('#status').val() == '') {
+            //     Swal.fire('Warning!', 'Please select Status', 'warning');
+            // } 
+            else {
                 $.ajaxSetup({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -159,7 +161,7 @@
                         'name': $('#name').val(),
                         'rfid': $('#rfid').val(),
                         'tipe': $('#tipe').val(),
-                        'status': $('#status').val(),
+                        // 'status': $('#status').val(),
                     },
                     beforeSend: function() {
                         Swal.fire({
@@ -218,7 +220,7 @@
                     $('#name').val(response.name);
                     $('#rfid').val(response.rfid);
                     $('#tipe').val(response.tipe).trigger('change');
-                    $('#status').val(response.status).trigger('change');
+                    // $('#status').val(response.status).trigger('change');
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');
                 });

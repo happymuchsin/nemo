@@ -37,4 +37,9 @@ class Approval extends Model
     {
         return $this->belongsTo(MasterStyle::class, 'master_style_id', 'id');
     }
+
+    public function approval()
+    {
+        return $this->belongsTo(MasterApproval::class, 'master_approval_id', 'id');
+    }
 }

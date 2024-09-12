@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\MasterNeedle;
 use App\Models\Needle;
-use App\Models\NeedleDetail;
 use App\Models\Stock;
 use Carbon\Carbon;
 use Exception;
@@ -148,13 +147,6 @@ class MasterNeedleController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
-            $n = Needle::where('master_needle_id', $id)->get();
-            foreach ($n as $n) {
-                NeedleDetail::where('needle_id', $n->id)->update([
-                    'deleted_by' => Auth::user()->username,
-                    'deleted_at' => Carbon::now(),
-                ]);
-            }
             Needle::where('master_needle_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),

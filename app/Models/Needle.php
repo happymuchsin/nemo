@@ -29,6 +29,10 @@ class Needle extends Model
     {
         return $this->belongsTo(MasterNeedle::class, 'master_needle_id', 'id');
     }
+    public function master_status()
+    {
+        return $this->belongsTo(MasterStatus::class, 'master_status_id', 'id');
+    }
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');

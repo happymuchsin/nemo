@@ -79,9 +79,11 @@
             </div>
             <!-- /.login-card-body -->
         </div>
-        <div class="login-logo">
-            <img src="{{ asset('assets/img/anggun.png') }}" height="80">
-        </div>
+        @if (env('APP_ENV') != 'local')
+            <div class="login-logo">
+                <img src="{{ asset('assets/img/anggun.png') }}" height="80">
+            </div>
+        @endif
     </div>
     <!-- /.login-box -->
 

@@ -37,7 +37,11 @@ class MasterPlacementController extends Controller
 
     public function data(Request $request)
     {
-        $data = User::with(['division', 'position'])->where('name', '!=', 'developer')->get();
+        $data = User::with(['division', 'position'])
+            ->when(env('APP_ENV') != 'local', function ($q) {
+                $q->where('name', '!=', 'developer');
+            })
+            ->get();
         return datatables()->of($data)
             ->addColumn('lokasi', function ($q) {
                 $s = MasterPlacement::where('user_id', $q->id)->first();

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CardController;
 use App\Http\Controllers\Api\ChangeNeedleController;
 use App\Http\Controllers\Api\NeedleController;
 use App\Http\Controllers\Api\SpinnerController;
+use App\Http\Controllers\Api\StyleController;
 use App\Http\Controllers\Api\VersionController;
 use App\Http\Resources\ApiResource;
 use Illuminate\Http\Request;
@@ -42,6 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('spinner', [SpinnerController::class, 'spinner']);
+
+    Route::prefix('/style')->group(function () {
+        Route::post('get', [StyleController::class, 'get']);
+    });
 
     Route::prefix('/needle')->group(function () {
         Route::post('save', [NeedleController::class, 'save']);

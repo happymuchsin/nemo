@@ -4,14 +4,12 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
+use App\Models\Approval;
 use App\Models\MasterCounter;
 use App\Models\MasterLine;
-use App\Models\MasterStatus;
 use App\Models\Needle;
-use App\Models\NeedleDetail;
 use App\Models\Stock;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use stdClass;
 
@@ -44,18 +42,17 @@ class NeedleReportController extends Controller
         if ($id == 'needle_report_exchange') {
             $filter_date = $request->filter_date;
             $filter_line = $request->filter_line;
-            $data = NeedleDetail::join('needles as n', 'n.id', 'needle_details.needle_id')
-                ->join('master_statuses as ms', 'ms.id', 'needle_details.master_status_id')
-                ->join('users as u', 'u.id', 'n.user_id')
-                ->join('master_lines as ml', 'ml.id', 'n.master_line_id')
-                ->join('master_needles as mn', 'mn.id', 'n.master_needle_id')
-                ->selectRaw('needle_details.created_at as created_at, ml.name as line, u.username as username, u.name as name, mn.brand as brand, mn.tipe as tipe, mn.size as size, ms.name as remark, needle_details.filename as filename, needle_details.ext as ext, needle_details.needle_id as needle_id, needle_details.id as id')
-                ->whereDate('needle_details.created_at', $filter_date)
-                ->whereIn('needle_details.master_status_id', [1, 2, 3, 4])
+            $data = Needle::join('master_statuses as ms', 'ms.id', 'needles.master_status_id')
+                ->join('users as u', 'u.id', 'needles.user_id')
+                ->join('master_lines as ml', 'ml.id', 'needles.master_line_id')
+                ->join('master_needles as mn', 'mn.id', 'needles.master_needle_id')
+                ->selectRaw('needles.created_at as created_at, ml.name as line, u.username as username, u.name as name, mn.brand as brand, mn.tipe as tipe, mn.size as size, ms.name as remark, needles.filename as filename, needles.ext as ext, needles.id as id, needles.user_id as user_id, master_line_id, master_style_id')
+                ->whereDate('needles.created_at', $filter_date)
+                ->whereIn('needles.master_status_id', [1, 2, 3, 4])
                 ->when($filter_line != 'all', function ($q) use ($filter_line) {
                     $q->where('ml.id', $filter_line);
                 })
-                ->orderBy('needle_details.created_at')
+                ->orderBy('needles.created_at')
                 ->get();
             return datatables()->of($data)
                 ->addColumn('time', function ($q) {
@@ -73,9 +70,19 @@ class NeedleReportController extends Controller
                     }
                     $h = '';
                     if ($q->filename) {
-                        $gambar = asset("assets/uploads/needle/$c->year/$month/$q->needle_id/$q->id.$q->ext");
+                        $gambar = asset("assets/uploads/needle/$c->year/$month/$q->id.$q->ext");
                     } else {
-                        $gambar = asset('assets/img/altgambar.jpeg');
+                        $a = Approval::where('needle_id', $q->id)->first();
+                        if ($a) {
+                            $gambar = asset("assets/uploads/needle/$c->year/$month/$a->id.$a->ext");
+                        } else {
+                            $aa = Approval::where('user_id', $q->user_id)->where('master_line_id', $q->master_line_id)->where('master_style_id', $q->master_style_id)->where('tanggal', date('Y-m-d', strtotime($q->created_at)))->first();
+                            if ($aa) {
+                                $gambar = asset("assets/uploads/needle/$c->year/$month/$aa->id.$aa->ext");
+                            } else {
+                                $gambar = asset('assets/img/altgambar.jpeg');
+                            }
+                        }
                     }
                     $h .= '<a href="#" onclick="poto(\'' . $gambar . '\')"><img src="' . $gambar . '" width="75px" /></a>';
                     return $h;

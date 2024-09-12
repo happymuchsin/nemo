@@ -11,7 +11,6 @@ use App\Models\MasterSample;
 use App\Models\MasterStyle;
 use App\Models\MasterSubCategory;
 use App\Models\Needle;
-use App\Models\NeedleDetail;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -476,6 +475,11 @@ class MasterStyleController extends Controller
             DB::beginTransaction();
 
             if ($id == 0) {
+                $s = MasterStyle::where('srf', $srf)->first();
+                if ($s) {
+                    DB::rollBack();
+                    return response()->json('SRF already used', 200);
+                }
                 MasterStyle::create([
                     'master_buyer_id' => $master_buyer_id,
                     'master_category_id' => $master_category_id,
@@ -505,33 +509,50 @@ class MasterStyleController extends Controller
                     'created_at' => Carbon::now(),
                 ]));
             } else {
-                MasterStyle::where('id', $id)->update([
-                    'master_buyer_id' => $master_buyer_id,
-                    'master_sub_category_id' => $master_sub_category_id,
-                    'master_sample_id' => $master_sample_id,
-                    'master_fabric_id' => $master_fabric_id,
-                    'srf' => $srf,
-                    'season' => $season,
-                    'name' => $name,
-                    'start' => $start,
-                    'end' => $end,
-                    'updated_by' => Auth::user()->username,
-                    'updated_at' => Carbon::now(),
-                ]);
-                HelperController::activityLog("UPDATE MASTER STYLE", 'master_styles', 'update', $request->ip(), $request->userAgent(), json_encode([
-                    'id' => $id,
-                    'master_buyer_id' => $master_buyer_id,
-                    'master_sub_category_id' => $master_sub_category_id,
-                    'master_sample_id' => $master_sample_id,
-                    'master_fabric_id' => $master_fabric_id,
-                    'srf' => $srf,
-                    'season' => $season,
-                    'name' => $name,
-                    'start' => $start,
-                    'end' => $end,
-                    'updated_by' => Auth::user()->username,
-                    'updated_at' => Carbon::now(),
-                ]), $id);
+                $n = 0;
+                $s = MasterStyle::where('id', $id)->first();
+                if ($s) {
+                    if ($s->srf == $srf) {
+                        $n = 1;
+                    } else {
+                        $x = MasterStyle::where('srf', $srf)->first();
+                        if ($x) {
+                            DB::rollBack();
+                            return response()->json('SRF already used', 200);
+                        } else {
+                            $n = 1;
+                        }
+                    }
+                }
+                if ($n == 1) {
+                    MasterStyle::where('id', $id)->update([
+                        'master_buyer_id' => $master_buyer_id,
+                        'master_sub_category_id' => $master_sub_category_id,
+                        'master_sample_id' => $master_sample_id,
+                        'master_fabric_id' => $master_fabric_id,
+                        'srf' => $srf,
+                        'season' => $season,
+                        'name' => $name,
+                        'start' => $start,
+                        'end' => $end,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]);
+                    HelperController::activityLog("UPDATE MASTER STYLE", 'master_styles', 'update', $request->ip(), $request->userAgent(), json_encode([
+                        'id' => $id,
+                        'master_buyer_id' => $master_buyer_id,
+                        'master_sub_category_id' => $master_sub_category_id,
+                        'master_sample_id' => $master_sample_id,
+                        'master_fabric_id' => $master_fabric_id,
+                        'srf' => $srf,
+                        'season' => $season,
+                        'name' => $name,
+                        'start' => $start,
+                        'end' => $end,
+                        'updated_by' => Auth::user()->username,
+                        'updated_at' => Carbon::now(),
+                    ]), $id);
+                }
             }
 
             DB::commit();
@@ -563,13 +584,6 @@ class MasterStyleController extends Controller
     {
         try {
             DB::beginTransaction();
-            $n = Needle::where('master_style_id', $id)->get();
-            foreach ($n as $n) {
-                NeedleDetail::where('needle_id', $n->id)->update([
-                    'deleted_by' => Auth::user()->username,
-                    'deleted_at' => Carbon::now(),
-                ]);
-            }
             Needle::where('master_style_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
