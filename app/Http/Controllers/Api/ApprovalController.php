@@ -22,11 +22,11 @@ class ApprovalController extends Controller
 
         $data = [];
         $s = Approval::with(['user', 'needle' => function ($q) {
-            $q->with(['line', 'style' => function ($q1) {
-                $q1->with(['buyer']);
-            }, 'box', 'needle']);
+            $q->with(['box', 'needle']);
         }, 'approval' => function ($q) {
             $q->with(['user']);
+        }, 'master_line', 'master_style' => function ($q) {
+            $q->with(['buyer']);
         }])
             ->where('master_area_id', $area_id)
             ->where('master_counter_id', $lokasi_id)
@@ -39,30 +39,24 @@ class ApprovalController extends Controller
             $d->name = $s->user->name;
             $d->status = $s->status;
             $d->idCard = $s->user->rfid;
+            $d->line = $s->master_line->name;
+            $d->lineId = $s->master_line->id;
+            $d->buyer = $s->master_style->buyer->name;
+            $d->srf = $s->master_style->srf;
+            $d->style = $s->master_style->name;
+            $d->styleId = $s->master_style->id;
             if ($s->needle) {
-                $d->line = $s->needle->line->name;
-                $d->lineId = $s->needle->line->id;
-                $d->buyer = $s->needle->style->buyer->name;
-                $d->srf = $s->needle->style->srf;
-                $d->style = $s->needle->style->name;
-                $d->styleId = $s->needle->style->id;
                 $d->brand = $s->needle->needle->brand;
                 $d->tipe = $s->needle->needle->tipe;
                 $d->size = $s->needle->needle->size;
                 $d->boxCard = $s->needle->box->rfid;
                 $d->needleId = $s->needle->needle->id;
             } else {
-                $d->line = '';
-                $d->lineId = '';
-                $d->buyer = '';
-                $d->srf = '';
-                $d->style = '';
-                $d->styleId = '';
                 $d->brand = '';
                 $d->tipe = '';
                 $d->size = '';
                 $d->boxCard = '';
-                $d->needleId = '';
+                $d->needleId = 0;
             }
             $d->requestDate = date('Y-m-d', strtotime($s->created_at));
             $d->requestTime = date('H:i:s', strtotime($s->created_at));
