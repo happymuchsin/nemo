@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\Approval;
+use App\Models\MasterApproval;
 use App\Models\Needle;
 use Carbon\Carbon;
 use Exception;
@@ -34,8 +35,16 @@ class ApprovalController extends Controller
     {
         $bulan = $request->bulan;
         $tahun = $request->tahun;
+
+        $master_approval = MasterApproval::where('user_id', Auth::user()->id)->first();
+        if ($master_approval) {
+            $master_approval_id = $master_approval->id;
+        } else {
+            $master_approval_id = null;
+        }
+
         $data = Approval::with(['user', 'needle', 'master_needle', 'master_line', 'master_style'])
-            ->where('master_approval_id', Auth::user()->id)
+            ->where('master_approval_id', $master_approval_id)
             ->whereYear('tanggal', $tahun)
             ->when($bulan != 'all', function ($q) use ($bulan) {
                 $q->whereMonth('tanggal', $bulan);
@@ -51,13 +60,13 @@ class ApprovalController extends Controller
             //     return strtoupper($q->needle_status);
             // })
             ->addColumn('needleBrand', function ($q) {
-                return $q->master_needle->brand;
+                return $q->master_needle ? $q->master_needle->brand : '';
             })
             ->addColumn('needleTipe', function ($q) {
-                return $q->master_needle->tipe;
+                return $q->master_needle ? $q->master_needle->tipe : '';
             })
             ->addColumn('needleSize', function ($q) {
-                return $q->master_needle->size;
+                return $q->master_needle ? $q->master_needle->size : '';
             })
             ->addColumn('line', function ($q) {
                 return $q->master_line->name;
