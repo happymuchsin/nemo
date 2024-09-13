@@ -54,7 +54,7 @@ class SpinnerController extends Controller
             }
             foreach ($s as $s) {
                 $d = new stdClass;
-                $d->id = $s->user_id;
+                $d->id = $s->id;
                 $d->name = $s->user->username . ' - ' . $s->user->name;
                 $data[] = $d;
             }
