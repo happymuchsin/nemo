@@ -97,19 +97,25 @@ class CardController extends Controller
                             $stat = MasterStatus::where('name', 'BROKEN MISSING FRAGMENT')->first();
 
                             if ($s->master_needle_id) {
-                                $in = Stock::where('master_box_id', $b->id)->where('master_needle_id', $s->master_needle_id)->where('is_clear', 'not')->sum('in');
-                                $out = Stock::where('master_box_id', $b->id)->where('master_needle_id', $s->master_needle_id)->where('is_clear', 'not')->sum('out');
+                                $master_needle_id = $s->master_needle_id;
+                                $in = Stock::where('master_box_id', $b->id)->where('master_needle_id', $master_needle_id)->where('is_clear', 'not')->sum('in');
+                                $out = Stock::where('master_box_id', $b->id)->where('master_needle_id', $master_needle_id)->where('is_clear', 'not')->sum('out');
 
                                 if ($in <= $out) {
                                     return new ApiResource(422, 'Stock in Box is empty !!!', '');
                                 }
+
+                                $stock = Stock::where('master_box_id', $b->id)->where('master_needle_id', $master_needle_id)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
                             } else {
+                                $master_needle_id = null;
                                 $in = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('in');
                                 $out = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('out');
 
                                 if ($in <= $out) {
                                     return new ApiResource(422, 'Stock in Box is empty !!!', '');
                                 }
+
+                                $stock = Stock::where('master_box_id', $b->id)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
                             }
 
                             Needle::create([
@@ -117,7 +123,7 @@ class CardController extends Controller
                                 'master_line_id' => $s->master_line_id,
                                 'master_style_id' => $s->master_style_id,
                                 'master_box_id' => $b->id,
-                                'master_needle_id' => $s->master_needle_id,
+                                'master_needle_id' => $master_needle_id,
                                 'master_status_id' => $stat->id,
                                 'status' => '',
                                 'remark' => '',
@@ -129,15 +135,13 @@ class CardController extends Controller
                                 'master_line_id' => $s->master_line_id,
                                 'master_style_id' => $s->master_style_id,
                                 'master_box_id' => $b->id,
-                                'master_needle_id' => $s->master_needle_id,
+                                'master_needle_id' => $master_needle_id,
                                 'master_status_id' => $stat->id,
                                 'status' => '',
                                 'remark' => '',
                                 'created_by' => $username,
                                 'created_at' => $now,
                             ]), null, $username);
-
-                            $stock = Stock::where('master_box_id', $b->id)->where('master_needle_id', $s->master_needle_id)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
 
                             Stock::where('id', $stock->id)->update([
                                 'out' => DB::raw("`out` + 1"),
