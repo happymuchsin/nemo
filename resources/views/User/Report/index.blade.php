@@ -119,7 +119,7 @@
         function setTable(id) {
             if ($.fn.DataTable.isDataTable("#table")) {
                 $('#table').html('');
-                table.destroy();
+                $('#table').DataTable().clear().destroy();
             }
             $('#tableHead').html('');
             if (id == 'report_daily') {
@@ -190,7 +190,7 @@
                         order: [],
                         paging: false,
                     });
-                }, 250);
+                }, 500);
             } else if (id == 'report_weekly') {
                 setTimeout(() => {
                     $('#tableHead').html(`
@@ -268,7 +268,7 @@
                             }
                         }
                     });
-                }, 250);
+                }, 500);
             } else if (id == 'report_monthly') {
                 setTimeout(() => {
                     $('#tableHead').html(`
@@ -346,7 +346,7 @@
                             }
                         }
                     });
-                }, 250);
+                }, 500);
             } else if (id == 'report_quarterly') {
                 setTimeout(() => {
                     $('#tableHead').html(`
@@ -426,7 +426,7 @@
                             }
                         }
                     });
-                }, 250);
+                }, 500);
             } else if (id == 'report_half') {
                 setTimeout(() => {
                     $('#tableHead').html(`
@@ -506,7 +506,7 @@
                             }
                         }
                     });
-                }, 250);
+                }, 500);
             } else if (id == 'report_yearly') {
                 setTimeout(() => {
                     $('#tableHead').html(`
@@ -584,7 +584,7 @@
                             }
                         }
                     });
-                }, 250);
+                }, 500);
             }
         }
 
