@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResource;
 use App\Models\MasterApproval;
+use App\Models\MasterArea;
 use App\Models\MasterBuyer;
 use App\Models\MasterLine;
 use App\Models\MasterNeedle;
@@ -22,16 +23,50 @@ class SpinnerController extends Controller
         $area_id = $request->area_id;
         $tipe = $request->tipe;
         $x = $request->x;
+        $master_area = MasterArea::where('name', 'SAMPLE ROOM')->first();
         if ($tipe == 'line') {
             $data = MasterLine::selectRaw('id, name')->where('master_area_id', $area_id)->get();
         } else if ($tipe == 'buyer') {
-            $data = MasterBuyer::selectRaw('id, name')->get();
-        } else if ($tipe == 'style') {
+            $data = MasterBuyer::join('master_styles as ms', 'ms.master_buyer_id', 'master_buyers.id')
+                ->join('needles as n', 'n.master_style_id', 'ms.id')
+                ->join('master_lines as ml', 'ml.id', 'n.master_line_id')
+                ->selectRaw('master_buyers.id as id, master_buyers.name as name')
+                ->where('master_area_id', $master_area->id)
+                ->groupBy('name')
+                ->get();
+        } else if ($tipe == 'season') {
             $data = [];
-            $ms = MasterStyle::where('master_buyer_id', $x)->groupBy('name')->get();
+            // $ms = MasterStyle::where('master_buyer_id', $x)->groupBy('season')->get();
+            $ms = MasterBuyer::join('master_styles as ms', 'ms.master_buyer_id', 'master_buyers.id')
+                ->join('needles as n', 'n.master_style_id', 'ms.id')
+                ->join('master_lines as ml', 'ml.id', 'n.master_line_id')
+                ->selectRaw('ms.season as season')
+                ->where('master_area_id', $master_area->id)
+                ->where('master_buyer_id', $x)
+                ->groupBy('season')
+                ->get();
             foreach ($ms as $ms) {
                 $d = new stdClass;
-                $d->id = $ms->name;
+                $d->id = $ms->season;
+                $d->name = $ms->season;
+                $data[] = $d;
+            }
+        } else if ($tipe == 'style') {
+            $data = [];
+            $master_buyer_id = $request->master_buyer_id;
+            // $ms = MasterStyle::where('master_buyer_id', $master_buyer_id)->where('season', $x)->groupBy('name')->get();
+            $ms = MasterBuyer::join('master_styles as ms', 'ms.master_buyer_id', 'master_buyers.id')
+                ->join('needles as n', 'n.master_style_id', 'ms.id')
+                ->join('master_lines as ml', 'ml.id', 'n.master_line_id')
+                ->selectRaw('ms.id as id, ms.name as name')
+                ->where('master_area_id', $master_area->id)
+                ->where('master_buyer_id', $master_buyer_id)
+                ->where('season', $x)
+                ->groupBy('name')
+                ->get();
+            foreach ($ms as $ms) {
+                $d = new stdClass;
+                $d->id = $ms->id;
                 $d->name = $ms->name;
                 $data[] = $d;
             }

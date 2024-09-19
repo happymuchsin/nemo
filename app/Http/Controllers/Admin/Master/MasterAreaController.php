@@ -41,10 +41,12 @@ class MasterAreaController extends Controller
         $data = MasterArea::get();
         return datatables()->of($data)
             ->addColumn('action', function ($q) {
-                return view('includes.admin.action', [
-                    'edit' => route('admin.master.area.edit', ['id' => $q->id]),
-                    'hapus' => route('admin.master.area.hapus', ['id' => $q->id]),
-                ]);
+                if ($q->name != 'SAMPLE ROOM') {
+                    return view('includes.admin.action', [
+                        'edit' => route('admin.master.area.edit', ['id' => $q->id]),
+                        'hapus' => route('admin.master.area.hapus', ['id' => $q->id]),
+                    ]);
+                }
             })
             ->make(true);
     }
@@ -121,6 +123,10 @@ class MasterAreaController extends Controller
     public function hapus(Request $request, $id)
     {
         try {
+            $a = MasterArea::where('id', $id)->first();
+            if ($a->name == 'SAMPLE ROOM') {
+                return response()->json('SAMPLE ROOM CANNOT DELETED', 422);
+            }
             DB::beginTransaction();
             $s = MasterLine::where('master_area_id', $id)->get();
             foreach ($s as $s) {

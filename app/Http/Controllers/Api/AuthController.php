@@ -104,6 +104,8 @@ class AuthController extends Controller
                     } else {
                         return new ApiResource(422, 'Placement not found', '');
                     }
+                } else {
+                    return new ApiResource(422, 'Wrong Password', '');
                 }
             } else {
                 return new ApiResource(422, 'User not found', '');
