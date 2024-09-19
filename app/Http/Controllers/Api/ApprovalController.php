@@ -38,37 +38,11 @@ class ApprovalController extends Controller
             $d->username = $s->user->username;
             $d->name = $s->user->name;
             $d->status = $s->status;
-            $d->idCard = $s->user->rfid;
             $d->line = $s->master_line->name;
-            $d->lineId = $s->master_line->id;
-            $d->buyer = $s->master_style->buyer->name;
-            $d->srf = $s->master_style->srf;
-            $d->style = $s->master_style->name;
-            $d->styleId = $s->master_style->id;
-            if ($s->needle) {
-                $d->brand = $s->needle->needle->brand;
-                $d->tipe = $s->needle->needle->tipe;
-                $d->size = $s->needle->needle->size;
-                $d->boxCard = $s->needle->box->rfid;
-                $d->needleId = $s->needle->needle->id;
-            } else {
-                $d->brand = '';
-                $d->tipe = '';
-                $d->size = '';
-                $d->boxCard = '';
-                $d->needleId = 0;
-            }
             $d->requestDate = date('Y-m-d', strtotime($s->created_at));
             $d->requestTime = date('H:i:s', strtotime($s->created_at));
             $d->approvalName = $s->approval->user->name;
             $d->approvalUsername = $s->approval->user->username;
-            $created_at = Carbon::parse($s->created_at);
-            if (strlen($created_at->month) == 1) {
-                $month = '0' . $created_at->month;
-            } else {
-                $month = $created_at->month;
-            }
-            $d->gambar = base64_encode(file_get_contents("assets/uploads/needle/$created_at->year/$month/$s->id.$s->ext"));
             $data[] = $d;
         }
 
