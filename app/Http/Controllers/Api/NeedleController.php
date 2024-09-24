@@ -51,20 +51,22 @@ class NeedleController extends Controller
 
         try {
             $user = User::with(['division', 'position'])->where('rfid', $idCard)->first();
+            if (!$user) {
+                return new ApiResource(422, 'User not found', '');
+            }
             $master_placement = MasterPlacement::where('user_id', $user->id)->first();
-            $line = MasterLine::where('id', $master_placement->location_id)->first()->id;
+            if (!$master_placement) {
+                return new ApiResource(422, 'Master Placement not found', '');
+            }
+            $master_line = MasterLine::where('id', $master_placement->location_id)->first();
+            if (!$master_line) {
+                return new ApiResource(422, 'Master Line not found', '');
+            }
+            $line = $master_line->id;
+            $lokasi = $master_line->name;
             if ($condition == 'Missing Fragment') {
                 if ($reff == 'line') {
                     return new ApiResource(422, 'Area Line cannot request !!!', '');
-                }
-
-                $mp = MasterPlacement::where('user_id', $user->id)->first();
-                if ($mp->reff == 'line') {
-                    $s = MasterLine::where('id', $mp->location_id)->first();
-                    $lokasi = $s->name;
-                } else if ($mp->reff == 'counter') {
-                    $s = MasterCounter::where('id', $mp->location_id)->first();
-                    $lokasi = $s->name;
                 }
 
                 $ne = Needle::with(['needle'])->where('user_id', $user->id)->orderBy('created_at', 'desc')->first();
