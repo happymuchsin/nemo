@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\ListApp;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
@@ -12,6 +13,20 @@ use stdClass;
 
 class HelperController extends Controller
 {
+    static function version()
+    {
+        $listApp = ListApp::where('app', 'nemo')->orderByRaw("CAST(SUBSTRING_INDEX(version, '.', 1) AS UNSIGNED) DESC,
+                CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(version, '.', -2), '.', 1) AS UNSIGNED) DESC,
+                CAST(SUBSTRING_INDEX(version, '.', -1) AS UNSIGNED) DESC")->first();
+
+        if ($listApp) {
+            $version = $listApp->version;
+        } else {
+            $version = '1.0.0';
+        }
+        return $version;
+    }
+
     static function emitEvent($event, $data)
     {
         $client = new Client();
