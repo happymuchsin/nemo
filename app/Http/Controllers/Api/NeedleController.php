@@ -157,6 +157,14 @@ class NeedleController extends Controller
                 $box = MasterBox::where('rfid', $boxCard)->first();
                 $stat = MasterStatus::where('name', $status)->first();
 
+                if (!$box) {
+                    return new ApiResource(422, 'Box not found', '');
+                }
+
+                if (!$stat) {
+                    return new ApiResource(422, 'Master Status not found', '');
+                }
+
                 DB::beginTransaction();
 
                 $in = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->where('is_clear', 'not')->sum('in');
@@ -198,6 +206,10 @@ class NeedleController extends Controller
                 $needle_id = $ins->id;
 
                 $stock = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
+
+                if (!$stock) {
+                    return new ApiResource(422, 'Stock not found', '');
+                }
 
                 Stock::where('id', $stock->id)->update([
                     'out' => DB::raw("`out` + 1"),
