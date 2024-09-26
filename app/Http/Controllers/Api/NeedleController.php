@@ -72,7 +72,11 @@ class NeedleController extends Controller
                 $ne = Needle::with(['needle'])->where('user_id', $user->id)->orderBy('created_at', 'desc')->first();
                 if ($ne) {
                     $needle_id = $ne->id;
-                    $master_needle_id = $ne->needle->id;
+                    if ($ne->needle) {
+                        $master_needle_id = $ne->needle->id;
+                    } else {
+                        $master_needle_id = null;
+                    }
                 } else {
                     $needle_id = null;
                     $master_needle_id = null;
