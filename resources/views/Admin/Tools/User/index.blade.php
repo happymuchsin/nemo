@@ -278,7 +278,53 @@
                 });
         }
 
-        function hapus(url) {
+        function check(url) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                url: url,
+                type: "GET",
+                beforeSend: function() {
+                    Swal.fire({
+                        iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
+                        title: 'Please Wait',
+                        html: 'Fetching your data..',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                    });
+                    Swal.showLoading();
+                },
+                complete: function() {
+                    // Swal.close();
+                },
+                success: function(response) {
+                    if (response.tipe == 'not') {
+                        hapus(response.id);
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: response.message,
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes',
+                            confirmButtonColor: '#dc3545'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                hapus(response.id);
+                            }
+                        })
+                    }
+                },
+                error: function(response) {
+                    Swal.fire('Warning!', response.responseText, 'warning');
+                }
+            })
+
+        }
+
+        function hapus(id) {
             Swal.fire({
                 icon: 'question',
                 title: 'Are you sure want to permanent Delete this Data?',
@@ -293,8 +339,11 @@
                         }
                     });
                     $.ajax({
-                        url: url,
-                        type: "GET",
+                        url: "{{ route('admin.tools.user.hapus') }}",
+                        type: "POST",
+                        data: {
+                            'id': id,
+                        },
                         beforeSend: function() {
                             Swal.fire({
                                 iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',

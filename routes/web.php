@@ -402,7 +402,9 @@ Route::group(['middleware' => ['auth']], function () {
                                 ->name('admin.tools.user.crup');
                             Route::get('/edit/{id?}', [ToolsUserController::class, 'edit'])
                                 ->name('admin.tools.user.edit');
-                            Route::get('/hapus/{id?}', [ToolsUserController::class, 'hapus'])
+                            Route::get('/check/{id?}', [ToolsUserController::class, 'check'])
+                                ->name('admin.tools.user.check');
+                            Route::post('/hapus', [ToolsUserController::class, 'hapus'])
                                 ->name('admin.tools.user.hapus');
                             Route::get('/detail/{id?}/{username?}', [ToolsUserController::class, 'detail'])
                                 ->name('admin.tools.user.detail');

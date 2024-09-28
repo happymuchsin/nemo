@@ -100,7 +100,7 @@ class ApprovalController extends Controller
                 }
                 $h = '';
                 if ($q->filename) {
-                    $gambar = asset("assets/uploads/needle/$c->year/$month/$q->needle_id/$q->id.$q->ext");
+                    $gambar = asset("assets/uploads/needle/$c->year/$month/$q->id.$q->ext");
                 } else {
                     $gambar = asset('assets/img/altgambar.jpeg');
                 }

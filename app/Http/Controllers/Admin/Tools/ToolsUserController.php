@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin\Tools;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
+use App\Models\Approval;
 use App\Models\MasterDivision;
 use App\Models\MasterPosition;
+use App\Models\Needle;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -77,7 +79,7 @@ class ToolsUserController extends Controller
                 return view('includes.admin.action', [
                     'detail' => route('admin.tools.user.detail', ['id' => $q->id, 'username' => $q->username]),
                     'edit' => route('admin.tools.user.edit', ['id' => $q->id]),
-                    'hapus' => route('admin.tools.user.hapus', ['id' => $q->id]),
+                    'check' => route('admin.tools.user.check', ['id' => $q->id]),
                 ]);
             })
             ->make(true);
@@ -190,16 +192,80 @@ class ToolsUserController extends Controller
         return response()->json($s, 200);
     }
 
-    public function hapus(Request $request, $id)
+    public function check(Request $request, $id)
     {
+        $a = Approval::where('user_id', $id)->where('status', 'WAITING')->first();
+        if ($a) {
+            return response()->json(['tipe' => 'yes', 'message' => 'User has pending Approval, Are you sure want to Delete?', 'id' => $id], 200);
+        } else {
+            return response()->json(['tipe' => 'not', 'message' => '', 'id' => $id], 200);
+        }
+    }
+
+    public function hapus(Request $request)
+    {
+        $id = $request->id;
         $u = User::where('id', $id)->first();
         if ($u->username == 'developer') {
             return response()->json('DEVELOPER CANNOT DELETED', 422);
         }
-        User::where('id', $id)->update([
-            'deleted_at' => Carbon::now(),
+
+        $username = Auth::user()->username;
+        $now = Carbon::now();
+
+        $a = Approval::where('user_id', $id)->get();
+        foreach ($a as $a) {
+            $c = Carbon::parse($a->tanggal);
+            if (strlen($c->month) == 1) {
+                $month = '0' . $c->month;
+            } else {
+                $month = $c->month;
+            }
+            if ($a->filename) {
+                if (file_exists($file = public_path("assets/uploads/needle/$c->year/$month/$a->id.$a->ext")))
+                    unlink($file);
+            }
+        }
+        Approval::where('user_id', $id)->update([
+            'deleted_at' => $now,
+            'deleted_by' => $username,
         ]);
-        HelperController::activityLog("DELETE USER", 'users', 'delete', $request->ip(), $request->userAgent(), null, $id);
+        HelperController::activityLog("DELETE APPROVAL", 'approvals', 'delete', $request->ip(), $request->userAgent(), json_encode([
+            'user_id' => $id,
+            'deleted_at' => $now,
+            'deleted_by' => $username,
+        ]), $id);
+        $n = Needle::where('user_id', $id)->get();
+        foreach ($n as $n) {
+            $c = Carbon::parse($n->created_at);
+            if (strlen($c->month) == 1) {
+                $month = '0' . $c->month;
+            } else {
+                $month = $c->month;
+            }
+            if ($n->filename) {
+                if (file_exists($file = public_path("assets/uploads/needle/$c->year/$month/$n->id.$n->ext")))
+                    unlink($file);
+            }
+        }
+        Needle::where('user_id', $id)->update([
+            'deleted_at' => $now,
+            'deleted_by' => $username,
+        ]);
+        HelperController::activityLog("DELETE NEEDLE", 'needles', 'delete', $request->ip(), $request->userAgent(), json_encode([
+            'user_id' => $id,
+            'deleted_at' => $now,
+            'deleted_by' => $username,
+        ]), $id);
+        User::where('id', $id)->update([
+            'deleted_at' => $now,
+            'deleted_by' => $username,
+        ]);
+        HelperController::activityLog("DELETE USER", 'users', 'delete', $request->ip(), $request->userAgent(), json_encode([
+            'id' => $id,
+            'deleted_at' => $now,
+            'deleted_by' => $username,
+        ]), $id);
 
         return response()->json('Delete Success', 200);
     }

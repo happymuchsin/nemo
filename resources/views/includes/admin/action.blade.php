@@ -34,6 +34,12 @@
     </a>
 @endif
 
+@if (isset($check))
+    <a href="#" class="text-center" title="Delete" onclick="check('{!! $check !!}')">
+        <i class="fa fa-trash-alt text-danger mr-3"></i>
+    </a>
+@endif
+
 @if (isset($hapus))
     <a href="#" class="text-center" title="Delete" onclick="hapus('{!! $hapus !!}')">
         <i class="fa fa-trash-alt text-danger mr-3"></i>

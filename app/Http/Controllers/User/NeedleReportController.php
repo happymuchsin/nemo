@@ -52,6 +52,10 @@ class NeedleReportController extends Controller
                 ->when($filter_line != 'all', function ($q) use ($filter_line) {
                     $q->where('ml.id', $filter_line);
                 })
+                ->whereNull('ms.deleted_at')
+                ->whereNull('u.deleted_at')
+                ->whereNull('ml.deleted_at')
+                ->whereNull('mn.deleted_at')
                 ->orderBy('needles.created_at')
                 ->get();
             return datatables()->of($data)
