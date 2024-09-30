@@ -93,13 +93,13 @@ class ReportController extends Controller
                     return $q->user->username . ' - ' . $q->user->name;
                 })
                 ->addColumn('brand', function ($q) {
-                    return $q->needle->brand;
+                    return $q->needle ? $q->needle->brand : '';
                 })
                 ->addColumn('tipe', function ($q) {
-                    return $q->needle->tipe;
+                    return $q->needle ? $q->needle->tipe : '';
                 })
                 ->addColumn('size', function ($q) {
-                    return $q->needle->size;
+                    return $q->needle ? $q->needle->size : '';
                 })
                 ->addColumn('remark', function ($q) {
                     return $q->master_status->name;
