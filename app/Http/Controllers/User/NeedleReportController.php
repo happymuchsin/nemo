@@ -45,7 +45,7 @@ class NeedleReportController extends Controller
             $data = Needle::join('master_statuses as ms', 'ms.id', 'needles.master_status_id')
                 ->join('users as u', 'u.id', 'needles.user_id')
                 ->join('master_lines as ml', 'ml.id', 'needles.master_line_id')
-                ->join('master_needles as mn', 'mn.id', 'needles.master_needle_id')
+                ->leftJoin('master_needles as mn', 'mn.id', 'needles.master_needle_id')
                 ->selectRaw('needles.created_at as created_at, ml.name as line, u.username as username, u.name as name, mn.brand as brand, mn.tipe as tipe, mn.size as size, ms.name as remark, needles.filename as filename, needles.ext as ext, needles.id as id, needles.user_id as user_id, master_line_id, master_style_id')
                 ->whereDate('needles.created_at', $filter_date)
                 ->whereIn('needles.master_status_id', [1, 2, 3, 4])
