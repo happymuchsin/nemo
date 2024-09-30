@@ -80,7 +80,7 @@ class NeedleReportController extends Controller
                         if ($a) {
                             $gambar = asset("assets/uploads/needle/$c->year/$month/$a->id.$a->ext");
                         } else {
-                            $aa = Approval::where('user_id', $q->user_id)->where('master_line_id', $q->master_line_id)->where('master_style_id', $q->master_style_id)->where('tanggal', date('Y-m-d', strtotime($q->created_at)))->first();
+                            $aa = Approval::where('user_id', $q->user_id)->where('master_line_id', $q->master_line_id)->where('master_style_id', $q->master_style_id)->where('updated_at', $q->created_at)->first();
                             if ($aa) {
                                 $gambar = asset("assets/uploads/needle/$c->year/$month/$aa->id.$aa->ext");
                             } else {
