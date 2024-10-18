@@ -32,7 +32,7 @@ class ApprovalController extends Controller
             }])
                 ->where('master_area_id', $area_id)
                 ->where('master_counter_id', $lokasi_id)
-                ->where('status', '!=', 'DONE')
+                ->whereNotIn('status', ['DONE', 'REJECT'])
                 ->get();
             foreach ($s as $s) {
                 $d = new stdClass;
