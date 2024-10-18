@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Tools;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\Approval;
+use App\Models\MasterApproval;
 use App\Models\MasterDivision;
 use App\Models\MasterPosition;
 use App\Models\Needle;
@@ -227,6 +228,10 @@ class ToolsUserController extends Controller
             }
         }
         Approval::where('user_id', $id)->update([
+            'deleted_at' => $now,
+            'deleted_by' => $username,
+        ]);
+        MasterApproval::where('user_id', $id)->update([
             'deleted_at' => $now,
             'deleted_by' => $username,
         ]);
