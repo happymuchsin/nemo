@@ -129,6 +129,8 @@
                             <th>Time</th>
                             <th>Line</th>
                             <th>User</th>
+                            <th>Buyer</th>
+                            <th>Style</th>
                             <th>Brand</th>
                             <th>Type</th>
                             <th>Size</th>
@@ -173,6 +175,12 @@
                             },
                             {
                                 data: 'user'
+                            },
+                            {
+                                data: 'buyer'
+                            },
+                            {
+                                data: 'style'
                             },
                             {
                                 data: 'brand'

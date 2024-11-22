@@ -78,7 +78,7 @@ class ReportController extends Controller
 
         if ($id == 'report_daily') {
             $filter_date = $request->filter_date;
-            $data = Needle::with(['user', 'line', 'needle', 'master_status'])
+            $data = Needle::with(['user', 'line', 'needle', 'master_status', 'style.buyer'])
                 ->whereDate('created_at', $filter_date)
                 ->orderBy('created_at')
                 ->get();
@@ -91,6 +91,12 @@ class ReportController extends Controller
                 })
                 ->addColumn('user', function ($q) {
                     return $q->user->username . ' - ' . $q->user->name;
+                })
+                ->addColumn('buyer', function ($q) {
+                    return $q->style->buyer ? $q->style->buyer->name : '';
+                })
+                ->addColumn('style', function ($q) {
+                    return $q->style ? $q->style->name : '';
                 })
                 ->addColumn('brand', function ($q) {
                     return $q->needle ? $q->needle->brand : '';
