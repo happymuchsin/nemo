@@ -93,7 +93,7 @@ class ReportController extends Controller
                     return $q->user->username . ' - ' . $q->user->name;
                 })
                 ->addColumn('buyer', function ($q) {
-                    return $q->style->buyer ? $q->style->buyer->name : '';
+                    return $q->style ? $q->style->buyer->name : '';
                 })
                 ->addColumn('style', function ($q) {
                     return $q->style ? $q->style->name : '';
