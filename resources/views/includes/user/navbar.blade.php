@@ -20,6 +20,39 @@
                 <b class="text-center text-black"><i class="fa fa-list-dropdown"></i> Report</b>
             </a>
         </li>
+        <li id=""
+            class="nav-item text-center dropdown dropdown-hover {{ in_array($page, ['user_summary_stock', 'user_usage_needle', 'user_daily_stock', 'user_timing_log']) ? 'rounded-lg bg-warning' : '' }}">
+            <a id="dropdownSubMenuX" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false" class="nav-link dropdown-toggle">
+                <b class="text-center text-black"><i class="fa fa-list-dropdown"></i> Report</b>
+            </a>
+            <ul aria-labelledby="dropdownSubMenuX" class="dropdown-menu border-0 shadow">
+                <li>
+                    <a class="dropdown-item custom-dropdown-item {{ $page == 'user_summary_stock' ? 'rounded-lg bg-warning' : '' }}"
+                        href="{{ route('user.summary-stock') }}">
+                        Summary Stock
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item custom-dropdown-item {{ $page == 'user_usage_needle' ? 'rounded-lg bg-warning' : '' }}"
+                        href="{{ route('user.usage-needle') }}">
+                        Usage Needle
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item custom-dropdown-item {{ $page == 'user_daily_stock' ? 'rounded-lg bg-warning' : '' }}"
+                        href="{{ route('user.daily-stock') }}">
+                        Daily Stock
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item custom-dropdown-item {{ $page == 'user_report' ? 'rounded-lg bg-warning' : '' }}"
+                        href="{{ route('user.report') }}">
+                        Timing Log
+                    </a>
+                </li>
+            </ul>
+        </li>
         {{-- @endcan --}}
         {{-- @can('user-needle-report') --}}
         <li id="" class="nav-item text-center">

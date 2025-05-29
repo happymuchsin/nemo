@@ -39,6 +39,7 @@ class DashboardController extends Controller
         // Kansai = UO X 113 & DV X 57
 
         $bulan = date('n');
+        $tahun = date('Y');
         $tipe = $request->tipe;
 
         $idSingleNeedle = [];
@@ -97,14 +98,14 @@ class DashboardController extends Controller
             }
             return response()->json($h, 200);
         } else if ($tipe == 'box') {
-            $inSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereMonth('created_at', $bulan)->sum('in');
-            $outSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereMonth('created_at', $bulan)->sum('out');
-            $inDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereMonth('created_at', $bulan)->sum('in');
-            $outDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereMonth('created_at', $bulan)->sum('out');
-            $inObras = Stock::whereIn('master_needle_id', $idObras)->whereMonth('created_at', $bulan)->sum('in');
-            $outObras = Stock::whereIn('master_needle_id', $idObras)->whereMonth('created_at', $bulan)->sum('out');
-            $inKansai = Stock::whereIn('master_needle_id', $idKansai)->whereMonth('created_at', $bulan)->sum('in');
-            $outKansai = Stock::whereIn('master_needle_id', $idKansai)->whereMonth('created_at', $bulan)->sum('out');
+            $inSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('in');
+            $outSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('out');
+            $inDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('in');
+            $outDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('out');
+            $inObras = Stock::whereIn('master_needle_id', $idObras)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('in');
+            $outObras = Stock::whereIn('master_needle_id', $idObras)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('out');
+            $inKansai = Stock::whereIn('master_needle_id', $idKansai)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('in');
+            $outKansai = Stock::whereIn('master_needle_id', $idKansai)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('out');
 
             $ava_single_needle = $inSingleNeedle - $outSingleNeedle;
             $ava_double_needle = $inDoubleNeedle - $outDoubleNeedle;
@@ -128,14 +129,14 @@ class DashboardController extends Controller
         } else if ($tipe == 'chart') {
             $data = [];
             for ($i = 1; $i <= 12; $i++) {
-                $inSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereMonth('created_at', $i)->sum('in');
-                $outSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereMonth('created_at', $i)->sum('out');
-                $inDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereMonth('created_at', $i)->sum('in');
-                $outDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereMonth('created_at', $i)->sum('out');
-                $inObras = Stock::whereIn('master_needle_id', $idObras)->whereMonth('created_at', $i)->sum('in');
-                $outObras = Stock::whereIn('master_needle_id', $idObras)->whereMonth('created_at', $i)->sum('out');
-                $inKansai = Stock::whereIn('master_needle_id', $idKansai)->whereMonth('created_at', $i)->sum('in');
-                $outKansai = Stock::whereIn('master_needle_id', $idKansai)->whereMonth('created_at', $i)->sum('out');
+                $inSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('in');
+                $outSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('out');
+                $inDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('in');
+                $outDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('out');
+                $inObras = Stock::whereIn('master_needle_id', $idObras)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('in');
+                $outObras = Stock::whereIn('master_needle_id', $idObras)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('out');
+                $inKansai = Stock::whereIn('master_needle_id', $idKansai)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('in');
+                $outKansai = Stock::whereIn('master_needle_id', $idKansai)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('out');
 
                 $d = new stdClass;
                 $d->date = date('M', strtotime(date('Y-' . $i . '-01')));

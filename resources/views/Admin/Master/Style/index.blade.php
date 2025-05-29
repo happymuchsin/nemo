@@ -213,47 +213,15 @@
                     }
                 }
             });
-            $('#tengah').select2({
-                placeholder: "Select Month",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-            $('#belakang').select2({
-                placeholder: "Select Year",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-            $('#master_buyer_id').select2({
-                placeholder: "Select Buyer",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-            $('#master_category_id').select2({
-                placeholder: "Select Category",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-            $('#master_sub_category_id').select2({
-                placeholder: "Select Category",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-            $('#master_sample_id').select2({
-                placeholder: "Select Sample",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-            $('#master_fabric_id').select2({
-                placeholder: "Select Fabric",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
+            initSelect('tengah', 'Select Month', 'crupModal');
+            initSelect('belakang', 'Select Year', 'crupModal');
+            initSelect('master_buyer_id', 'Select Buyer', 'crupModal');
+            initSelect('master_category_id', 'Select Category', 'crupModal');
+            initSelect('master_sub_category_id', 'Select Sub Category', 'crupModal');
+            initSelect('master_sample_id', 'Select Sample', 'crupModal');
+            initSelect('master_fabric_id', 'Select Fabric', 'crupModal');
 
-            table = $('#table').DataTable({
-                dom: '<"toolbar">flrtip',
-                scrollY: screen.height * 0.6,
-                scrollX: true,
-                scrollCollapse: true,
+            table = initDataTable('table', '', '', '', {
                 ajax: {
                     url: "{{ route('admin.master.style.data') }}",
                     data: function(d) {
@@ -302,11 +270,6 @@
                 order: [
                     [0, 'asc']
                 ],
-                pageLength: 50,
-                lengthMenu: [
-                    [50, 100, 500, -1],
-                    [50, 100, 500, "All"]
-                ],
             });
             $('div.toolbar').html(
                 '<button class="btn btn-sm btn-success" onclick="add();"><i class="fa fa-circle-plus" /></i> New</button> <button class="btn btn-sm btn-success" onclick="btnImport();"><i class="fa fa-file-excel" /></i> Import</button>'
@@ -325,41 +288,20 @@
         function Import() {
             var data = new FormData();
             data.append('excel', $('#excel')[0].files[0]);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
+            sendAjax('impModal', {
                 url: "{{ route('admin.master.style.import') }}",
                 type: "POST",
-                cache: false,
                 data: data,
-                processData: false,
-                contentType: false,
-                beforeSend: function() {
-                    Swal.fire({
-                        iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                        title: "Please wait ...",
-                        html: "Fetching your data ...",
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                    });
-                    Swal.showLoading();
-                },
-                complete: function() {
-                    // Swal.close();
-                },
                 success: function(response) {
                     $('#impModal').modal('toggle');
-                    Swal.fire('Success!', response, 'success');
+                    successAlert(response);
+                    closeAlert();
                     setTimeout(() => {
-                        Swal.close();
+                        table.ajax.reload();
                     }, 1000);
-                    table.ajax.reload();
                 },
                 error: function(response) {
-                    Swal.fire('Warning!', response.responseText, 'warning');
+                    warningAlert(response.responseText);
                 }
             });
         }
@@ -376,7 +318,6 @@
             $('#master_sample_id').val('').trigger('change');
             $('#master_fabric_id').val('').trigger('change');
             $('#name').val('');
-            // $('#srf').val('');
             $('#depan').val('');
             $('#tengah').val("{{ strtoupper(date('M')) }}").trigger('change');
             $('#belakang').val("{{ date('y') }}").trigger('change');
@@ -388,23 +329,23 @@
 
         function crup() {
             if ($('#depan').val() == '' || $('#tengah').val() == '' || $('#belakang').val() == '') {
-                Swal.fire('Warning!', 'Please insert SRF No', 'warning');
+                warningAlert('Please insert SRF No');
             } else if ($('#master_buyer_id').val() == '') {
-                Swal.fire('Warning!', 'Please select Buyer', 'warning');
+                warningAlert('Please select Buyer');
             } else if ($('#master_category_id').val() == '') {
-                Swal.fire('Warning!', 'Please select Category', 'warning');
+                warningAlert('Please select Category');
             } else if ($('#master_sub_category_id').val() == '') {
-                Swal.fire('Warning!', 'Please select Sub Category', 'warning');
+                warningAlert('Please select Sub Category');
             } else if ($('#master_sample_id').val() == '') {
-                Swal.fire('Warning!', 'Please select Sample', 'warning');
+                warningAlert('Please select Sample');
             } else if ($('#master_fabric_id').val() == '') {
-                Swal.fire('Warning!', 'Please select Fabric', 'warning');
+                warningAlert('Please select Fabric');
             } else if ($('#name').val() == '') {
-                Swal.fire('Warning!', 'Please insert Name', 'warning');
+                warningAlert('Please insert Name');
             } else if ($('#season').val() == '') {
-                Swal.fire('Warning!', 'Please insert Season', 'warning');
+                warningAlert('Please insert Season');
             } else if ($('#range_date').val() == '') {
-                Swal.fire('Warning!', 'Please select Start - End', 'warning');
+                warningAlert('Please select Start - End');
             } else {
                 var depan = $('#depan').val();
                 if (depan.length == 1) {
@@ -414,14 +355,9 @@
                 } else {
                     depan = depan;
                 }
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.ajax({
-                    type: "POST",
+                sendAjax('crupModal', {
                     url: "{{ route('admin.master.style.crup') }}",
+                    type: "POST",
                     data: {
                         'id': $('#key').val(),
                         'name': $('#name').val(),
@@ -434,53 +370,27 @@
                         'master_sample_id': $('#master_sample_id').val(),
                         'master_fabric_id': $('#master_fabric_id').val(),
                     },
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        // Swal.close();
-                    },
                     success: function(response) {
                         $('#crupModal').modal('toggle');
-                        Swal.fire('Success!', response, 'success');
+                        successAlert(response);
+                        closeAlert();
                         setTimeout(() => {
-                            Swal.close();
+                            table.ajax.reload();
                         }, 1000);
-                        table.ajax.reload();
                     },
                     error: function(response) {
-                        Swal.fire('Warning!', response.responseText, 'warning');
+                        warningAlert(response.responseText);
                     }
                 })
             }
         };
 
         function edit(url) {
-            $.ajax({
-                    type: "get",
-                    url: url,
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        Swal.close();
-                    },
-                })
-                .done(function(response) {
+            sendAjax('', {
+                url: url,
+                type: "get",
+                success: function(response) {
+                    unwaitAlert();
                     $('#crupJudul').html(
                         '<h5 class="modal-title"><i class="fa fa-file-pen"></i> Edit</h5>');
                     $('#crupHeader').removeClass('bg-success');
@@ -498,48 +408,34 @@
                     $('#range_date').val(response.range_date);
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');
-                });
+                },
+                error: function(response) {
+                    warningAlert(response.responseText);
+                }
+            });
         }
 
         function hapus(url) {
-            Swal.fire({
+            customAlert({
                 icon: 'question',
-                title: 'Are you sure want to permanent Delete this Data?',
+                title: "Are you sure want to permanent Delete this Data?",
                 showCancelButton: true,
-                confirmButtonText: 'Confirm Delete',
-                confirmButtonColor: '#dc3545'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    });
-                    $.ajax({
+                confirmButtonText: "Confirm Delete",
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: "Cancel",
+                callback: function() {
+                    sendAjax('', {
                         url: url,
                         type: "GET",
-                        beforeSend: function() {
-                            Swal.fire({
-                                iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                title: 'Please Wait',
-                                html: 'Fetching your data..',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                            Swal.showLoading();
-                        },
-                        complete: function() {
-                            // Swal.close();
-                        },
                         success: function(response) {
-                            Swal.fire('Success!', response, 'success');
+                            successAlert(response);
+                            closeAlert();
                             setTimeout(() => {
-                                Swal.close();
+                                table.ajax.reload();
                             }, 1000);
-                            table.ajax.reload();
                         },
                         error: function(response) {
-                            Swal.fire('Warning!', response.responseText, 'warning');
+                            warningAlert(response.responseText);
                         }
                     });
                 }

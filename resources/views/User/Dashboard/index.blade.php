@@ -42,7 +42,7 @@
         var chart = null;
         $(document).ready(function() {
             $('#collSidebar').attr('hidden', true);
-            $('#collSidebar').click();
+            // $('#collSidebar').click();
 
             outstanding();
 
@@ -52,39 +52,31 @@
         })
 
         function outstanding() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
-                type: "POST",
+            sendAjax('', {
                 url: "{{ route('user.dashboard.data') }}",
+                type: "POST",
                 data: {
                     tipe: 'outstanding',
                 },
                 success: function(response) {
+                    unwaitAlert();
                     $('#outstanding').html(response);
                 },
                 error: function(response) {
-                    Swal.fire('Warning!', response.responseText, 'warning');
+                    warningAlert(response.responseText);
                 }
             })
         }
 
         function reloadData() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
-                type: "POST",
+            sendAjax('', {
                 url: "{{ route('user.dashboard.data') }}",
+                type: "POST",
                 data: {
                     tipe: 'box',
                 },
                 success: function(response) {
+                    unwaitAlert();
                     $('#ava_single_needle').text(response.ava_single_needle);
                     $('#ava_obras').text(response.ava_obras);
                     $('#ava_double_needle').text(response.ava_double_needle);
@@ -95,7 +87,7 @@
                     $('#rep_kansai').text(response.rep_kansai);
                 },
                 error: function(response) {
-                    Swal.fire('Warning!', response.responseText, 'warning');
+                    warningAlert(response.responseText);
                 }
             })
         }
@@ -104,32 +96,14 @@
             if (chart != null) {
                 chart.dispose();
             }
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
-                    url: "{{ route('user.dashboard.data') }}",
-                    type: "POST",
-                    data: {
-                        tipe: 'chart',
-                    },
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        Swal.close();
-                    },
-                })
-                .done(function(response) {
+            sendAjax('', {
+                url: "{{ route('user.dashboard.data') }}",
+                type: "POST",
+                data: {
+                    tipe: 'chart',
+                },
+                success: function(response) {
+                    unwaitAlert();
                     am4core.ready(function() {
                         am4core.useTheme(am4themes_animated);
                         var chart = am4core.create("chart", am4charts.XYChart);
@@ -174,11 +148,14 @@
                         var series3 = createSeries("void", "Toggle Obras", "#fff");
                         var series4 = createSeries("void", "Toggle Double Needle", "#fff");
                         var series5 = createSeries("void", "Toggle Kansai", "#fff");
-                        var series6 = createSeries("ava_single_needle", "Available Single Needle", "#3698d8");
-                        var series7 = createSeries("rep_single_needle", "Replacement Single Needle", "#85c1e7");
+                        var series6 = createSeries("ava_single_needle", "Available Single Needle",
+                            "#3698d8");
+                        var series7 = createSeries("rep_single_needle", "Replacement Single Needle",
+                            "#85c1e7");
                         var series8 = createSeries("ava_obras", "Available Obras", "#25cb76");
                         var series9 = createSeries("rep_obras", "Replacement Obras", "#80dfac");
-                        var series10 = createSeries("ava_double_needle", "Available Double Needle", "#e67f32");
+                        var series10 = createSeries("ava_double_needle", "Available Double Needle",
+                            "#e67f32");
                         var series11 = createSeries("rep_double_needle", "Replacement Double Needle",
                             "#f0b27f");
                         var series12 = createSeries("ava_kansai", "Available Kansai", "#e84e42");
@@ -295,7 +272,11 @@
                         chart.legend = new am4charts.Legend();
                         chart.cursor = new am4charts.XYCursor();
                     })
-                })
+                },
+                error: function(response) {
+                    warningAlert(response.responseText);
+                }
+            })
         }
 
         socket.on('nemoReload', () => {

@@ -50,40 +50,9 @@
     <script>
         var table = null;
         $(document).ready(function() {
-            $('#master_counter_id').select2({
-                placeholder: "Select Counter",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-            $('#tipe').select2({
-                placeholder: "Select Type",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-            // $('#tipe').on('change', function() {
-            //     $('#status').html('');
-            //     if ($(this).val() == 'RETURN') {
-            //         $('#status').append(`
-        //             <option value=""></option>
-        //             <option value="OK">OK</option>
-        //             <option value="NG">NG</option>
-        //         `);
-            //     } else {
-            //         $('#status').append(`
-        //             <option value="NEW">NEW</option>
-        //         `);
-            //     }
-            // });
-            // $('#status').select2({
-            //     placeholder: "Select Status",
-            //     dropdownParent: $('#crupModal'),
-            //     width: '100%',
-            // });
-            table = $('#table').DataTable({
-                dom: '<"toolbar">flrtip',
-                scrollY: screen.height * 0.6,
-                scrollX: true,
-                scrollCollapse: true,
+            initSelect('master_counter_id', 'Select Counter', 'crupModal');
+            initSelect('tipe', 'Select Type', 'crupModal');
+            table = initDataTable('table', '', '', '', {
                 ajax: {
                     url: "{{ route('admin.master.box.data') }}",
                 },
@@ -99,20 +68,12 @@
                     {
                         data: 'tipe'
                     },
-                    // {
-                    //     data: 'status'
-                    // },
                     {
                         data: 'action'
                     },
                 ],
                 order: [
                     [0, 'asc']
-                ],
-                pageLength: 50,
-                lengthMenu: [
-                    [50, 100, 500, -1],
-                    [50, 100, 500, "All"]
                 ],
             });
             $('div.toolbar').html(
@@ -130,86 +91,49 @@
             $('#name').val('');
             $('#rfid').val('');
             $('#tipe').val('').trigger('change');
-            // $('#status').val('').trigger('change');
             $('#key').val(0);
             $('#crupModal').modal('toggle');
         }
 
         function crup() {
             if ($('#master_counter_id').val() == '') {
-                Swal.fire('Warning!', 'Please select Counter', 'warning');
+                warningAlert('Please select Counter');
             } else if ($('#name').val() == '') {
-                Swal.fire('Warning!', 'Please insert Name', 'warning');
+                warningAlert('Please insert Name');
             } else if ($('#tipe').val() == '') {
-                Swal.fire('Warning!', 'Please select Type', 'warning');
-            }
-            // else if ($('#status').val() == '') {
-            //     Swal.fire('Warning!', 'Please select Status', 'warning');
-            // } 
-            else {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.ajax({
-                    type: "POST",
+                warningAlert('Please select Type');
+            } else {
+                sendAjax('crupModal', {
                     url: "{{ route('admin.master.box.crup') }}",
+                    type: "POST",
                     data: {
                         'id': $('#key').val(),
                         'master_counter_id': $('#master_counter_id').val(),
                         'name': $('#name').val(),
                         'rfid': $('#rfid').val(),
                         'tipe': $('#tipe').val(),
-                        // 'status': $('#status').val(),
-                    },
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        // Swal.close();
                     },
                     success: function(response) {
                         $('#crupModal').modal('toggle');
-                        Swal.fire('Success!', response, 'success');
+                        successAlert(response);
+                        closeAlert();
                         setTimeout(() => {
-                            Swal.close();
+                            table.ajax.reload();
                         }, 1000);
-                        table.ajax.reload();
                     },
                     error: function(response) {
-                        Swal.fire('Warning!', response.responseText, 'warning');
+                        warningAlert(response.responseText);
                     }
                 })
             }
         };
 
         function edit(url) {
-            $.ajax({
-                    type: "get",
-                    url: url,
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        Swal.close();
-                    },
-                })
-                .done(function(response) {
+            sendAjax('', {
+                url: url,
+                type: "get",
+                success: function(response) {
+                    unwaitAlert();
                     $('#crupJudul').html(
                         '<h5 class="modal-title"><i class="fa fa-file-pen"></i> Edit</h5>');
                     $('#crupHeader').removeClass('bg-success');
@@ -220,51 +144,36 @@
                     $('#name').val(response.name);
                     $('#rfid').val(response.rfid);
                     $('#tipe').val(response.tipe).trigger('change');
-                    // $('#status').val(response.status).trigger('change');
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');
-                });
+                },
+                error: function(response) {
+                    warningAlert(response.responseText);
+                }
+            });
         }
 
         function hapus(url) {
-            Swal.fire({
+            customAlert({
                 icon: 'question',
-                title: 'Are you sure want to permanent Delete this Data?',
+                title: "Are you sure want to permanent Delete this Data?",
                 showCancelButton: true,
-                confirmButtonText: 'Confirm Delete',
-                confirmButtonColor: '#dc3545'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    });
-                    $.ajax({
+                confirmButtonText: "Confirm Delete",
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: "Cancel",
+                callback: function() {
+                    sendAjax('', {
                         url: url,
                         type: "GET",
-                        beforeSend: function() {
-                            Swal.fire({
-                                iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                title: 'Please Wait',
-                                html: 'Fetching your data..',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                            Swal.showLoading();
-                        },
-                        complete: function() {
-                            // Swal.close();
-                        },
                         success: function(response) {
-                            Swal.fire('Success!', response, 'success');
+                            successAlert(response);
+                            closeAlert();
                             setTimeout(() => {
-                                Swal.close();
+                                table.ajax.reload();
                             }, 1000);
-                            table.ajax.reload();
                         },
                         error: function(response) {
-                            Swal.fire('Warning!', response.responseText, 'warning');
+                            warningAlert(response.responseText);
                         }
                     });
                 }

@@ -12,41 +12,21 @@
     <script>
         function ubah() {
             if ($('#password').val() == '') {
-                Swal.fire('Warning', 'Please insert Password', 'warning');
+                warningAlert('Please insert Password');
             } else {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.ajax({
-                    type: "POST",
+                sendAjax('', {
                     url: "{{ route('admin.profile.change') }}",
+                    type: "POST",
                     data: {
                         password: $('#password').val(),
                     },
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        // Swal.close();
-                    },
                     success: function(response) {
-                        Swal.fire('Success!', response, 'success');
-                        setTimeout(() => {
-                            Swal.close();
-                        }, 1000);
+                        successAlert(response);
+                        closeAlert();
                         $('#password').val('');
                     },
                     error: function(response) {
-                        Swal.fire('Warning!', response.responseText, 'warning');
+                        warningAlert(response.responseText);
                     }
                 })
             }

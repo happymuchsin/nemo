@@ -76,6 +76,11 @@
     .toolbar {
         float: left;
     }
+
+    .custom-dropdown-item:hover {
+        background-color: blue;
+        color: white;
+    }
 </style>
 
 <script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
@@ -125,6 +130,220 @@
 </script>
 
 <script>
+    function sendAjax(modal, options) {
+        const defaultOptions = {
+            url: '', // URL endpoint
+            type: 'POST', // HTTP method: GET, POST, PUT, DELETE
+            data: {}, // Data to send
+            processData: true, // Set to false for FormData
+            contentType: 'application/json', // Content type
+            dataType: 'json', // Expected response type
+            async: true, // Asynchronous or not
+            beforeSend: null, // Callback before sending request
+            success: null, // Callback for success response
+            error: null, // Callback for error response
+            complete: null // Callback when request finishes
+        };
+
+        const config = $.extend({}, defaultOptions, options);
+
+        // Check if data is FormData and adjust settings
+        if (config.data instanceof FormData) {
+            config.processData = false; // Prevent jQuery from processing data
+            config.contentType = false; // Allow FormData to set its own Content-Type
+        }
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $.ajax({
+            url: config.url,
+            type: config.type,
+            data: config.contentType === 'application/json' ? JSON.stringify(config.data) : config.data,
+            processData: config.processData,
+            contentType: config.contentType,
+            dataType: config.dataType,
+            async: config.async,
+            beforeSend: function() {
+                waitAlert();
+            },
+            complete: function() {
+                // unwaitAlert();
+            },
+            success: function(response) {
+                if (typeof config.success === 'function') {
+                    config.success(response);
+                }
+            },
+            error: function(xhr, status, error) {
+                if (typeof config.error === 'function') {
+                    config.error(xhr, status, error);
+                }
+            },
+        });
+    }
+
+    function customAlert(options) {
+        // Default configuration
+        const defaultOptions = {
+            title: 'Alert', // Default title
+            text: '', // Default message
+            icon: 'info', // Type of alert: 'success', 'error', 'info', 'question'
+            iconHtml: '',
+            html: '',
+            showConfirmButton: true,
+            showCancelButton: false, // Show cancel button
+            confirmButtonText: 'OK', // Text on confirm button
+            cancelButtonText: 'Cancel', // Text on cancel button
+            input: null, // Input type: 'text', 'email', 'password', etc.
+            inputPlaceholder: '', // Placeholder for input
+            inputValue: '', // Default value for input
+            backdrop: true,
+            allowOutsideClick: true, // Allow dismissing by clicking outside
+            allowEscapeKey: true, // Allow dismissing with Escape key
+            callback: null // Callback function for confirm action
+        };
+
+        // Merge options with defaults
+        const config = {
+            ...defaultOptions,
+            ...options
+        };
+
+        // Call SweetAlert2
+        Swal.fire({
+            title: config.title,
+            text: config.text,
+            icon: config.icon,
+            iconHtml: config.iconHtml,
+            html: config.html,
+            showConfirmButton: config.showConfirmButton,
+            showCancelButton: config.showCancelButton,
+            confirmButtonText: config.confirmButtonText,
+            cancelButtonText: config.cancelButtonText,
+            input: config.input,
+            inputPlaceholder: config.inputPlaceholder,
+            inputValue: config.inputValue,
+            backdrop: config.backdrop,
+            allowOutsideClick: config.allowOutsideClick,
+            allowEscapeKey: config.allowEscapeKey
+        }).then((result) => {
+            if (result.isConfirmed && typeof config.callback === 'function') {
+                config.callback(result.value); // Pass the input value to the callback if confirmed
+            } else if (result.isDismissed && config.showCancelButton) {
+                console.log('User canceled');
+            }
+        });
+    }
+
+    function warningAlert(text) {
+        customAlert({
+            title: 'Warning!',
+            text: text,
+            icon: 'warning'
+        });
+    }
+
+    function successAlert(text) {
+        customAlert({
+            title: 'Success!',
+            text: text,
+            icon: 'success'
+        });
+    }
+
+    function waitAlert() {
+        Swal.fire({
+            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
+            title: 'Please Wait',
+            html: 'Fetching your data..',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+        });
+        Swal.showLoading();
+    }
+
+    function unwaitAlert() {
+        Swal.close();
+    }
+
+    function closeAlert() {
+        setTimeout(() => {
+            Swal.close();
+        }, 1000);
+    }
+
+    function initSelect(id, placeHolder, modal) {
+        $('#' + id).select2({
+            placeholder: placeHolder,
+            dropdownParent: $('#' + modal),
+            width: '100%',
+            allowClear: true,
+        });
+    }
+
+    function initDataTable(id, toolbar, modal, h, options = {}) {
+        var xtoolbar = '';
+        if (toolbar == '') {
+            xtoolbar = 'toolbar';
+        } else {
+            xtoolbar = toolbar;
+        }
+
+        var xh = '';
+        if (h == '') {
+            xh = 0.6;
+        } else {
+            xh = h;
+        }
+
+        // Default configuration
+        const defaultOptions = {
+            dom: '<"' + xtoolbar + '">flrtip',
+            scrollY: screen.height * xh,
+            scrollX: true,
+            scrollCollapse: true,
+            // autoWidth: true,
+            // responsive: true,
+            searching: true,
+            ordering: true,
+            order: [],
+            paging: true,
+            pageLength: 50,
+            lengthMenu: [
+                [50, 100, 500, -1],
+                [50, 100, 500, "All"]
+            ],
+        };
+
+        // Merge user-defined options with defaults
+        const config = $.extend(true, {}, defaultOptions, options);
+
+        if (config.ajax) {
+            const userAjax = config.ajax;
+            config.ajax = $.extend(true, {
+                beforeSend: function() {
+                    waitAlert();
+                },
+                complete: function() {
+                    unwaitAlert();
+                }
+            }, userAjax);
+        }
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        // Initialize DataTable with merged configuration
+        return $('#' + id).DataTable(config);
+    }
+
     if (window.history.replaceState) {
         window.history.replaceState(null, null, window.location.href);
     }

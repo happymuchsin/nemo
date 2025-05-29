@@ -56,4 +56,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(MasterPosition::class, 'master_position_id', 'id');
     }
+
+    public function placement()
+    {
+        return $this->belongsTo(MasterPlacement::class, 'id', 'user_id');
+    }
 }

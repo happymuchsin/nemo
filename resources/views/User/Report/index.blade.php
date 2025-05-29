@@ -122,6 +122,7 @@
                 $('#table').DataTable().clear().destroy();
             }
             $('#tableHead').html('');
+            $('#tableFoot').html('');
             if (id == 'report_daily') {
                 setTimeout(() => {
                     $('#tableHead').html(`
@@ -137,34 +138,30 @@
                             <th>Remark</th>
                         </tr>
                         `)
-                    $('#tableFoot').html('<tr></tr>');
-                    table = $('#table').DataTable({
+                    $('#tableFoot').html(`
+                        <tr style="display:none">
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        `);
+                    table = initDataTable('table', '', '', '', {
                         dom: '<"toolbar"B>flrtip',
                         buttons: [{
                             extend: 'excelHtml5',
                             title: 'Daily ' + $('#filter_date').val(),
                         }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
                         ajax: {
                             url: "{{ route('user.report.data') }}",
                             data: function(d) {
                                 d.id = id;
                                 d.filter_date = $('#filter_date').val();
-                            },
-                            beforeSend: function() {
-                                Swal.fire({
-                                    iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                    title: 'Please Wait',
-                                    html: 'Fetching your data..',
-                                    allowOutsideClick: false,
-                                    allowEscapeKey: false,
-                                });
-                                Swal.showLoading();
-                            },
-                            complete: function() {
-                                Swal.close();
                             },
                         },
                         columns: [{
@@ -195,7 +192,6 @@
                                 data: 'remark'
                             },
                         ],
-                        order: [],
                         paging: false,
                     });
                 }, 500);
@@ -219,33 +215,17 @@
                             <th></th>
                         </tr>
                     `)
-                    table = $('#table').DataTable({
+                    table = initDataTable('table', '', '', '', {
                         dom: '<"toolbar"B>flrtip',
                         buttons: [{
                             extend: 'excelHtml5',
                             title: 'Weekly ' + $('#filter_week').val(),
                         }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
                         ajax: {
                             url: "{{ route('user.report.data') }}",
                             data: function(d) {
                                 d.id = id;
                                 d.filter_week = $('#filter_week').val();
-                            },
-                            beforeSend: function() {
-                                Swal.fire({
-                                    iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                    title: 'Please Wait',
-                                    html: 'Fetching your data..',
-                                    allowOutsideClick: false,
-                                    allowEscapeKey: false,
-                                });
-                                Swal.showLoading();
-                            },
-                            complete: function() {
-                                Swal.close();
                             },
                         },
                         columns: [{
@@ -259,7 +239,6 @@
                                 data: 'stock'
                             },
                         ],
-                        order: [],
                         paging: false,
                         footerCallback: function(tfoot, data) {
                             var api = this.api();
@@ -297,33 +276,17 @@
                             <th></th>
                         </tr>
                     `)
-                    table = $('#table').DataTable({
+                    table = initDataTable('table', '', '', '', {
                         dom: '<"toolbar"B>flrtip',
                         buttons: [{
                             extend: 'excelHtml5',
                             title: 'Monthly ' + $('#filter_month').val(),
                         }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
                         ajax: {
                             url: "{{ route('user.report.data') }}",
                             data: function(d) {
                                 d.id = id;
                                 d.filter_month = $('#filter_month').val();
-                            },
-                            beforeSend: function() {
-                                Swal.fire({
-                                    iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                    title: 'Please Wait',
-                                    html: 'Fetching your data..',
-                                    allowOutsideClick: false,
-                                    allowEscapeKey: false,
-                                });
-                                Swal.showLoading();
-                            },
-                            complete: function() {
-                                Swal.close();
                             },
                         },
                         columns: [{
@@ -337,7 +300,6 @@
                                 data: 'stock'
                             },
                         ],
-                        order: [],
                         paging: false,
                         footerCallback: function(tfoot, data) {
                             var api = this.api();
@@ -375,35 +337,19 @@
                             <th></th>
                         </tr>
                     `)
-                    table = $('#table').DataTable({
+                    table = initDataTable('table', '', '', '', {
                         dom: '<"toolbar"B>flrtip',
                         buttons: [{
                             extend: 'excelHtml5',
                             title: 'Quarterly ' + $('#filter_quarter').val() + ' ' + $(
                                 '#filter_year').val(),
                         }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
                         ajax: {
                             url: "{{ route('user.report.data') }}",
                             data: function(d) {
                                 d.id = id;
                                 d.filter_quarter = $('#filter_quarter').val();
                                 d.filter_year = $('#filter_year').val();
-                            },
-                            beforeSend: function() {
-                                Swal.fire({
-                                    iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                    title: 'Please Wait',
-                                    html: 'Fetching your data..',
-                                    allowOutsideClick: false,
-                                    allowEscapeKey: false,
-                                });
-                                Swal.showLoading();
-                            },
-                            complete: function() {
-                                Swal.close();
                             },
                         },
                         columns: [{
@@ -417,7 +363,6 @@
                                 data: 'stock'
                             },
                         ],
-                        order: [],
                         paging: false,
                         footerCallback: function(tfoot, data) {
                             var api = this.api();
@@ -455,35 +400,19 @@
                             <th></th>
                         </tr>
                     `)
-                    table = $('#table').DataTable({
+                    table = initDataTable('table', '', '', '', {
                         dom: '<"toolbar"B>flrtip',
                         buttons: [{
                             extend: 'excelHtml5',
                             title: 'Half Yearly ' + $('#filter_half').val() + ' ' + $(
                                 '#filter_year').val(),
                         }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
                         ajax: {
                             url: "{{ route('user.report.data') }}",
                             data: function(d) {
                                 d.id = id;
                                 d.filter_half = $('#filter_half').val();
                                 d.filter_year = $('#filter_year').val();
-                            },
-                            beforeSend: function() {
-                                Swal.fire({
-                                    iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                    title: 'Please Wait',
-                                    html: 'Fetching your data..',
-                                    allowOutsideClick: false,
-                                    allowEscapeKey: false,
-                                });
-                                Swal.showLoading();
-                            },
-                            complete: function() {
-                                Swal.close();
                             },
                         },
                         columns: [{
@@ -497,7 +426,6 @@
                                 data: 'stock'
                             },
                         ],
-                        order: [],
                         paging: false,
                         footerCallback: function(tfoot, data) {
                             var api = this.api();
@@ -535,33 +463,17 @@
                             <th></th>
                         </tr>
                     `)
-                    table = $('#table').DataTable({
+                    table = initDataTable('table', '', '', '', {
                         dom: '<"toolbar"B>flrtip',
                         buttons: [{
                             extend: 'excelHtml5',
                             title: 'Yearly ' + $('#filter_year').val(),
                         }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
                         ajax: {
                             url: "{{ route('user.report.data') }}",
                             data: function(d) {
                                 d.id = id;
                                 d.filter_year = $('#filter_year').val();
-                            },
-                            beforeSend: function() {
-                                Swal.fire({
-                                    iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                    title: 'Please Wait',
-                                    html: 'Fetching your data..',
-                                    allowOutsideClick: false,
-                                    allowEscapeKey: false,
-                                });
-                                Swal.showLoading();
-                            },
-                            complete: function() {
-                                Swal.close();
                             },
                         },
                         columns: [{
@@ -575,7 +487,6 @@
                                 data: 'stock'
                             },
                         ],
-                        order: [],
                         paging: false,
                         footerCallback: function(tfoot, data) {
                             var api = this.api();

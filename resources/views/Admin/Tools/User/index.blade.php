@@ -79,29 +79,10 @@
         var table = null,
             tableDetail = null;
         $(document).ready(function() {
-            $('#master_division_id').select2({
-                placeholder: "Select Division",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-
-            $('#master_position_id').select2({
-                placeholder: "Select Position",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-
-            $('#skill').select2({
-                placeholder: "Select Skill",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-
-            table = $('#table').DataTable({
-                dom: '<"toolbar">flrtip',
-                scrollY: screen.height * .6,
-                scrollX: true,
-                scrollCollapse: true,
+            initSelect('master_division_id', 'Select Division', 'crupModal');
+            initSelect('master_position_id', 'Select Position', 'crupModal');
+            initSelect('skill', 'Select Skill', 'crupModal');
+            table = initDataTable('table', '', '', '', {
                 fixedColumns: {
                     rightColumns: 1
                 },
@@ -137,7 +118,6 @@
                         sortable: false,
                     }
                 ],
-                order: [],
                 paging: false,
             });
             $('div.toolbar').html(
@@ -145,7 +125,9 @@
             );
 
             $('#detailModal').on('hidden.bs.modal', function(e) {
-                table.ajax.reload();
+                setTimeout(() => {
+                    table.ajax.reload();
+                }, 1000);
             })
         })
 
@@ -170,20 +152,20 @@
         function crup() {
             var c = 0;
             if ($('#username').val() == '') {
-                Swal.fire('Warning', 'Please insert NIK / Username', 'warning');
+                warningAlert('Please insert NIK / Username');
             } else if ($('#name').val() == '') {
-                Swal.fire('Warning', 'Please insert Name', 'warning');
+                warningAlert('Please insert Name');
             } else if ($('#master_division_id').val() == '') {
-                Swal.fire('Warning', 'Please select Division', 'warning');
+                warningAlert('Please select Division');
             } else if ($('#master_position_id').val() == '') {
-                Swal.fire('Warning', 'Please select Position', 'warning');
+                warningAlert('Please select Position');
             } else if ($('#skill').val() == '') {
-                Swal.fire('Warning', 'Please select Skill', 'warning');
+                warningAlert('Please select Skill');
             } else if ($('#join_date').val() == '') {
-                Swal.fire('Warning', 'Please select Join Date', 'warning');
+                warningAlert('Please select Join Date');
             } else if ($('#password').val() == '') {
                 if ($('#key').val() == 0) {
-                    Swal.fire('Warning', 'Please insert Password', 'warning');
+                    warningAlert('Please insert Password');
                 } else {
                     c = 1;
                 }
@@ -192,14 +174,9 @@
             }
 
             if (c == 1) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.ajax({
-                    type: "POST",
+                sendAjax('crupModal', {
                     url: "{{ route('admin.tools.user.crup') }}",
+                    type: "POST",
                     data: {
                         id: $('#key').val(),
                         username: $('#username').val(),
@@ -211,53 +188,27 @@
                         join_date: $('#join_date').val(),
                         password: $('#password').val(),
                     },
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        // Swal.close();
-                    },
                     success: function(response) {
                         $('#crupModal').modal('toggle');
-                        Swal.fire('Success!', response, 'success');
+                        successAlert(response);
+                        closeAlert();
                         setTimeout(() => {
-                            Swal.close();
+                            table.ajax.reload();
                         }, 1000);
-                        table.ajax.reload();
                     },
                     error: function(response) {
-                        Swal.fire('Warning!', response.responseText, 'warning');
+                        warningAlert(response.responseText);
                     }
                 })
             }
         }
 
         function edit(url) {
-            $.ajax({
-                    type: "get",
-                    url: url,
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        Swal.close();
-                    },
-                })
-                .done(function(response) {
+            sendAjax('', {
+                url: url,
+                type: "get",
+                success: function(response) {
+                    unwaitAlert();
                     $('#crupJudul').html(
                         '<h5 class="modal-title"><i class="fa fa-file-pen"></i> Edit</h5>');
                     $('#crupHeader').removeClass('bg-success');
@@ -275,97 +226,65 @@
                     $('#password').val('');
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');
-                });
+                },
+                error: function(response) {
+                    warningAlert(response.responseText);
+                }
+            });
         }
 
         function check(url) {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
+            sendAjax('', {
                 url: url,
                 type: "GET",
-                beforeSend: function() {
-                    Swal.fire({
-                        iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                        title: 'Please Wait',
-                        html: 'Fetching your data..',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                    });
-                    Swal.showLoading();
-                },
-                complete: function() {
-                    // Swal.close();
-                },
                 success: function(response) {
+                    unwaitAlert();
                     if (response.tipe == 'not') {
                         hapus(response.id);
                     } else {
-                        Swal.fire({
+                        customerAlert({
                             icon: 'warning',
                             title: response.message,
                             showCancelButton: true,
                             confirmButtonText: 'Yes',
-                            confirmButtonColor: '#dc3545'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
+                            confirmButtonColor: '#dc3545',
+                            callback: function() {
                                 hapus(response.id);
                             }
                         })
                     }
                 },
                 error: function(response) {
-                    Swal.fire('Warning!', response.responseText, 'warning');
+                    warningAlert(response.responseText);
                 }
             })
 
         }
 
         function hapus(id) {
-            Swal.fire({
+            customAlert({
                 icon: 'question',
-                title: 'Are you sure want to permanent Delete this Data?',
+                title: "Are you sure want to permanent Delete this Data?",
                 showCancelButton: true,
-                confirmButtonText: 'Confirm Delete',
-                confirmButtonColor: '#dc3545'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    });
-                    $.ajax({
+                confirmButtonText: "Confirm Delete",
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: "Cancel",
+                callback: function() {
+                    sendAjax('', {
                         url: "{{ route('admin.tools.user.hapus') }}",
                         type: "POST",
                         data: {
                             'id': id,
                         },
-                        beforeSend: function() {
-                            Swal.fire({
-                                iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                title: 'Please Wait',
-                                html: 'Fetching your data..',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                            Swal.showLoading();
-                        },
-                        complete: function() {
-                            // Swal.close();
-                        },
                         success: function(response) {
-                            Swal.fire('Success!', response, 'success');
+                            successAlert(response);
+                            closeAlert();
                             setTimeout(() => {
-                                Swal.close();
+                                table.ajax.reload();
                             }, 1000);
-                            table.ajax.reload();
                         },
                         error: function(response) {
-                            Swal.fire('Warning!', response.responseText, 'warning');
+                            warningAlert(response.responseText);
                         }
                     });
                 }
@@ -373,25 +292,13 @@
         }
 
         function detail(url) {
-            $.ajax({
-                    type: "get",
-                    url: url,
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        Swal.close();
-                    },
-                })
-                .done(function(response) {
-                    $('#detailJudul').html('<h5 class="modal-title"><i class="fa fa-file-pen"></i> Detail User ' +
+            sendAjax('', {
+                url: url,
+                type: "get",
+                success: function(response) {
+                    unwaitAlert();
+                    $('#detailJudul').html(
+                        '<h5 class="modal-title"><i class="fa fa-file-pen"></i> Detail User ' +
                         response.username + '</h5>');
                     $('#detailHeader').removeClass('bg-success');
                     $('#detailHeader').addClass('bg-info');
@@ -402,12 +309,7 @@
                     }
 
                     setTimeout(() => {
-                        tableDetail = $('#tableDetail').DataTable({
-                            dom: '<"toolbarDetail">frtip',
-                            scrollY: screen.height * 0.4,
-                            scrollX: true,
-                            scrollCollapse: true,
-                            paging: false,
+                        tableDetail = initDataTable('tableDetail', 'toolbarDetail', '', 0.4, {
                             ajax: {
                                 url: "{{ route('admin.tools.user.data-role') }}",
                                 data: function(d) {
@@ -421,6 +323,7 @@
                                     data: 'action',
                                 }
                             ],
+                            paging: false,
                         });
                         $('div.toolbarDetail').html(
                             '<div><label>Role</label><div class="form-group" onchange="crupRole()"><select name="role" id="role" class="form-select" required></select></div></div>'
@@ -457,87 +360,55 @@
                     $('#user_id').val(response.user_id);
 
                     $("#detailModal").modal('toggle');
-                });
+                },
+                error: function(response) {
+                    warningAlert(response.responseText);
+                }
+            });
         }
 
         function crupRole() {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
-                type: "POST",
+            sendAjax('crupModal', {
                 url: "{{ route('admin.tools.user.crup-role') }}",
+                type: "POST",
                 data: {
                     'user_id': $('#user_id').val(),
                     'role_id': $('#role').val(),
                 },
-                beforeSend: function() {
-                    Swal.fire({
-                        iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                        title: 'Please Wait',
-                        html: 'Fetching your data..',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                    });
-                    Swal.showLoading();
-                },
-                complete: function() {
-                    // Swal.close();
-                },
                 success: function(response) {
-                    Swal.fire('Success!', response, 'success');
+                    successAlert(response);
+                    closeAlert();
                     setTimeout(() => {
-                        Swal.close();
+                        tableDetail.ajax.reload();
                     }, 1000);
-                    tableDetail.ajax.reload();
                 },
                 error: function(response) {
-                    Swal.fire('Warning!', response, 'warning');
+                    warningAlert(response.responseText);
                 }
             })
         }
 
         function hapusDetail(url) {
-            Swal.fire({
+            customAlert({
                 icon: 'question',
-                title: 'Are you sure want to permanent Delete this Data?',
+                title: "Are you sure want to permanent Delete this Data?",
                 showCancelButton: true,
-                confirmButtonText: 'Confirm Delete',
-                confirmButtonColor: '#dc3545'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    });
-                    $.ajax({
+                confirmButtonText: "Confirm Delete",
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: "Cancel",
+                callback: function() {
+                    sendAjax('', {
                         url: url,
                         type: "GET",
-                        beforeSend: function() {
-                            Swal.fire({
-                                iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                title: 'Please Wait',
-                                html: 'Fetching your data..',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                            Swal.showLoading();
-                        },
-                        complete: function() {
-                            // Swal.close();
-                        },
                         success: function(response) {
-                            Swal.fire('Success!', response, 'success');
+                            successAlert(response);
+                            closeAlert();
                             setTimeout(() => {
-                                Swal.close();
+                                tableDetail.ajax.reload();
                             }, 1000);
-                            tableDetail.ajax.reload();
                         },
                         error: function(response) {
-                            Swal.fire('Warning!', response.responseText, 'warning');
+                            warningAlert(response.responseText);
                         }
                     });
                 }

@@ -41,13 +41,7 @@
     <script>
         var table = null;
         $(document).ready(function() {
-            table = $('#table').DataTable({
-                scrollY: '50vh',
-                scrollX: '80vh',
-                scrollCollapse: true,
-                paging: false,
-                order: [],
-                dom: '<"toolbar">frtip',
+            table = initDataTable('table', '', '', 0.4, {
                 ajax: {
                     url: "{{ route('admin.tools.activity-log.data') }}",
                     data: function(d) {
@@ -68,6 +62,7 @@
                         data: "created_at",
                     },
                 ],
+                paging: false,
             });
             $('div.toolbar').html(
                 `<button class="btn btn-sm btn-danger" onclick="Truncate();"><i class="fa fa-trash-can-xmark"></i> Clear Log</button>`
@@ -75,41 +70,28 @@
         })
 
         function Truncate() {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
+            customAlert({
+                icon: 'question',
+                title: "Are you sure?",
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.value) {
-                    $.ajax({
+                confirmButtonText: "Yes, delete it!",
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: "Cancel",
+                callback: function() {
+                    sendAjax('', {
                         url: "{{ route('admin.tools.activity-log.hapus') }}",
-                        beforeSend: function() {
-                            Swal.fire({
-                                iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                title: 'Please Wait',
-                                html: 'Fetching your data..',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                            Swal.showLoading();
-                        },
-                        complete: function() {
-                            // Swal.close();
-                        },
+                        type: "GET",
                         success: function(response) {
-                            Swal.fire('Success!', response, 'success');
+                            successAlert(response);
+                            closeAlert();
                             setTimeout(() => {
-                                Swal.close();
+                                table.ajax.reload();
                             }, 1000);
-                            table.ajax.reload();
                         },
                         error: function(response) {
-                            Swal.fire('Warning!', response, 'warning');
+                            warningAlert(response.responseText);
                         }
-                    })
+                    });
                 }
             })
         }

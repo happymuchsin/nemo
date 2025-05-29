@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Http\Resources\ApiResource;
 use App\Models\Approval;
+use App\Models\HistoryOutStock;
 use App\Models\MasterBox;
 use App\Models\MasterLine;
 use App\Models\MasterPlacement;
@@ -143,17 +144,36 @@ class CardController extends Controller
                                 'created_at' => $now,
                             ]), null, $username);
 
+                            $x = Stock::where('id', $stock->id)->first();
+
                             Stock::where('id', $stock->id)->update([
-                                'out' => DB::raw("`out` + 1"),
+                                'out' => $x->out + 1,
                                 'updated_by' => $username,
                                 'updated_at' => $now,
                             ]);
                             HelperController::activityLog("ANDROID UPDATE STOCK", 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
                                 'id' => $stock->id,
-                                'out' => 'out + 1',
+                                'out' => $x->out + 1,
                                 'updated_by' => $username,
                                 'updated_at' => $now,
                             ]), $stock->id, $username);
+
+                            HistoryOutStock::create([
+                                'stock_id' => $stock->id,
+                                'stock_before' => $x->in - $x->out,
+                                'qty' => 1,
+                                'stock_after' => $x->in - $x->out - 1,
+                                'created_by' => $username,
+                                'created_at' => $now,
+                            ]);
+                            HelperController::activityLog("ANDROID CREATE HISTORY OUT STOCK", 'history_out_stocks', 'create', $request->ip(), $request->userAgent(), json_encode([
+                                'stock_id' => $stock->id,
+                                'stock_before' => $x->in - $x->out,
+                                'qty' => 1,
+                                'stock_after' => $x->in - $x->out - 1,
+                                'created_by' => $username,
+                                'created_at' => $now,
+                            ]), null, $username);
 
                             $s->status = 'DONE';
                             $s->updated_at = $now;

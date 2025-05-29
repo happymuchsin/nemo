@@ -108,35 +108,32 @@
                             <th>Image</th>
                         </tr>
                         `)
-                    $('#tableFoot').html('<tr></tr>');
-                    table = $('#table').DataTable({
+                    $('#tableFoot').html(`
+                        <tr style="display:none">
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        `);
+                    table = initDataTable('table', '', '', '', {
                         dom: '<"toolbar"B>flrtip',
                         buttons: [{
                             extend: 'excelHtml5',
                             title: 'Daily ' + $('#filter_date').val(),
                         }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
                         ajax: {
                             url: "{{ route('user.needle-report.data') }}",
                             data: function(d) {
                                 d.id = id;
                                 d.filter_date = $('#filter_date').val();
                                 d.filter_line = $('#filter_line').val();
-                            },
-                            beforeSend: function() {
-                                Swal.fire({
-                                    iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                    title: 'Please Wait',
-                                    html: 'Fetching your data..',
-                                    allowOutsideClick: false,
-                                    allowEscapeKey: false,
-                                });
-                                Swal.showLoading();
-                            },
-                            complete: function() {
-                                Swal.close();
                             },
                         },
                         columns: [{
@@ -170,7 +167,6 @@
                                 data: 'gambar'
                             },
                         ],
-                        order: [],
                         paging: false,
                     });
                 }, 250);
@@ -191,33 +187,17 @@
                             <th></th>
                         </tr>
                     `)
-                    table = $('#table').DataTable({
+                    table = initDataTable('table', '', '', '', {
                         dom: '<"toolbar"B>flrtip',
                         buttons: [{
                             extend: 'excelHtml5',
                             title: 'Stock ' + $('#filter_counter').text().trim(),
                         }, ],
-                        scrollY: screen.height * 0.6,
-                        scrollX: true,
-                        scrollCollapse: true,
                         ajax: {
                             url: "{{ route('user.needle-report.data') }}",
                             data: function(d) {
                                 d.id = id;
                                 d.filter_counter = $('#filter_counter').val();
-                            },
-                            beforeSend: function() {
-                                Swal.fire({
-                                    iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                    title: 'Please Wait',
-                                    html: 'Fetching your data..',
-                                    allowOutsideClick: false,
-                                    allowEscapeKey: false,
-                                });
-                                Swal.showLoading();
-                            },
-                            complete: function() {
-                                Swal.close();
                             },
                         },
                         columns: [{
@@ -236,7 +216,6 @@
                                 data: 'qty'
                             },
                         ],
-                        order: [],
                         paging: false,
                         footerCallback: function(tfoot, data) {
                             var api = this.api();

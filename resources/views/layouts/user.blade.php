@@ -27,7 +27,7 @@
     </body>
 @else
 
-    <body class="hold-transition layout-navbar-fixed layout-fixed text-sm">
+    <body class="hold-transition layout-navbar-fixed layout-fixed text-sm sidebar-collapse">
         <div id="app">
             <div class="wrapper">
                 @include('includes.user.navbar')

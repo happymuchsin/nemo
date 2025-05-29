@@ -1,4 +1,4 @@
-@extends('layouts.user', ['page' => $page, 'sidebar' => true])
+@extends('layouts.user', ['page' => $page, 'sidebar' => false])
 @section('title', $title)
 
 @section('page-content')
@@ -44,32 +44,16 @@
         var table = null;
 
         $(document).ready(function() {
+            $('#collSidebar').attr('hidden', true);
             $('#bulan').val("{{ date('n') }}").trigger('change');
             $('#tahun').val("{{ date('Y') }}").trigger('change');
 
-            table = $('#table').DataTable({
-                dom: '<"toolbar">flrtip',
-                scrollY: screen.height * 0.6,
-                scrollX: true,
-                scrollCollapse: true,
+            table = initDataTable('table', '', '', '', {
                 ajax: {
                     url: "{{ route('user.approval.data') }}",
                     data: function(d) {
                         d.bulan = $('#bulan').val();
                         d.tahun = $('#tahun').val();
-                    },
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        Swal.close();
                     },
                 },
                 columns: [{
@@ -109,54 +93,29 @@
                         data: 'action'
                     },
                 ],
-                order: [],
-                pageLength: 50,
-                lengthMenu: [
-                    [50, 100, 500, -1],
-                    [50, 100, 500, "All"]
-                ],
             });
         })
 
         function approval(url, status) {
-            Swal.fire({
+            customAlert({
                 icon: 'question',
                 title: 'Are you sure want to ' + status + ' this Data?',
                 showCancelButton: true,
                 confirmButtonText: 'Confirm ' + status,
-                confirmButtonColor: status == 'APPROVE' ? '#08b92c' : '#dc3545'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    });
-                    $.ajax({
+                confirmButtonColor: status == 'APPROVE' ? '#08b92c' : '#dc3545',
+                callback: function() {
+                    sendAjax('', {
                         url: url,
                         type: "GET",
-                        beforeSend: function() {
-                            Swal.fire({
-                                iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                title: 'Please Wait',
-                                html: 'Fetching your data..',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                            Swal.showLoading();
-                        },
-                        complete: function() {
-                            // Swal.close();
-                        },
                         success: function(response) {
-                            Swal.fire('Success!', response, 'success');
+                            successAlert(response);
+                            closeAlert();
                             setTimeout(() => {
-                                Swal.close();
+                                table.ajax.reload();
                             }, 1000);
-                            table.ajax.reload();
                         },
                         error: function(response) {
-                            Swal.fire('Warning!', response.responseText, 'warning');
+                            warningAlert(response.responseText);
                         }
                     });
                 }

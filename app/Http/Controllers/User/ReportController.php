@@ -120,13 +120,13 @@ class ReportController extends Controller
             $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
             $period = CarbonPeriod::create($start, $end);
 
-            $dataNeedle = Needle::whereBetween('created_at', [$start, $end])
+            $dataNeedle = Needle::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')
                 ->get();
 
             $collectNeedle = collect($dataNeedle);
 
-            $dataStock = Stock::whereBetween('created_at', [$start, $end])
+            $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
                 ->orderBy('created_at')
                 ->get();
 
@@ -141,12 +141,13 @@ class ReportController extends Controller
                     $kol = $m->name;
                     $id = $m->id;
                     $d->$kol = $collectNeedle
-                        ->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])
+                        ->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . ' 23:59:59'])
                         ->where('master_status_id', $id)
                         ->count();
                 }
-                $in = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])->sum('in');
-                $out = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])->sum('out');
+                $in = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . ' 23:59:59'])->sum('in');
+                // $out = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . ' 23:59:59'])->sum('out');
+                $out = $collectNeedle->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . ' 23:59:59'])->count();
                 $d->stock = $in - $out;
                 $data[] = $d;
             }
@@ -186,7 +187,8 @@ class ReportController extends Controller
                         ->count();
                 }
                 $in = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])->sum('in');
-                $out = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])->sum('out');
+                // $out = $collectStock->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . '23:59:59'])->sum('out');
+                $out = $collectNeedle->whereBetween('created_at', [$tanggal . ' 00:00:00', $tanggal . ' 23:59:59'])->count();
                 $d->stock = $in - $out;
                 $data[] = $d;
             }
@@ -245,8 +247,9 @@ class ReportController extends Controller
                         ->where('master_status_id', $id)
                         ->count();
                 }
-                $in = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('in');
-                $out = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('out');
+                $in = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->sum('in');
+                // $out = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->sum('out');
+                $out = $collectNeedle->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->count();
                 $d->stock = $in - $out;
                 $data[] = $d;
             }
@@ -295,8 +298,9 @@ class ReportController extends Controller
                         ->where('master_status_id', $id)
                         ->count();
                 }
-                $in = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('in');
-                $out = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('out');
+                $in = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->sum('in');
+                // $out = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->sum('out');
+                $out = $collectNeedle->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->count();
                 $d->stock = $in - $out;
                 $data[] = $d;
             }
@@ -333,8 +337,9 @@ class ReportController extends Controller
                         ->where('master_status_id', $id)
                         ->count();
                 }
-                $in = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('in');
-                $out = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end  . ' 23:59:59'])->sum('out');
+                $in = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->sum('in');
+                // $out = $collectStock->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->sum('out');
+                $out = $collectNeedle->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->count();
                 $d->stock = $in - $out;
                 $data[] = $d;
             }

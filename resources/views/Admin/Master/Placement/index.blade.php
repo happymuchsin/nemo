@@ -46,22 +46,20 @@
     <script>
         var table = null;
         $(document).ready(function() {
-            $('#reff').select2({
-                placeholder: "Select Type",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
+            initSelect('reff', 'Select Type', 'crupModal');
+            initSelect('lokasi', 'Select Location', 'crupModal');
+            initSelect('kounter', 'Select Counter', 'crupModal');
             $('#reff').on('change', function() {
-                $.ajax({
+                sendAjax('crupModal', {
                     url: "{{ route('admin.master.placement.spinner') }}",
                     type: "POST",
-                    cache: false,
                     data: {
                         _token: "{{ csrf_token() }}",
                         tipe: 'reff',
                         reff: $(this).val(),
                     },
                     success: function(data) {
+                        unwaitAlert();
                         if ($('#reff').val() == 'line') {
                             $('#divKounter').prop('hidden', false);
                         } else {
@@ -73,20 +71,17 @@
                                 .name + ' - ' + v.name + '</option>')
                         })
                         $('#kounter').html('');
+                    },
+                    error: function(response) {
+                        warningAlert(response.responseText);
                     }
                 })
             });
-            $('#lokasi').select2({
-                placeholder: "Select Location",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
             $('#lokasi').on('change', function() {
                 if ($('#reff').val() == 'line') {
-                    $.ajax({
+                    sendAjax('crupModal', {
                         url: "{{ route('admin.master.placement.spinner') }}",
                         type: "POST",
-                        cache: false,
                         data: {
                             _token: "{{ csrf_token() }}",
                             tipe: 'lokasi',
@@ -94,25 +89,20 @@
                             lokasi: $(this).val(),
                         },
                         success: function(data) {
+                            unwaitAlert();
                             $('#kounter').html('<option value=""></option>');
                             $.each(data, function(k, v) {
                                 $('#kounter').append('<option value="' + v.id + '">' + v
                                     .area.name + ' - ' + v.name + '</option>')
                             })
+                        },
+                        error: function(response) {
+                            warningAlert(response.responseText);
                         }
                     })
                 }
             });
-            $('#kounter').select2({
-                placeholder: "Select Counter",
-                dropdownParent: $('#crupModal'),
-                width: '100%',
-            });
-            table = $('#table').DataTable({
-                dom: '<"toolbar">flrtip',
-                scrollY: screen.height * 0.6,
-                scrollX: true,
-                scrollCollapse: true,
+            table = initDataTable('table', '', '', '', {
                 ajax: {
                     url: "{{ route('admin.master.placement.data') }}",
                 },
@@ -141,81 +131,50 @@
                         data: 'action'
                     },
                 ],
-                order: [],
                 paging: false,
             });
         })
 
         function crup() {
             if ($('#lokasi').val() == '') {
-                Swal.fire('Warning!', 'Please select Location', 'warning');
+                warningAlert('Please select Location');
             } else {
                 if ($('#lokasi').val() == 'line' && $('#kounter').val() == '') {
-                    Swal.fire('Warning!', 'Please select Counter', 'warning');
+                    warningAlert('Please select Counter');
                 }
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.ajax({
-                    type: "POST",
+                sendAjax('crupModal', {
                     url: "{{ route('admin.master.placement.crup') }}",
+                    type: "POST",
                     data: {
                         'id': $('#key').val(),
                         'reff': $('#reff').val(),
                         'lokasi': $('#lokasi').val(),
                         'counter': $('#kounter').val(),
                     },
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        // Swal.close();
-                    },
                     success: function(response) {
                         $('#crupModal').modal('toggle');
-                        Swal.fire('Success!', response, 'success');
+                        successAlert(response);
+                        closeAlert();
                         setTimeout(() => {
-                            Swal.close();
+                            table.ajax.reload();
                         }, 1000);
-                        table.ajax.reload();
                     },
                     error: function(response) {
-                        Swal.fire('Warning!', response.responseText, 'warning');
+                        warningAlert(response.responseText);
                     }
                 })
             }
         };
 
         function edit(url) {
-            $.ajax({
-                    type: "get",
-                    url: url,
-                    beforeSend: function() {
-                        Swal.fire({
-                            iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                            title: 'Please Wait',
-                            html: 'Fetching your data..',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                        });
-                        Swal.showLoading();
-                    },
-                    complete: function() {
-                        Swal.close();
-                    },
-                })
-                .done(function(response) {
+            sendAjax('', {
+                url: url,
+                type: "get",
+                success: function(response) {
+                    unwaitAlert();
                     $('#crupJudul').html(
-                        '<h5 class="modal-title"><i class="fa fa-file-pen"></i> Placement ' + response.username +
+                        '<h5 class="modal-title"><i class="fa fa-file-pen"></i> Placement ' + response
+                        .username +
                         ' - ' + response.name + '</h5>');
                     $('#crupHeader').removeClass('bg-success');
                     $('#crupHeader').addClass('bg-info');
@@ -224,52 +183,40 @@
                     $('#reff').val(response.reff).trigger('change');
                     setTimeout(() => {
                         $('#lokasi').val(response.lokasi).trigger('change');
-                        $('#kounter').val(response.counter).trigger('change');
                     }, 500);
+                    setTimeout(() => {
+                        $('#kounter').val(response.counter).trigger('change');
+                    }, 1000);
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');
-                });
+                },
+                error: function(response) {
+                    warningAlert(response.responseText);
+                }
+            });
         }
 
         function hapus(url) {
-            Swal.fire({
+            customAlert({
                 icon: 'question',
-                title: 'Are you sure want to permanent Delete this Data?',
+                title: "Are you sure want to permanent Delete this Data?",
                 showCancelButton: true,
-                confirmButtonText: 'Confirm Delete',
-                confirmButtonColor: '#dc3545'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    });
-                    $.ajax({
+                confirmButtonText: "Confirm Delete",
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: "Cancel",
+                callback: function() {
+                    sendAjax('', {
                         url: url,
                         type: "GET",
-                        beforeSend: function() {
-                            Swal.fire({
-                                iconHtml: '<i class="fa-light fa-hourglass-clock fa-beat text-warning"></i>',
-                                title: 'Please Wait',
-                                html: 'Fetching your data..',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                            });
-                            Swal.showLoading();
-                        },
-                        complete: function() {
-                            // Swal.close();
-                        },
                         success: function(response) {
-                            Swal.fire('Success!', response, 'success');
+                            successAlert(response);
+                            closeAlert();
                             setTimeout(() => {
-                                Swal.close();
+                                table.ajax.reload();
                             }, 1000);
-                            table.ajax.reload();
                         },
                         error: function(response) {
-                            Swal.fire('Warning!', response.responseText, 'warning');
+                            warningAlert(response.responseText);
                         }
                     });
                 }

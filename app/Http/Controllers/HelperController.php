@@ -27,6 +27,17 @@ class HelperController extends Controller
         return $version;
     }
 
+    static function numberToLetters($num)
+    {
+        $numeric = $num - 1;
+        $letter = '';
+        while ($numeric >= 0) {
+            $letter = chr($numeric % 26 + 65) . $letter;
+            $numeric = intval($numeric / 26) - 1;
+        }
+        return $letter;
+    }
+
     static function emitEvent($event, $data)
     {
         $client = new Client();
