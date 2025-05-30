@@ -92,8 +92,6 @@ class DailyStockController extends Controller
             $d->size = $m->size;
             $d->code = $m->code;
             $dc = $collect_daily_closing->where('master_needle_id', $m->id);
-            // $opening = 0;
-            // $closing = 0;
             foreach ($dc->all() as $r) {
                 $cout = 'xout' . str_replace('-', '', $r->tanggal);
                 $cin = 'xin' . str_replace('-', '', $r->tanggal);
@@ -102,22 +100,16 @@ class DailyStockController extends Controller
                 if ($r->out) {
                     $issue[] = $r->tanggal;
                     $out = $r->out;
-                    // $opening += $r->opening;
-                    // $closing += $r->closing;
                 }
                 if ($r->in) {
                     $add[] = $r->tanggal;
                     $in = $r->in;
-                    // $opening += $r->opening;
-                    // $closing += $r->closing;
                 }
                 $d->$cout = $out;
                 $d->$cin = $in;
             }
-            // $d->opening = $opening;
-            // $d->closing = $closing;
-            $d->opening = $dc->value('opening') ?? 0;
-            $d->closing = $dc->value('closing') ?? 0;
+            $d->opening = $dc->where('tanggal', $start->toDateString())->value('opening') ?? 0;
+            $d->closing = $dc->where('tanggal', $end->toDateString())->value('closing') ?? 0;
             $data[] = $d;
         }
 
@@ -188,8 +180,6 @@ class DailyStockController extends Controller
                 $d->size = $m->size;
                 $d->code = $m->code;
                 $dc = $collect_daily_closing->where('master_needle_id', $m->id);
-                // $opening = 0;
-                // $closing = 0;
                 foreach ($dc->all() as $r) {
                     $cout = 'xout' . str_replace('-', '', $r->tanggal);
                     $cin = 'xin' . str_replace('-', '', $r->tanggal);
@@ -198,22 +188,16 @@ class DailyStockController extends Controller
                     if ($r->out) {
                         $issue[] = $r->tanggal;
                         $out = $r->out;
-                        // $opening += $r->opening;
-                        // $closing += $r->closing;
                     }
                     if ($r->in) {
                         $add[] = $r->tanggal;
                         $in = $r->in;
-                        // $opening += $r->opening;
-                        // $closing += $r->closing;
                     }
                     $d->$cout = $out;
                     $d->$cin = $in;
                 }
-                // $d->opening = $opening;
-                // $d->closing = $closing;
-                $d->opening = $dc->value('opening') ?? 0;
-                $d->closing = $dc->value('closing') ?? 0;
+                $d->opening = $dc->where('tanggal', $start->toDateString())->value('opening') ?? 0;
+                $d->closing = $dc->where('tanggal', $end->toDateString())->value('closing') ?? 0;
                 $data[] = $d;
             }
 
