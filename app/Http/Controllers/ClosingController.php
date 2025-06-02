@@ -22,7 +22,7 @@ class ClosingController extends Controller
 
             DB::beginTransaction();
 
-            $stat = MasterStatus::where('name', 'RETURN')->first();
+            $stat = MasterStatus::where('name', '!=', 'RETURN')->first();
 
             $master_needle = MasterNeedle::when($master_needle_id, function ($q) use ($master_needle_id) {
                 $q->where('id', $master_needle_id);
