@@ -6,6 +6,7 @@ use App\Models\Needle;
 use App\Models\Stock;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class aTest extends Command
 {
@@ -28,12 +29,14 @@ class aTest extends Command
      */
     public function handle()
     {
-        $start = Carbon::parse('2025-05-29');
-        $end = Carbon::parse('2025-05-29');
+        // $start = Carbon::parse('2025-05-29');
+        // $end = Carbon::parse('2025-05-29');
 
-        $stock_report = self::generateStockReport($start->subDays(10), $end, 10, 'all');
+        // $stock_report = self::generateStockReport($start->subDays(10), $end, 10, 'all');
 
-        print_r($stock_report->value('in'));
+        // print_r($stock_report->value('in'));
+
+        echo Str::orderedUuid() . PHP_EOL;
     }
 
     static function generateStockReport($startDate, $endDate, $master_needle_id, $master_status_id)
