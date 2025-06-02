@@ -50,12 +50,16 @@ class DailyStockController extends Controller
             $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
             $start = Carbon::parse($filter_daily);
             $end = Carbon::parse($filter_daily);
+            $ys = Carbon::parse($filter_daily);
+            $ye = Carbon::parse($filter_daily);
         } else if ($filter_period == 'weekly') {
             $x = explode('-W', $filter_weekly);
             $year = $x[0];
             $week = $x[1];
             $start = Carbon::now()->setISODate($year, $week)->startOfWeek();
             $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
+            $ys = Carbon::now()->setISODate($year, $week)->startOfWeek();
+            $ye = Carbon::now()->setISODate($year, $week)->endOfWeek();
             $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
         } else if ($filter_period == 'monthly') {
             $x = explode('-', $filter_monthly);
@@ -65,21 +69,28 @@ class DailyStockController extends Controller
             $range = ["$tahun-$bulan-01 00:00:00", "$tahun-$bulan-$lastDay 23:59:59"];
             $start = Carbon::parse("$tahun-$bulan-01");
             $end = Carbon::parse("$tahun-$bulan-$lastDay");
+            $ys = Carbon::parse("$tahun-$bulan-01");
+            $ye = Carbon::parse("$tahun-$bulan-$lastDay");
         } else if ($filter_period == 'yearly') {
             $range = ["$filter_yearly-01-01 00:00:00", "$filter_yearly-12-31 23:59:59"];
             $start = Carbon::parse("$filter_yearly-01-01");
             $end = Carbon::parse("$filter_yearly-12-31");
+            $ys = Carbon::parse("$filter_yearly-01-01");
+            $ye = Carbon::parse("$filter_yearly-12-31");
         }
 
         $daily_closing = DailyClosing::whereBetween('tanggal', [$start, $end])->get();
         $collect_daily_closing = collect($daily_closing);
 
-        if ($collect_daily_closing->count() == 0) {
-            return response()->json(['found' => 'not'], 200);
-        }
-
         $issue = [];
         $add = [];
+
+        while ($ys->lte($ye)) {
+            $tanggal = $ys->toDateString();
+            $issue[] = $tanggal;
+            $add[] = $tanggal;
+            $ys->addDay();
+        }
 
         $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
         foreach ($master_needle as $k => $m) {
@@ -89,25 +100,23 @@ class DailyStockController extends Controller
             $d->tipe = $m->tipe;
             $d->size = $m->size;
             $d->code = $m->code;
-            $dc = $collect_daily_closing->groupBy('tanggal');
-            foreach ($dc->all() as $r) {
-                $cout = 'xout' . str_replace('-', '', $r->tanggal);
-                $cin = 'xin' . str_replace('-', '', $r->tanggal);
-                $out = 0;
-                $in = 0;
-                $dc2 = $collect_daily_closing->where('master_needle_id', $m->id)->where('tanggal', $r->tanggal);
-                foreach ($dc2->all() as $r2) {
-                    if ($r2->out) {
-                        $issue[] = $r2->tanggal;
-                        $out += $r2->out;
+            $dc = $collect_daily_closing->where('master_needle_id', $m->id);
+            foreach ($issue as $i) {
+                $dc2 = $dc->where('tanggal', $i);
+                $cout = 'xout' . str_replace('-', '', $i);
+                $cin = 'xin' . str_replace('-', '', $i);
+                foreach ($dc2->all() as $r) {
+                    $out = '';
+                    $in = '';
+                    if ($r->out > 0) {
+                        $out = $r->out;
                     }
-                    if ($r2->in) {
-                        $add[] = $r2->tanggal;
-                        $in += $r2->in;
+                    if ($r->in > 0) {
+                        $in = $r->in;
                     }
+                    $d->$cout = $out;
+                    $d->$cin = $in;
                 }
-                $d->$cout = $out == 0 ? '' : $out;
-                $d->$cin = $in == 0 ? '' : $in;
             }
             $d->opening = $dc->where('tanggal', $start->toDateString())->value('opening') ?? 0;
             $d->closing = $dc->where('tanggal', $end->toDateString())->value('closing') ?? 0;
@@ -135,6 +144,8 @@ class DailyStockController extends Controller
             $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
             $start = Carbon::parse($filter_daily);
             $end = Carbon::parse($filter_daily);
+            $ys = Carbon::parse($filter_daily);
+            $ye = Carbon::parse($filter_daily);
             $judul = 'Daily Stock ' . $filter_daily;
         } else if ($filter_period == 'weekly') {
             $x = explode('-W', $filter_weekly);
@@ -142,6 +153,8 @@ class DailyStockController extends Controller
             $week = $x[1];
             $start = Carbon::now()->setISODate($year, $week)->startOfWeek();
             $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
+            $ys = Carbon::now()->setISODate($year, $week)->startOfWeek();
+            $ye = Carbon::now()->setISODate($year, $week)->endOfWeek();
             $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
             $judul = 'Daily Stock ' . $filter_weekly;
         } else if ($filter_period == 'monthly') {
@@ -152,11 +165,15 @@ class DailyStockController extends Controller
             $range = ["$tahun-$bulan-01 00:00:00", "$tahun-$bulan-$lastDay 23:59:59"];
             $start = Carbon::parse("$tahun-$bulan-01");
             $end = Carbon::parse("$tahun-$bulan-$lastDay");
+            $ys = Carbon::parse("$tahun-$bulan-01");
+            $ye = Carbon::parse("$tahun-$bulan-$lastDay");
             $judul = 'Daily Stock ' . $filter_monthly;
         } else if ($filter_period == 'yearly') {
             $range = ["$filter_yearly-01-01 00:00:00", "$filter_yearly-12-31 23:59:59"];
             $start = Carbon::parse("$filter_yearly-01-01");
             $end = Carbon::parse("$filter_yearly-12-31");
+            $ys = Carbon::parse("$filter_yearly-01-01");
+            $ye = Carbon::parse("$filter_yearly-12-31");
             $judul = 'Daily Stock ' . $filter_yearly;
         }
 
@@ -164,13 +181,16 @@ class DailyStockController extends Controller
             $daily_closing = DailyClosing::whereBetween('tanggal', [$start, $end])->get();
             $collect_daily_closing = collect($daily_closing);
 
-            if ($collect_daily_closing->count() == 0) {
-                return response()->json('Data not found', 200);
-            }
-
             $issue = [];
             $add = [];
             $data = [];
+
+            while ($ys->lte($ye)) {
+                $tanggal = $ys->toDateString();
+                $issue[] = $tanggal;
+                $add[] = $tanggal;
+                $ys->addDay();
+            }
 
             $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
             foreach ($master_needle as $k => $m) {
@@ -180,25 +200,23 @@ class DailyStockController extends Controller
                 $d->tipe = $m->tipe;
                 $d->size = $m->size;
                 $d->code = $m->code;
-                $dc = $collect_daily_closing->groupBy('tanggal');
-                foreach ($dc->all() as $r) {
-                    $cout = 'xout' . str_replace('-', '', $r->tanggal);
-                    $cin = 'xin' . str_replace('-', '', $r->tanggal);
-                    $out = 0;
-                    $in = 0;
-                    $dc2 = $collect_daily_closing->where('master_needle_id', $m->id)->where('tanggal', $r->tanggal);
-                    foreach ($dc2->all() as $r2) {
-                        if ($r2->out) {
-                            $issue[] = $r2->tanggal;
-                            $out += $r2->out;
+                $dc = $collect_daily_closing->where('master_needle_id', $m->id);
+                foreach ($issue as $i) {
+                    $dc2 = $dc->where('tanggal', $i);
+                    $cout = 'xout' . str_replace('-', '', $i);
+                    $cin = 'xin' . str_replace('-', '', $i);
+                    foreach ($dc2->all() as $r) {
+                        $out = '';
+                        $in = '';
+                        if ($r->out > 0) {
+                            $out = $r->out;
                         }
-                        if ($r2->in) {
-                            $add[] = $r2->tanggal;
-                            $in += $r2->in;
+                        if ($r->in > 0) {
+                            $in = $r->in;
                         }
+                        $d->$cout = $out;
+                        $d->$cin = $in;
                     }
-                    $d->$cout = $out == 0 ? '' : $out;
-                    $d->$cin = $in == 0 ? '' : $in;
                 }
                 $d->opening = $dc->where('tanggal', $start->toDateString())->value('opening') ?? 0;
                 $d->closing = $dc->where('tanggal', $end->toDateString())->value('closing') ?? 0;
