@@ -89,22 +89,25 @@ class DailyStockController extends Controller
             $d->tipe = $m->tipe;
             $d->size = $m->size;
             $d->code = $m->code;
-            $dc = $collect_daily_closing->where('master_needle_id', $m->id);
+            $dc = $collect_daily_closing->groupBy('tanggal');
             foreach ($dc->all() as $r) {
                 $cout = 'xout' . str_replace('-', '', $r->tanggal);
                 $cin = 'xin' . str_replace('-', '', $r->tanggal);
-                $out = '';
-                $in = '';
-                if ($r->out) {
-                    $issue[] = $r->tanggal;
-                    $out = $r->out;
+                $out = 0;
+                $in = 0;
+                $dc2 = $collect_daily_closing->where('master_needle_id', $m->id)->where('tanggal', $r->tanggal);
+                foreach ($dc2->all() as $r2) {
+                    if ($r2->out) {
+                        $issue[] = $r2->tanggal;
+                        $out += $r2->out;
+                    }
+                    if ($r2->in) {
+                        $add[] = $r2->tanggal;
+                        $in += $r2->in;
+                    }
                 }
-                if ($r->in) {
-                    $add[] = $r->tanggal;
-                    $in = $r->in;
-                }
-                $d->$cout = $out;
-                $d->$cin = $in;
+                $d->$cout = $out == 0 ? '' : $out;
+                $d->$cin = $in == 0 ? '' : $in;
             }
             $d->opening = $dc->where('tanggal', $start->toDateString())->value('opening') ?? 0;
             $d->closing = $dc->where('tanggal', $end->toDateString())->value('closing') ?? 0;
@@ -177,22 +180,25 @@ class DailyStockController extends Controller
                 $d->tipe = $m->tipe;
                 $d->size = $m->size;
                 $d->code = $m->code;
-                $dc = $collect_daily_closing->where('master_needle_id', $m->id);
+                $dc = $collect_daily_closing->groupBy('tanggal');
                 foreach ($dc->all() as $r) {
                     $cout = 'xout' . str_replace('-', '', $r->tanggal);
                     $cin = 'xin' . str_replace('-', '', $r->tanggal);
-                    $out = '';
-                    $in = '';
-                    if ($r->out) {
-                        $issue[] = $r->tanggal;
-                        $out = $r->out;
+                    $out = 0;
+                    $in = 0;
+                    $dc2 = $collect_daily_closing->where('master_needle_id', $m->id)->where('tanggal', $r->tanggal);
+                    foreach ($dc2->all() as $r2) {
+                        if ($r2->out) {
+                            $issue[] = $r2->tanggal;
+                            $out += $r2->out;
+                        }
+                        if ($r2->in) {
+                            $add[] = $r2->tanggal;
+                            $in += $r2->in;
+                        }
                     }
-                    if ($r->in) {
-                        $add[] = $r->tanggal;
-                        $in = $r->in;
-                    }
-                    $d->$cout = $out;
-                    $d->$cin = $in;
+                    $d->$cout = $out == 0 ? '' : $out;
+                    $d->$cin = $in == 0 ? '' : $in;
                 }
                 $d->opening = $dc->where('tanggal', $start->toDateString())->value('opening') ?? 0;
                 $d->closing = $dc->where('tanggal', $end->toDateString())->value('closing') ?? 0;
