@@ -46,8 +46,8 @@
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item custom-dropdown-item {{ $page == 'user_report' ? 'rounded-lg bg-warning' : '' }}"
-                        href="{{ route('user.report') }}">
+                    <a class="dropdown-item custom-dropdown-item {{ $page == 'user_timing_log' ? 'rounded-lg bg-warning' : '' }}"
+                        href="{{ route('user.timing-log') }}">
                         Timing Log
                     </a>
                 </li>

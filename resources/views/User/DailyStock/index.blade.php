@@ -178,7 +178,7 @@
 
         function unduh() {
             $.ajax({
-                url: "{{ route('user.usage-needle.unduh', ['locale' => app()->getLocale()]) }}",
+                url: "{{ route('user.daily-stock.unduh', ['locale' => app()->getLocale()]) }}",
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",

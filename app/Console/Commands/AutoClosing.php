@@ -2,14 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\DailyClosing;
-use App\Models\MasterNeedle;
-use App\Models\Needle;
-use App\Models\Stock;
+use App\Http\Controllers\ClosingController;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AutoClosing extends Command
 {
@@ -33,75 +30,23 @@ class AutoClosing extends Command
     public function handle()
     {
         $now = Carbon::now();
-        $start = '2025-05-01';
-        $end = '2025-05-31';
-        // $start = $now->today();
-        // $end = $now->today();
+        // $start = '2025-05-01';
+        // $end = '2025-05-31';
+        $start = $now->today();
+        $end = $now->today();
 
-        $x = self::generateStockReport($now, $start, $end);
-
-        echo $x;
-    }
-
-    static function generateStockReport($now, $startDate, $endDate)
-    {
         try {
-            $start = Carbon::parse($startDate);
-            $end = Carbon::parse($endDate);
-
-            DB::beginTransaction();
-
-            $master_needle = MasterNeedle::get();
-            while ($start->lte($end)) {
-                $tanggal = $start->toDateString();
-                $kemarin = Carbon::parse($tanggal)->subDay()->toDateString();
-                foreach ($master_needle as $m) {
-                    $in = Stock::whereDate('created_at', $tanggal)
-                        ->where('master_needle_id', $m->id)
-                        ->sum('in');
-                    $out = Needle::whereDate('created_at', $tanggal)
-                        ->where('master_needle_id', $m->id)
-                        ->count();
-
-                    $dc = DailyClosing::where('master_needle_id', $m->id)
-                        ->whereDate('tanggal', $kemarin)
-                        ->first();
-
-                    $opening = $dc ? $dc->closing : 0;
-                    $closing = $opening + $in - $out;
-
-                    $dc = DailyClosing::where('master_needle_id', $m->id)
-                        ->whereDate('tanggal', $tanggal)
-                        ->first();
-                    if ($dc) {
-                        $dc->opening = $opening;
-                        $dc->in = $in;
-                        $dc->out = $out;
-                        $dc->closing = $closing;
-                        $dc->updated_by = 1;
-                        $dc->updated_at = $now;
-                        $dc->save();
-                    } else {
-                        DailyClosing::create([
-                            'master_needle_id' => $m->id,
-                            'tanggal' => $tanggal,
-                            'opening' => $opening,
-                            'in' => $in,
-                            'out' => $out,
-                            'closing' => $closing,
-                            'created_by' => 1,
-                            'created_at' => $now,
-                        ]);
-                    }
-                }
-                $start->addDay();
+            Log::channel('AutoDailyClosing')->info('START DAILY CLOSING ' . Carbon::now()->toDateTimeString());
+            $x = ClosingController::generateStockReport($now, $start, $end, null);
+            if ($x == 'sukses') {
+                Log::channel('AutoDailyClosing')->info('END DAILY CLOSING ' . Carbon::now()->toDateTimeString());
+            } else {
+                Log::channel('AutoDailyClosing')->info('ERROR DAILY CLOSING ' . $x . ' ' . Carbon::now()->toDateTimeString());
+                Log::channel('AutoDailyClosing')->info('END DAILY CLOSING ' . Carbon::now()->toDateTimeString());
             }
-
-            DB::commit();
-            return 'sukses';
         } catch (Exception $e) {
-            DB::rollBack();
-            return $e->getMessage();
+            Log::channel('AutoDailyClosing')->info('ERROR DAILY CLOSING ' . $e->getMessage() . ' ' . Carbon::now()->toDateTimeString());
+            Log::channel('AutoDailyClosing')->info('END DAILY CLOSING ' . Carbon::now()->toDateTimeString());
         }
     }
 }

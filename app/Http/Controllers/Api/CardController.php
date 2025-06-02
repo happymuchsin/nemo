@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\ClosingController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Http\Resources\ApiResource;
@@ -90,6 +91,8 @@ class CardController extends Controller
                 if ($tipe == 'approval') {
                     $approval = $request->approval;
                     $username = $request->username;
+                    $scan_rfid = $request->scan_rfid;
+                    $scan_box = $request->scan_box;
                     $s = Approval::where('id', $approval)->first();
                     if ($s) {
                         if ($s->status == 'APPROVE') {
@@ -126,6 +129,8 @@ class CardController extends Controller
                                 'master_box_id' => $b->id,
                                 'master_needle_id' => $master_needle_id,
                                 'master_status_id' => $stat->id,
+                                'scan_rfid' => $scan_rfid,
+                                'scan_box' => $scan_box,
                                 'status' => '',
                                 'remark' => '',
                                 'created_by' => $username,
@@ -138,6 +143,8 @@ class CardController extends Controller
                                 'master_box_id' => $b->id,
                                 'master_needle_id' => $master_needle_id,
                                 'master_status_id' => $stat->id,
+                                'scan_rfid' => $scan_rfid,
+                                'scan_box' => $scan_box,
                                 'status' => '',
                                 'remark' => '',
                                 'created_by' => $username,
@@ -174,6 +181,12 @@ class CardController extends Controller
                                 'created_by' => $username,
                                 'created_at' => $now,
                             ]), null, $username);
+
+                            $closing = ClosingController::generateStockReport($now, $now->today(), $now->today(), $master_needle_id);
+                            if ($closing != 'sukses') {
+                                DB::rollBack();
+                                return new ApiResource(422, 'Sync closing failed', '');
+                            }
 
                             $s->status = 'DONE';
                             $s->updated_at = $now;

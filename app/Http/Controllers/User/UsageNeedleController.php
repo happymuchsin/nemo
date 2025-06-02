@@ -335,7 +335,6 @@ class UsageNeedleController extends Controller
             }
 
             $ws->getStyle("A" . $kk + 1 . ':' . $col1 . $kkk)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            $ws->getStyle("A" . $kk + 1 . ':' . $col1 . $kkk)->getFont()->setBold(true)->setSize(12);
 
             $ws->getStyle('A1')->getFont()->setBold(true)->setSize(16);
             $ws->mergeCells('A1:' . $col1 . '1')->getCell('A1')->setValue($judul)->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);

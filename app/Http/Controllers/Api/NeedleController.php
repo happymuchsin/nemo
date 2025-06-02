@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\ClosingController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Http\Resources\ApiResource;
 use App\Models\Approval;
+use App\Models\HistoryOutStock;
 use App\Models\Needle;
 use App\Models\MasterBox;
 use App\Models\MasterCounter;
@@ -48,6 +50,8 @@ class NeedleController extends Controller
         $area_id = $request->area_id;
         $lokasi_id = $request->lokasi_id;
         $now = Carbon::now();
+        $scan_rfid = $request->scan_rfid;
+        $scan_box = $request->scan_box;
 
         try {
             $user = User::with(['division', 'position'])->where('rfid', $idCard)->first();
@@ -186,6 +190,8 @@ class NeedleController extends Controller
                     'master_needle_id' => $needle,
                     'master_status_id' => $stat->id,
                     'status' => $request_status,
+                    'scan_rfid' => $scan_rfid,
+                    'scan_box' => $scan_box,
                     'remark' => $remark,
                     'filename' => $filename,
                     'ext' => $ext,
@@ -199,6 +205,8 @@ class NeedleController extends Controller
                     'master_box_id' => $box->id,
                     'master_needle_id' => $needle,
                     'master_status_id' => $stat->id,
+                    'scan_rfid' => $scan_rfid,
+                    'scan_box' => $scan_box,
                     'status' => $request_status,
                     'remark' => $remark,
                     'filename' => $filename,
@@ -215,17 +223,42 @@ class NeedleController extends Controller
                     return new ApiResource(422, 'Stock not found', '');
                 }
 
+                $x = Stock::where('id', $stock->id)->first();
+
                 Stock::where('id', $stock->id)->update([
-                    'out' => DB::raw("`out` + 1"),
+                    'out' => $x->out + 1,
                     'updated_by' => $username,
                     'updated_at' => $now,
                 ]);
                 HelperController::activityLog("ANDROID UPDATE STOCK", 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
                     'id' => $stock->id,
-                    'out' => 'out + 1',
+                    'out' => $x->out + 1,
                     'updated_by' => $username,
                     'updated_at' => $now,
                 ]), $stock->id, $username);
+
+                HistoryOutStock::create([
+                    'stock_id' => $stock->id,
+                    'stock_before' => $x->in - $x->out,
+                    'qty' => 1,
+                    'stock_after' => $x->in - $x->out - 1,
+                    'created_by' => $username,
+                    'created_at' => $now,
+                ]);
+                HelperController::activityLog("ANDROID CREATE HISTORY OUT STOCK", 'history_out_stocks', 'create', $request->ip(), $request->userAgent(), json_encode([
+                    'stock_id' => $stock->id,
+                    'stock_before' => $x->in - $x->out,
+                    'qty' => 1,
+                    'stock_after' => $x->in - $x->out - 1,
+                    'created_by' => $username,
+                    'created_at' => $now,
+                ]), null, $username);
+
+                $closing = ClosingController::generateStockReport($now, $now->today(), $now->today(), $needle);
+                if ($closing != 'sukses') {
+                    DB::rollBack();
+                    return new ApiResource(422, 'Sync closing failed', '');
+                }
 
                 if ($img) {
                     if (strlen($now->month) == 1) {
@@ -253,6 +286,8 @@ class NeedleController extends Controller
                         'master_box_id' => $box->id,
                         'master_needle_id' => $needle,
                         'master_status_id' => $stat->id,
+                        'scan_rfid' => $scan_rfid,
+                        'scan_box' => $scan_box,
                         'status' => $request_status,
                         'remark' => $remark,
                         'filename' => $filename,
@@ -267,6 +302,8 @@ class NeedleController extends Controller
                         'master_box_id' => $box->id,
                         'master_needle_id' => $needle,
                         'master_status_id' => $stat->id,
+                        'scan_rfid' => $scan_rfid,
+                        'scan_box' => $scan_box,
                         'status' => $request_status,
                         'remark' => $remark,
                         'filename' => $filename,

@@ -34,6 +34,7 @@ use App\Http\Controllers\User\NeedleReportController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\StockController;
 use App\Http\Controllers\User\SummaryStockController;
+use App\Http\Controllers\User\TimingLogController;
 use App\Http\Controllers\User\UsageNeedleController;
 
 /*
@@ -100,6 +101,14 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('', [DailyStockController::class, 'index'])->name('user.daily-stock');
                     Route::post('data', [DailyStockController::class, 'data'])->name('user.daily-stock.data');
                     Route::post('unduh', [DailyStockController::class, 'unduh'])->name('user.daily-stock.unduh');
+                });
+
+            Route::prefix('/timing-log')
+                ->middleware(['permission:user-report'])
+                ->group(function () {
+                    Route::get('', [TimingLogController::class, 'index'])->name('user.timing-log');
+                    Route::get('data', [TimingLogController::class, 'data'])->name('user.timing-log.data');
+                    Route::post('unduh', [TimingLogController::class, 'unduh'])->name('user.timing-log.unduh');
                 });
 
             Route::prefix('/needle-report')
