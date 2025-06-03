@@ -9,6 +9,7 @@ use App\Models\MasterNeedle;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -105,18 +106,18 @@ class DailyStockController extends Controller
                 $dc2 = $dc->where('tanggal', $i);
                 $cout = 'xout' . str_replace('-', '', $i);
                 $cin = 'xin' . str_replace('-', '', $i);
+                $out = '';
+                $in = '';
                 foreach ($dc2->all() as $r) {
-                    $out = '';
-                    $in = '';
                     if ($r->out > 0) {
                         $out = $r->out;
                     }
                     if ($r->in > 0) {
                         $in = $r->in;
                     }
-                    $d->$cout = $out;
-                    $d->$cin = $in;
                 }
+                $d->$cout = $out;
+                $d->$cin = $in;
             }
             $d->opening = $dc->where('tanggal', $start->toDateString())->value('opening') ?? 0;
             $d->closing = $dc->where('tanggal', $end->toDateString())->value('closing') ?? 0;
@@ -192,6 +193,7 @@ class DailyStockController extends Controller
                 $ys->addDay();
             }
 
+            $total = [];
             $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
             foreach ($master_needle as $k => $m) {
                 $d = new stdClass;
@@ -205,18 +207,18 @@ class DailyStockController extends Controller
                     $dc2 = $dc->where('tanggal', $i);
                     $cout = 'xout' . str_replace('-', '', $i);
                     $cin = 'xin' . str_replace('-', '', $i);
+                    $out = '';
+                    $in = '';
                     foreach ($dc2->all() as $r) {
-                        $out = '';
-                        $in = '';
                         if ($r->out > 0) {
                             $out = $r->out;
                         }
                         if ($r->in > 0) {
                             $in = $r->in;
                         }
-                        $d->$cout = $out;
-                        $d->$cin = $in;
                     }
+                    $d->$cout = $out;
+                    $d->$cin = $in;
                 }
                 $d->opening = $dc->where('tanggal', $start->toDateString())->value('opening') ?? 0;
                 $d->closing = $dc->where('tanggal', $end->toDateString())->value('closing') ?? 0;
@@ -274,6 +276,7 @@ class DailyStockController extends Controller
             $ws->getStyle('A1')->getFont()->setBold(true)->setSize(16);
             $ws->mergeCells('A1:' . $col . '1')->getCell('A1')->setValue($judul)->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
+            $kStart = 5;
             $k = 5;
             foreach ($data as $d) {
                 $k++;
@@ -309,6 +312,19 @@ class DailyStockController extends Controller
                 $ws->getStyle("A$k:{$col}{$k}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
             }
 
+            $colTotal = HelperController::numberToLetters($last + 1);
+            $kEnd = $k + 1;
+            $ws->getStyle("A$kEnd:{$colTotal}{$kEnd}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $ws->mergeCells("A$kEnd:E$kEnd")->getCell("A$kEnd")->setValue('Total')->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $ws->getCell("F$kEnd")->setValue("=SUM(F$kStart:F{$kEnd})");
+            $ws->getCell("{$colTotal}{$kEnd}")->setValue("=SUM({$colTotal}{$kStart}:{$colTotal}{$kEnd})");
+            $startIndex = Coordinate::columnIndexFromString('G');
+            $endIndex = Coordinate::columnIndexFromString($colTotal);
+
+            for ($colIndex = $startIndex; $colIndex <= $endIndex; $colIndex++) {
+                $colLetter = HelperController::numberToLetters($colIndex);
+                $ws->getCell("{$colLetter}{$kEnd}")->setValue("=SUM({$colLetter}{$kStart}:{$colLetter}{$kEnd})");
+            }
 
             foreach ($ws->getColumnIterator() as $column) {
                 $ws->getColumnDimension($column->getColumnIndex())->setAutoSize(true);

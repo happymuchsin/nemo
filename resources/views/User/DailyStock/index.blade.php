@@ -28,6 +28,8 @@
             <x-layout.table :id="'table'">
                 <x-slot:thead>
                 </x-slot:thead>
+                <x-slot:tfoot>
+                </x-slot:tfoot>
             </x-layout.table>
         </x-slot:body>
     </x-layout.content>
@@ -132,7 +134,21 @@
                     });
                     header += `</tr>`;
 
+                    var footer = `<tr>
+                            <th colspan="5" class="text-center">Total</th>
+                            <th></th>
+                        `;
+                    $.each(response.issue, function(ki, vi) {
+                        footer += `<th></th>`;
+                    });
+                    $.each(response.add, function(ka, va) {
+                        footer += `<th></th>`;
+                    });
+                    footer += `<th></th>
+                        </tr>`;
+
                     $('#tableHead').html(header);
+                    $('#tableFoot').html(footer);
 
                     setTimeout(() => {
                         table = initDataTable('table', '', '', '', {
@@ -148,6 +164,19 @@
                                 // Ubah isi kolom pertama (index ke-0) jadi nomor urut
                                 $('td:eq(0)', row).html(table.page.info().start + index +
                                     1);
+                            },
+                            footerCallback: function(tfoot, data, start, end, display) {
+                                var api = this.api();
+                                if (end > 0) {
+                                    for (var s = 5; s <= api.columns().count() - 1; s++) {
+                                        var x = api.column(s, {
+                                            search: 'applied'
+                                        }).data().reduce(function(a, b) {
+                                            return +a + +b;
+                                        }, 0);
+                                        $(api.column(s).footer()).html(x);
+                                    }
+                                }
                             }
                         });
                         $.each(response.data, function(k, v) {

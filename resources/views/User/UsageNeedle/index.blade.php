@@ -67,6 +67,14 @@
                         @endforeach
                     </tr>
                 </x-slot:thead>
+                {{-- <x-slot:tfoot>
+                    <tr>
+                        <th colspan="8" class="text-center">Total</th>
+                        @foreach ($master_needle as $d)
+                            <th></th>
+                        @endforeach
+                    </tr>
+                </x-slot:tfoot> --}}
             </x-layout.table>
         </x-slot:body>
     </x-layout.content>
@@ -77,8 +85,8 @@
 
         $(document).ready(function() {
             $('#collSidebar').attr('hidden', true);
-            $('#table').addClass('nowrap');
             $('#tableSummary').addClass('nowrap');
+            $('#table').addClass('nowrap');
             $('#filter_period').on('change', function() {
                 if ($(this).val() == 'daily') {
                     $('.filter-daily').show();
@@ -204,7 +212,20 @@
                     rowCallback: function(row, data, index) {
                         // Ubah isi kolom pertama (index ke-0) jadi nomor urut
                         $('td:eq(0)', row).html(table.page.info().start + index + 1);
-                    }
+                    },
+                    // footerCallback: function(tfoot, data, start, end, display) {
+                    //     var api = this.api();
+                    //     if (end > 0) {
+                    //         for (var s = 8; s <= api.columns().count() - 1; s++) {
+                    //             var x = api.column(s, {
+                    //                 search: 'applied'
+                    //             }).data().reduce(function(a, b) {
+                    //                 return +a + +b;
+                    //             }, 0);
+                    //             $(api.column(s).footer()).html(x);
+                    //         }
+                    //     }
+                    // }
                 });
             }, 500);
         })
