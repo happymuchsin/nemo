@@ -35,6 +35,7 @@ class ApprovalController extends Controller
     {
         $bulan = $request->bulan;
         $tahun = $request->tahun;
+        $filter_status = $request->filter_status;
 
         $master_approval = MasterApproval::where('user_id', Auth::user()->id)->first();
         if ($master_approval) {
@@ -49,7 +50,7 @@ class ApprovalController extends Controller
             ->when($bulan != 'all', function ($q) use ($bulan) {
                 $q->whereMonth('tanggal', $bulan);
             })
-            ->where('status', 'WAITING')
+            ->where('status', $filter_status)
             ->orderBy('created_at', 'desc')
             ->get();
         return datatables()->of($data)

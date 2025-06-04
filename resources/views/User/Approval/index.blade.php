@@ -7,9 +7,15 @@
             <x-filter.user-filter>
                 <x-slot:filter>
                     <x-filter.filter-date />
+                    <x-filter.filter :tipe="'select'" :label="'Status'" :id="'filter_status'" :colom="'col-sm-auto'">
+                        <x-slot:option>
+                            <option value="WAITING">WAITING</option>
+                            <option value="APPROVE">APPROVE</option>
+                            <option value="REJECT">REJECT</option>
+                        </x-slot:option>
+                    </x-filter.filter>
                     <div class="form-group">
-                        <x-layout.button :class="'btn-primary'" :id="'cari'" :onclick="'table.ajax.reload()'" :icon="'fa fa-search'"
-                            :name="'SEARCH'" />
+                        <x-layout.button :class="'btn-primary'" :id="'cari'" :onclick="'table.ajax.reload()'" :icon="'fa fa-search'" :name="'SEARCH'" />
                     </div>
                 </x-slot:filter>
             </x-filter.user-filter>
@@ -47,6 +53,7 @@
             $('#collSidebar').attr('hidden', true);
             $('#bulan').val("{{ date('n') }}").trigger('change');
             $('#tahun').val("{{ date('Y') }}").trigger('change');
+            $('#filter_status').val('WAITING').trigger('change');
 
             table = initDataTable('table', '', '', '', {
                 ajax: {
@@ -54,6 +61,7 @@
                     data: function(d) {
                         d.bulan = $('#bulan').val();
                         d.tahun = $('#tahun').val();
+                        d.filter_status = $('#filter_status').val();
                     },
                 },
                 columns: [{
