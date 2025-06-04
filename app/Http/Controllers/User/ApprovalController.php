@@ -45,7 +45,9 @@ class ApprovalController extends Controller
         }
 
         $data = Approval::with(['user', 'needle', 'master_needle', 'master_line', 'master_style'])
-            ->where('master_approval_id', $master_approval_id)
+            ->when(Auth::user()->username != 'developer', function ($q) use ($master_approval_id) {
+                $q->where('master_approval_id', $master_approval_id);
+            })
             ->whereYear('tanggal', $tahun)
             ->when($bulan != 'all', function ($q) use ($bulan) {
                 $q->whereMonth('tanggal', $bulan);
