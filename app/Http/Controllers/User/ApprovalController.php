@@ -112,8 +112,13 @@ class ApprovalController extends Controller
             })
             ->addColumn('action', function ($q) {
                 $h = '';
-                $h .= '<a href="#" class="text-center" title="Approve" onclick="approval(\'' . route('user.approval.approval', ['id' => $q->id, 'status' => 'approve']) . '\', \'' . 'APPROVE' . '\')"><i class="fa fa-check text-success mr-3"></i></a>';
-                $h .= '<a href="#" class="text-center" title="Reject" onclick="approval(\'' . route('user.approval.approval', ['id' => $q->id, 'status' => 'reject']) . '\', \'' . 'REJECT' . '\')"><i class="fa fa-x text-danger mr-3"></i></a>';
+                if ($q->status == 'WAITING') {
+                    $h .= '<a href="#" class="text-center" title="Approve" onclick="approval(\'' . route('user.approval.approval', ['id' => $q->id, 'status' => 'approve']) . '\', \'' . 'APPROVE' . '\')"><i class="fa fa-check text-success mr-3"></i></a>';
+                    $h .= '<a href="#" class="text-center" title="Reject" onclick="approval(\'' . route('user.approval.approval', ['id' => $q->id, 'status' => 'reject']) . '\', \'' . 'REJECT' . '\')"><i class="fa fa-x text-danger mr-3"></i></a>';
+                } else {
+                    $h .= '<a href="#" class="text-center" title="Approve"><i class="fa fa-check text-secondary mr-3"></i></a>';
+                    $h .= '<a href="#" class="text-center" title="Reject"><i class="fa fa-x text-secondary mr-3"></i></a>';
+                }
                 return $h;
             })
             ->rawColumns(['action', 'gambar'])
