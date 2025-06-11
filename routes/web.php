@@ -30,12 +30,14 @@ use App\Http\Controllers\NotifController;
 use App\Http\Controllers\User\ApprovalController;
 use App\Http\Controllers\User\DailyStockController;
 use App\Http\Controllers\User\DashboardController as UserDashboard;
+use App\Http\Controllers\User\DeadStockController;
 use App\Http\Controllers\User\NeedleReportController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\StockController;
 use App\Http\Controllers\User\SummaryStockController;
 use App\Http\Controllers\User\TimingLogController;
 use App\Http\Controllers\User\UsageNeedleController;
+use App\Http\Controllers\User\WarehouseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -132,6 +134,31 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::post('update', [StockController::class, 'update'])->name('user.stock.update');
                     Route::get('hapus/{id?}', [StockController::class, 'hapus'])->name('user.stock.hapus');
                     Route::get('clear/{id?}', [StockController::class, 'clear'])->name('user.stock.clear');
+                });
+
+            Route::prefix('/warehouse')
+                ->middleware(['permission:user-warehouse'])
+                ->group(function () {
+                    Route::get('', [WarehouseController::class, 'index'])->name('user.warehouse');
+                    Route::get('data', [WarehouseController::class, 'data'])->name('user.warehouse.data');
+                    Route::post('spinner', [WarehouseController::class, 'spinner'])->name('user.warehouse.spinner');
+                    Route::post('needle', [WarehouseController::class, 'needle'])->name('user.warehouse.needle');
+                    Route::post('store', [WarehouseController::class, 'store'])->name('user.warehouse.store');
+                    Route::get('get/{id?}', [WarehouseController::class, 'get'])->name('user.warehouse.get');
+                    Route::get('history', [WarehouseController::class, 'history'])->name('user.warehouse.history');
+                    Route::post('update', [WarehouseController::class, 'update'])->name('user.warehouse.update');
+                    Route::get('hapus/{id?}', [WarehouseController::class, 'hapus'])->name('user.warehouse.hapus');
+                    Route::post('transfer', [WarehouseController::class, 'transfer'])->name('user.warehouse.transfer');
+                });
+
+            Route::prefix('/dead-stock')
+                ->middleware(['permission:user-dead-stock'])
+                ->group(function () {
+                    Route::get('', [DeadStockController::class, 'index'])->name('user.dead-stock');
+                    Route::get('data', [DeadStockController::class, 'data'])->name('user.dead-stock.data');
+                    Route::get('get/{id?}', [DeadStockController::class, 'get'])->name('user.dead-stock.get');
+                    Route::get('history', [DeadStockController::class, 'history'])->name('user.dead-stock.history');
+                    Route::post('transfer', [DeadStockController::class, 'transfer'])->name('user.dead-stock.transfer');
                 });
 
             Route::prefix('/approval')

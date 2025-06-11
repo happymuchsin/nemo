@@ -69,8 +69,7 @@
                                     class="fa fa-circle-question"></i> Forgot Password</button>
                         </div> --}}
                         <div class="col">
-                            <button type="submit" class="btn btn-primary btn-block"><i
-                                    class="fa fa-right-to-bracket"></i> Sign In</button>
+                            <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-right-to-bracket"></i> Sign In</button>
                         </div>
                         <!-- /.col -->
                     </div>
@@ -84,7 +83,7 @@
                 <img src="{{ asset('assets/img/anggun.png') }}" height="80">
             </div>
         @endif
-        <h5 class="text-center">1.1.8</h5>
+        <h5 class="text-center">1.1.9</h5>
     </div>
     <!-- /.login-box -->
 

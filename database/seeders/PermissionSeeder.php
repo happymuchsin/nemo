@@ -37,6 +37,16 @@ class PermissionSeeder extends Seeder
                 'description' => 'Stock'
             ],
             [
+                'name' => 'user-warehouse',
+                'display_name' => 'user-warehouse',
+                'description' => 'Warehouse'
+            ],
+            [
+                'name' => 'user-dead-stock',
+                'display_name' => 'user-dead-stock',
+                'description' => 'Dead Stock'
+            ],
+            [
                 'name' => 'user-approval',
                 'display_name' => 'user-approval',
                 'description' => 'Approval'

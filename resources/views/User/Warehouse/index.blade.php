@@ -2,14 +2,12 @@
 @section('title', $title)
 
 @section('page-content')
-    <x-layout.content :name="'Stock'">
+    <x-layout.content :name="'Warehouse'">
         <x-slot:body>
             <x-layout.table :id="'table'">
                 <x-slot:thead>
                     <tr>
                         <th>Area</th>
-                        <th>Counter</th>
-                        <th>Box</th>
                         <th>Brand</th>
                         <th>Type</th>
                         <th>Size</th>
@@ -34,8 +32,6 @@
                     @endforeach
                 </x-slot:option>
             </x-modal.body>
-            <x-modal.body :tipe="'select'" :label="'Counter'" :id="'master_counter_id'" />
-            <x-modal.body :tipe="'select'" :label="'Box'" :id="'master_box_id'" />
             <x-modal.body :tipe="'select'" :label="'Needle Category'" :id="'needle_category'" :defaultOption="false">
                 <x-slot:option>
                     <option value="all">All</option>
@@ -60,12 +56,6 @@
                 <div class="col">
                     <x-modal.body :tipe="'text'" :label="'Area'" :id="'edit_area'" :readonly="'readonly'" />
                 </div>
-                <div class="col">
-                    <x-modal.body :tipe="'text'" :label="'Counter'" :id="'edit_counter'" :readonly="'readonly'" />
-                </div>
-                <div class="col">
-                    <x-modal.body :tipe="'text'" :label="'Box'" :id="'edit_box'" :readonly="'readonly'" />
-                </div>
             </div>
             <div class="row">
                 <div class="col">
@@ -89,21 +79,13 @@
         </x-slot:footer>
     </x-modal.modal>
 
-    <x-modal.modal :name="'add'" :ukuran="'modal-xl'">
+    <x-modal.modal :name="'add'" :ukuran="'modal-fullscreen'">
         <x-slot:body>
             <input type="hidden" id="addKey">
             <div class="row">
                 <div class="col">
                     <x-modal.body :tipe="'text'" :label="'Area'" :id="'add_area'" :readonly="'readonly'" />
                 </div>
-                <div class="col">
-                    <x-modal.body :tipe="'text'" :label="'Counter'" :id="'add_counter'" :readonly="'readonly'" />
-                </div>
-                <div class="col">
-                    <x-modal.body :tipe="'text'" :label="'Box'" :id="'add_box'" :readonly="'readonly'" />
-                </div>
-            </div>
-            <div class="row">
                 <div class="col">
                     <x-modal.body :tipe="'text'" :label="'Brand'" :id="'add_brand'" :readonly="'readonly'" />
                 </div>
@@ -117,8 +99,14 @@
                     <x-modal.body :tipe="'text'" :label="'Code'" :id="'add_code'" :readonly="'readonly'" />
                 </div>
             </div>
-            <x-modal.body :tipe="'text'" :label="'Machine'" :id="'add_machine'" :readonly="'readonly'" />
-            <x-modal.body :tipe="'number'" :label="'Qty'" :id="'add_qty'" />
+            <div class="row">
+                <div class="col-sm-8">
+                    <x-modal.body :tipe="'text'" :label="'Machine'" :id="'add_machine'" :readonly="'readonly'" />
+                </div>
+                <div class="col-sm-4">
+                    <x-modal.body :tipe="'number'" :label="'Qty'" :id="'add_qty'" />
+                </div>
+            </div>
             <x-layout.table :id="'tableHistory'">
                 <x-slot:thead>
                     <tr>
@@ -136,66 +124,77 @@
         </x-slot:footer>
     </x-modal.modal>
 
+    <x-modal.modal :name="'transfer'" :ukuran="'modal-fullscreen'">
+        <x-slot:body>
+            <input type="hidden" id="transferKey">
+            <div class="row">
+                <div class="col">
+                    <x-modal.body :tipe="'text'" :label="'Area'" :id="'transfer_area'" :readonly="'readonly'" />
+                </div>
+                <div class="col">
+                    <x-modal.body :tipe="'text'" :label="'Brand'" :id="'transfer_brand'" :readonly="'readonly'" />
+                </div>
+                <div class="col">
+                    <x-modal.body :tipe="'text'" :label="'Tipe'" :id="'transfer_tipe'" :readonly="'readonly'" />
+                </div>
+                <div class="col">
+                    <x-modal.body :tipe="'text'" :label="'Size'" :id="'transfer_size'" :readonly="'readonly'" />
+                </div>
+                <div class="col">
+                    <x-modal.body :tipe="'text'" :label="'Code'" :id="'transfer_code'" :readonly="'readonly'" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-8">
+                    <x-modal.body :tipe="'text'" :label="'Machine'" :id="'transfer_machine'" :readonly="'readonly'" />
+                </div>
+                <div class="col-sm-4">
+                    <x-modal.body :tipe="'text'" :label="'Remaining Stock'" :id="'transfer_stock'" :readonly="'readonly'" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <h3>Counter List</h3>
+                    <x-layout.table :id="'tableCounter'">
+                        <x-slot:thead>
+                        </x-slot:thead>
+                    </x-layout.table>
+                </div>
+                <div class="col-sm-6">
+                    <h3>History Transfer</h3>
+                    <x-layout.table :id="'tableTransfer'">
+                        <x-slot:thead>
+                            <tr>
+                                <th>Date Time</th>
+                                <th>Counter</th>
+                                <th>Box</th>
+                                <th>Qty</th>
+                            </tr>
+                        </x-slot:thead>
+                    </x-layout.table>
+                </div>
+            </div>
+        </x-slot:body>
+        <x-slot:footer>
+            <x-layout.button :class="'btn-primary'" :id="''" :onclick="'transfer()'" :icon="'fa fa-save'" :name="'Transfer'" />
+        </x-slot:footer>
+    </x-modal.modal>
+
     <script>
         var table = null,
             tableStore = null,
             tableHistory = null,
+            tableCounter = null,
+            tableTransfer = null,
             collectMasterNeedleId = [];
         $(document).ready(function() {
             $('#collSidebar').attr('hidden', true);
             initSelect('master_area_id', 'Select Area', 'storeModal');
-            initSelect('master_counter_id', 'Select Counter', 'storeModal');
-            initSelect('master_box_id', 'Select Box', 'storeModal');
             initSelect('master_needle_id', 'Select Needle', 'storeModal');
             initSelect('needle_category', 'Select Category', 'storeModal');
-            $('#master_area_id').on('change', function() {
-                sendAjax('storeModal', {
-                    url: "{{ route('user.stock.spinner') }}",
-                    type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        tipe: 'counter',
-                        master_area_id: $(this).val(),
-                    },
-                    success: function(data) {
-                        unwaitAlert();
-                        $('#master_counter_id').html('<option value=""></option>');
-                        $.each(data, function(k, v) {
-                            $('#master_counter_id').append('<option value="' + v.id +
-                                '">' + v.name + '</option>')
-                        })
-                    },
-                    error: function(response) {
-                        warningAlert(response.responseText);
-                    }
-                })
-            });
-            $('#master_counter_id').on('change', function() {
-                sendAjax('storeModal', {
-                    url: "{{ route('user.stock.spinner') }}",
-                    type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        tipe: 'box',
-                        master_area_id: $('#master_area_id').val(),
-                        master_counter_id: $(this).val(),
-                    },
-                    success: function(data) {
-                        unwaitAlert();
-                        $('#master_box_id').html('<option value=""></option>');
-                        $.each(data, function(k, v) {
-                            $('#master_box_id').append('<option value="' + v.id +
-                                '">' + v.name + '</option>')
-                        })
-                    },
-                    error: function(response) {
-                        warningAlert(response.responseText);
-                    }
-                })
-            });
             $('#needle_category').on('change', function() {
                 sendAjax('storeModal', {
-                    url: "{{ route('user.stock.spinner') }}",
+                    url: "{{ route('user.warehouse.spinner') }}",
                     type: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
@@ -217,21 +216,14 @@
             })
             table = initDataTable('table', '', '', '', {
                 ajax: {
-                    url: "{{ route('user.stock.data') }}",
+                    url: "{{ route('user.warehouse.data') }}",
                     data: function(d) {
                         d.filter_area = $('#filter_area').val();
-                        d.filter_counter = $('#filter_counter').val();
-                        d.filter_box = $('#filter_box').val();
+                        d.tipe = 'data';
                     },
                 },
                 columns: [{
                         data: 'area'
-                    },
-                    {
-                        data: 'counter'
-                    },
-                    {
-                        data: 'box'
                     },
                     {
                         data: 'brand'
@@ -278,8 +270,6 @@
             $('#storeHeader').removeClass('bg-info');
 
             $('#master_area_id').val('').trigger('change');
-            $('#master_counter_id').val('').trigger('change');
-            $('#master_box_id').val('').trigger('change');
             $('#master_needle_id').val('').trigger('change');
             $('#needle_category').val('all').trigger('change');
             $('#qty').val('');
@@ -296,27 +286,182 @@
                 callback: function() {
                     if ($('#master_area_id').val() == '') {
                         warningAlert('Please select Area');
-                    } else if ($('#master_counter_id').val() == '') {
-                        warningAlert('Please select Counter');
-                    } else if ($('#master_box_id').val() == '') {
-                        warningAlert('Please select Box');
                     } else if ($('#master_needle_id').val() == '') {
                         warningAlert('Please select Needle');
                     } else if ($('#qty').val() == '') {
                         warningAlert('Please insert Qty');
                     } else {
                         sendAjax('storeModal', {
-                            url: "{{ route('user.stock.store') }}",
+                            url: "{{ route('user.warehouse.store') }}",
                             type: "POST",
                             data: {
                                 master_area_id: $('#master_area_id').val(),
-                                master_counter_id: $('#master_counter_id').val(),
-                                master_box_id: $('#master_box_id').val(),
                                 master_needle_id: $('#master_needle_id').val(),
                                 qty: $('#qty').val(),
                             },
                             success: function(response) {
                                 $('#storeModal').modal('toggle');
+                                successAlert(response);
+                                closeAlert();
+                                setTimeout(() => {
+                                    table.ajax.reload();
+                                }, 1000);
+                            },
+                            error: function(response) {
+                                warningAlert(response.responseText);
+                            }
+                        })
+                    }
+                }
+            })
+        }
+
+        function btnTransfer(url) {
+            sendAjax('', {
+                url: url,
+                type: "get",
+                success: function(response) {
+                    unwaitAlert();
+                    $('#transferJudul').html(
+                        '<h5 class="modal-title"><i class="fa fa-right-left"></i> Transfer</h5>');
+                    $('#transferHeader').removeClass('bg-success');
+                    $('#transferHeader').addClass('bg-info');
+                    $('#transfer_area').val(response.area.name);
+                    $('#transfer_brand').val(response.needle.brand);
+                    $('#transfer_tipe').val(response.needle.tipe);
+                    $('#transfer_size').val(response.needle.size);
+                    $('#transfer_code').val(response.needle.code);
+                    $('#transfer_machine').val(response.needle.machine);
+                    $('#transfer_stock').val(response.in - response.out);
+                    $('#transferKey').val(response.id);
+
+                    if ($.fn.DataTable.isDataTable("#tableCounter")) {
+                        $('#tableCounter').html('');
+                        $('#tableCounter').DataTable().clear().destroy();
+                    }
+
+                    setTimeout(() => {
+                        $('#tableCounterHead').html(`
+                            <tr>
+                                <th>Counter</th>
+                                <th>Box</th>
+                                <th style="width: 100px">Stock</th>
+                                <th style="width: 100px">Transfer</th>
+                                <th style="width: 100px">After</th>
+                            </tr>
+                        `);
+                        tableCounter = initDataTable('tableCounter', 'toolbarCounter', '', 0.4, {
+                            ajax: {
+                                url: "{{ route('user.warehouse.data') }}",
+                                data: function(d) {
+                                    d.warehouse_id = response.id;
+                                    d.tipe = 'counter';
+                                }
+                            },
+                            columns: [{
+                                    data: 'counter'
+                                },
+                                {
+                                    data: 'box'
+                                },
+                                {
+                                    data: 'stock'
+                                },
+                                {
+                                    data: 'transfer'
+                                },
+                                {
+                                    data: 'after'
+                                },
+                            ],
+                            paging: false,
+                            drawCallback: function() {
+                                $('.input-transfer').each(function() {
+                                    var id = $(this).attr('id');
+                                    $('#transfer' + id).on('input', function() {
+                                        $('#after' + id).val(+$($('#transfer' + id)).val() + +$('#stock' + id).val());
+                                    });
+                                })
+                            },
+                        });
+                    }, 250);
+
+                    if ($.fn.DataTable.isDataTable("#tableTransfer")) {
+                        $('#tableTransfer').html('');
+                        $('#tableTransfer').DataTable().clear().destroy();
+                    }
+
+                    setTimeout(() => {
+                        tableTransfer = initDataTable('tableTransfer', 'toolbarTransfer', '', 0.4, {
+                            ajax: {
+                                url: "{{ route('user.warehouse.history') }}",
+                                data: function(d) {
+                                    d.warehouse_id = response.id;
+                                    d.tipe = 'transfer';
+                                }
+                            },
+                            columns: [{
+                                    data: 'created_at'
+                                },
+                                {
+                                    data: 'counter'
+                                },
+                                {
+                                    data: 'box'
+                                },
+                                {
+                                    data: 'qty'
+                                },
+                            ],
+                            paging: false
+                        });
+                    }, 250);
+                    $('#transferModal').modal('toggle');
+                },
+                error: function(response) {
+                    warningAlert(response.responseText);
+                }
+            });
+        }
+
+        function transfer() {
+            customAlert({
+                icon: 'question',
+                title: 'Is the data correct?',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                confirmButtonColor: '#08fe3e',
+                callback: function() {
+                    var data = [],
+                        total = 0;
+                    $('.input-transfer').each(function() {
+                        var id = $(this).attr('id');
+                        if ($('#transfer' + id).val() > 0 || $('#transfer' + id).val() != '') {
+                            data.push({
+                                'ke_id': id,
+                                'stock': $('#stock' + id).val(),
+                                'after': $('#after' + id).val(),
+                                'qty': $('#transfer' + id).val(),
+                            })
+                            total += +$('#transfer' + id).val();
+                        }
+                    })
+                    if (total == 0) {
+                        warningAlert('Please insert Qty Transfer');
+                    } else if (total > $('#transfer_stock').val()) {
+                        warningAlert('Total Transfer is more than Remaining Stock');
+                    } else {
+                        sendAjax('transferModal', {
+                            url: "{{ route('user.warehouse.transfer') }}",
+                            type: "POST",
+                            data: {
+                                dari_id: $('#transferKey').val(),
+                                dari: 'warehouse',
+                                ke: 'stock',
+                                data: data,
+                            },
+                            success: function(response) {
+                                $('#transferModal').modal('toggle');
                                 successAlert(response);
                                 closeAlert();
                                 setTimeout(() => {
@@ -343,8 +488,6 @@
                     $('#updateHeader').removeClass('bg-success');
                     $('#updateHeader').addClass('bg-info');
                     $('#edit_area').val(response.area.name);
-                    $('#edit_counter').val(response.counter.name);
-                    $('#edit_box').val(response.box.name);
                     $('#edit_brand').val(response.needle.brand);
                     $('#edit_tipe').val(response.needle.tipe);
                     $('#edit_size').val(response.needle.size);
@@ -360,7 +503,7 @@
             });
         }
 
-        function addStock(url) {
+        function addWarehouse(url) {
             sendAjax('', {
                 url: url,
                 type: "get",
@@ -371,8 +514,6 @@
                     $('#addHeader').removeClass('bg-success');
                     $('#addHeader').addClass('bg-info');
                     $('#add_area').val(response.area.name);
-                    $('#add_counter').val(response.counter.name);
-                    $('#add_box').val(response.box.name);
                     $('#add_brand').val(response.needle.brand);
                     $('#add_tipe').val(response.needle.tipe);
                     $('#add_size').val(response.needle.size);
@@ -383,28 +524,29 @@
 
                     if ($.fn.DataTable.isDataTable("#tableHistory")) {
                         $('#tableHistory').html('');
-                        tableHistory.destroy();
+                        $('#tableHistory').DataTable().clear().destroy();
                     }
 
                     setTimeout(() => {
                         tableHistory = initDataTable('tableHistory', 'toolbarHistory', '', 0.4, {
                             ajax: {
-                                url: "{{ route('user.stock.history') }}",
+                                url: "{{ route('user.warehouse.history') }}",
                                 data: function(d) {
-                                    d.stock_id = response.id;
+                                    d.warehouse_id = response.id;
+                                    d.tipe = 'add';
                                 }
                             },
                             columns: [{
                                     data: 'created_at'
                                 },
                                 {
-                                    data: 'stock_before'
+                                    data: 'warehouse_before'
                                 },
                                 {
                                     data: 'qty'
                                 },
                                 {
-                                    data: 'stock_after'
+                                    data: 'warehouse_after'
                                 },
                                 {
                                     data: 'user'
@@ -428,7 +570,7 @@
             else
                 modal = 'addModal';
             sendAjax(modal, {
-                url: "{{ route('user.stock.update') }}",
+                url: "{{ route('user.warehouse.update') }}",
                 type: "POST",
                 data: {
                     id: tipe == 'edit' ? $('#editKey').val() : $('#addKey').val(),
@@ -460,32 +602,6 @@
                 confirmButtonText: "Confirm Delete",
                 confirmButtonColor: '#dc3545',
                 cancelButtonText: "Cancel",
-                callback: function() {
-                    sendAjax('', {
-                        url: url,
-                        type: "GET",
-                        success: function(response) {
-                            successAlert(response);
-                            closeAlert();
-                            setTimeout(() => {
-                                table.ajax.reload();
-                            }, 1000);
-                        },
-                        error: function(response) {
-                            warningAlert(response.responseText);
-                        }
-                    });
-                }
-            })
-        }
-
-        function bersihkan(url) {
-            customAlert({
-                icon: 'question',
-                title: 'Are you sure want to Clear this Box?',
-                showCancelButton: true,
-                confirmButtonText: 'Confirm Clear',
-                confirmButtonColor: '#dc3545',
                 callback: function() {
                     sendAjax('', {
                         url: url,

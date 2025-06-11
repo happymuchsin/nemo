@@ -13,15 +13,18 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::firstOrCreate([
-            'id' => 1,
-            'username' => 'developer',
-            'name' => 'DEVELOPER',
-            'master_division_id' => 1,
-            'master_position_id' => 1,
-            'email' => 'happymuchsin@gmail.com',
-            'password' => bcrypt('qwe123'),
-        ]);
+        $u = User::where('username', 'developer')->first();
+        if (!$u) {
+            User::firstOrCreate([
+                'id' => 1,
+                'username' => 'developer',
+                'name' => 'DEVELOPER',
+                'master_division_id' => 1,
+                'master_position_id' => 1,
+                'email' => 'happymuchsin@gmail.com',
+                'password' => bcrypt('qwe123'),
+            ]);
+        }
 
         $u = User::find(1);
         $u->assignRole('developer');

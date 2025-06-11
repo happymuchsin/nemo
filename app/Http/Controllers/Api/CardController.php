@@ -65,6 +65,23 @@ class CardController extends Controller
                             $x->name = $u->name;
                             $x->rfid = $u->rfid;
                             $x->line = $lokasi->name;
+
+                            $history = [];
+                            $needle = Needle::with(['needle'])
+                                ->where('user_id', $u->id)
+                                ->orderBy('created_at', 'desc')
+                                ->limit(10)
+                                ->get();
+                            foreach ($needle as $n) {
+                                $history[] = [
+                                    'created_at' => date('Y-m-d H:i:s', strtotime($n->created_at)),
+                                    'brand' => $n->needle->brand,
+                                    'tipe' => $n->needle->tipe,
+                                    'size' => $n->needle->size,
+                                    'code' => $n->needle->code,
+                                ];
+                            }
+                            $x->history = $history;
                             return new ApiResource(200, 'success', $x);
                         }
                     } else {
@@ -89,6 +106,7 @@ class CardController extends Controller
             $b = MasterBox::where('rfid', $rfid)->first();
             if ($b) {
                 if ($tipe == 'approval') {
+                    $mode = $request->mode;
                     $approval = $request->approval;
                     $username = $request->username;
                     $scan_rfid = $request->scan_rfid;
@@ -100,7 +118,7 @@ class CardController extends Controller
 
                             $stat = MasterStatus::where('name', 'BROKEN MISSING FRAGMENT')->first();
 
-                            if ($s->master_needle_id) {
+                            if ($s->master_needle_id && $mode == 'tetap') {
                                 $master_needle_id = $s->master_needle_id;
                                 $in = Stock::where('master_box_id', $b->id)->where('master_needle_id', $master_needle_id)->where('is_clear', 'not')->sum('in');
                                 $out = Stock::where('master_box_id', $b->id)->where('master_needle_id', $master_needle_id)->where('is_clear', 'not')->sum('out');
@@ -120,6 +138,9 @@ class CardController extends Controller
                                 }
 
                                 $stock = Stock::where('master_box_id', $b->id)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
+                                if ($mode == 'ubah') {
+                                    $master_needle_id = $stock->master_needle_id;
+                                }
                             }
 
                             Needle::create([

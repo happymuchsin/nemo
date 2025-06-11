@@ -2,82 +2,85 @@
     <!-- Left navbar links -->
     <ul class="navbar-nav mr-auto">
         <li class="nav-item px-0">
-            <a class="nav-link" data-widget="pushmenu" id="collSidebar" href="#" role="button"><i
-                    class="fa fa-bars"></i></a>
+            <a class="nav-link" data-widget="pushmenu" id="collSidebar" href="#" role="button"><i class="fa fa-bars"></i></a>
         </li>
-        {{-- @can('user-dashboard') --}}
-        <li id="" class="nav-item text-center">
-            <a class="nav-link {{ $page == 'user_dashboard' ? 'rounded-lg bg-warning' : '' }}"
-                href="{{ route('user.dashboard') }}">
-                <b class="text-center text-black"><i class="fa fa-laptop"></i> Dashboard</b>
-            </a>
-        </li>
-        {{-- @endcan --}}
-        {{-- @can('user-report') --}}
-        <li id="" class="nav-item text-center">
-            <a class="nav-link {{ $page == 'user_report' ? 'rounded-lg bg-warning' : '' }}"
-                href="{{ route('user.report') }}">
-                <b class="text-center text-black"><i class="fa fa-list-dropdown"></i> Report</b>
-            </a>
-        </li>
-        <li id=""
-            class="nav-item text-center dropdown dropdown-hover {{ in_array($page, ['user_summary_stock', 'user_usage_needle', 'user_daily_stock', 'user_timing_log']) ? 'rounded-lg bg-warning' : '' }}">
-            <a id="dropdownSubMenuX" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false" class="nav-link dropdown-toggle">
-                <b class="text-center text-black"><i class="fa fa-list-dropdown"></i> Report</b>
-            </a>
-            <ul aria-labelledby="dropdownSubMenuX" class="dropdown-menu border-0 shadow">
-                <li>
-                    <a class="dropdown-item custom-dropdown-item {{ $page == 'user_summary_stock' ? 'rounded-lg bg-warning' : '' }}"
-                        href="{{ route('user.summary-stock') }}">
-                        Summary Stock
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item custom-dropdown-item {{ $page == 'user_usage_needle' ? 'rounded-lg bg-warning' : '' }}"
-                        href="{{ route('user.usage-needle') }}">
-                        Usage Needle
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item custom-dropdown-item {{ $page == 'user_daily_stock' ? 'rounded-lg bg-warning' : '' }}"
-                        href="{{ route('user.daily-stock') }}">
-                        Daily Stock
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item custom-dropdown-item {{ $page == 'user_timing_log' ? 'rounded-lg bg-warning' : '' }}"
-                        href="{{ route('user.timing-log') }}">
-                        Timing Log
-                    </a>
-                </li>
-            </ul>
-        </li>
-        {{-- @endcan --}}
-        {{-- @can('user-needle-report') --}}
-        <li id="" class="nav-item text-center">
-            <a class="nav-link {{ $page == 'user_needle_report' ? 'rounded-lg bg-warning' : '' }}"
-                href="{{ route('user.needle-report') }}">
-                <b class="text-center text-black"><i class="fa fa-reel"></i> Needle Report</b>
-            </a>
-        </li>
-        {{-- @endcan --}}
-        {{-- @can('user-stock') --}}
-        <li id="" class="nav-item text-center">
-            <a class="nav-link {{ $page == 'user_stock' ? 'rounded-lg bg-warning' : '' }}"
-                href="{{ route('user.stock') }}">
-                <b class="text-center text-black"><i class="fa fa-shelves"></i> Stock</b>
-            </a>
-        </li>
-        {{-- @endcan --}}
-        {{-- @can('user-approval') --}}
-        <li id="" class="nav-item text-center">
-            <a class="nav-link {{ $page == 'user_approval' ? 'rounded-lg bg-warning' : '' }}"
-                href="{{ route('user.approval') }}">
-                <b class="text-center text-black"><i class="fa fa-list-check"></i> Approval</b>
-            </a>
-        </li>
-        {{-- @endcan --}}
+        @can('user-dashboard')
+            <li id="" class="nav-item text-center">
+                <a class="nav-link {{ $page == 'user_dashboard' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.dashboard') }}">
+                    <b class="text-center text-black"><i class="fa fa-laptop"></i> Dashboard</b>
+                </a>
+            </li>
+        @endcan
+        @can('user-report')
+            <li id="" class="nav-item text-center">
+                <a class="nav-link {{ $page == 'user_report' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.report') }}">
+                    <b class="text-center text-black"><i class="fa fa-list-dropdown"></i> Report</b>
+                </a>
+            </li>
+            <li id=""
+                class="nav-item text-center dropdown dropdown-hover {{ in_array($page, ['user_summary_stock', 'user_usage_needle', 'user_daily_stock', 'user_timing_log']) ? 'rounded-lg bg-warning' : '' }}">
+                <a id="dropdownSubMenuX" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">
+                    <b class="text-center text-black"><i class="fa fa-list-dropdown"></i> Report</b>
+                </a>
+                <ul aria-labelledby="dropdownSubMenuX" class="dropdown-menu border-0 shadow">
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_summary_stock' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.summary-stock') }}">
+                            Summary Stock
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_usage_needle' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.usage-needle') }}">
+                            Usage Needle
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_daily_stock' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.daily-stock') }}">
+                            Daily Stock
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_timing_log' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.timing-log') }}">
+                            Timing Log
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        @endcan
+        @can('user-needle-report')
+            <li id="" class="nav-item text-center">
+                <a class="nav-link {{ $page == 'user_needle_report' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.needle-report') }}">
+                    <b class="text-center text-black"><i class="fa fa-reel"></i> Needle Report</b>
+                </a>
+            </li>
+        @endcan
+        {{-- @can('user-stock')
+            <li id="" class="nav-item text-center">
+                <a class="nav-link {{ $page == 'user_stock' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.stock') }}">
+                    <b class="text-center text-black"><i class="fa fa-shelves"></i> Stock</b>
+                </a>
+            </li>
+        @endcan --}}
+        @can('user-warehouse')
+            <li id="" class="nav-item text-center">
+                <a class="nav-link {{ $page == 'user_warehouse' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.warehouse') }}">
+                    <b class="text-center text-black"><i class="fa fa-shelves"></i> Warehouse</b>
+                </a>
+            </li>
+        @endcan
+        @can('user-dead-stock')
+            <li id="" class="nav-item text-center">
+                <a class="nav-link {{ $page == 'user_dead_stock' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.dead-stock') }}">
+                    <b class="text-center text-black"><i class="fa fa-shelves"></i> Dead Stock</b>
+                </a>
+            </li>
+        @endcan
+        @can('user-approval')
+            <li id="" class="nav-item text-center">
+                <a class="nav-link {{ $page == 'user_approval' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.approval') }}">
+                    <b class="text-center text-black"><i class="fa fa-list-check"></i> Approval</b>
+                </a>
+            </li>
+        @endcan
     </ul>
 
     @if (env('APP_ENV') == 'production')
@@ -130,8 +133,7 @@
                     <i class="fa fa-user-gear text-info mr-2"></i> Change Password
                 </a>
                 <div class="dropdown-divider"></div>
-                <a href="{{ route('logout') }}" class="dropdown-item dropdown-footer"><i
-                        class="fa fa-power-off text-danger"></i> Log Out</a>
+                <a href="{{ route('logout') }}" class="dropdown-item dropdown-footer"><i class="fa fa-power-off text-danger"></i> Log Out</a>
             </div>
         </li>
         <li class="nav-item">

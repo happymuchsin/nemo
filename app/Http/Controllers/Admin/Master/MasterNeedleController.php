@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
+use App\Models\DeadStock;
+use App\Models\MasterArea;
 use App\Models\MasterNeedle;
 use App\Models\Needle;
 use App\Models\Stock;
@@ -55,6 +57,7 @@ class MasterNeedleController extends Controller
         $code = strtoupper($request->code);
         $machine = strtoupper($request->machine);
         $min_stock = $request->min_stock;
+        $now = Carbon::now();
 
         try {
             DB::beginTransaction();
@@ -64,7 +67,7 @@ class MasterNeedleController extends Controller
                 if ($s) {
                     return response()->json('Brand Tipe Size Code Machine already used', 422);
                 } else {
-                    MasterNeedle::create([
+                    $mn = MasterNeedle::create([
                         'brand' => $brand,
                         'tipe' => $tipe,
                         'size' => $size,
@@ -72,7 +75,7 @@ class MasterNeedleController extends Controller
                         'machine' => $machine,
                         'min_stock' => $min_stock,
                         'created_by' => Auth::user()->username,
-                        'created_at' => Carbon::now(),
+                        'created_at' => $now,
                     ]);
                     HelperController::activityLog("CREATE MASTER NEEDLE", 'master_needles', 'create', $request->ip(), $request->userAgent(), json_encode([
                         'brand' => $brand,
@@ -82,8 +85,27 @@ class MasterNeedleController extends Controller
                         'machine' => $machine,
                         'min_stock' => $min_stock,
                         'created_by' => Auth::user()->username,
-                        'created_at' => Carbon::now(),
+                        'created_at' => $now,
                     ]));
+                    $master_area = MasterArea::get();
+                    foreach ($master_area as $ma) {
+                        DeadStock::create([
+                            'master_area_id' => $ma->id,
+                            'master_needle_id' => $mn->id,
+                            'in' => 0,
+                            'out' => 0,
+                            'created_by' => Auth::user()->username,
+                            'created_at' => $now,
+                        ]);
+                        HelperController::activityLog("CREATE DEAD STOCK", 'dead_stock', 'create', $request->ip(), $request->userAgent(), json_encode([
+                            'master_area_id' => $ma->id,
+                            'master_needle_id' => $mn->id,
+                            'in' => 0,
+                            'out' => 0,
+                            'created_by' => Auth::user()->username,
+                            'created_at' => $now,
+                        ]));
+                    }
                 }
             } else {
                 $c = 0;
@@ -109,7 +131,7 @@ class MasterNeedleController extends Controller
                         'machine' => $machine,
                         'min_stock' => $min_stock,
                         'updated_by' => Auth::user()->username,
-                        'updated_at' => Carbon::now(),
+                        'updated_at' => $now,
                     ]);
                     HelperController::activityLog("UPDATE MASTER NEEDLE", 'master_needles', 'update', $request->ip(), $request->userAgent(), json_encode([
                         'id' => $id,
@@ -120,7 +142,7 @@ class MasterNeedleController extends Controller
                         'machine' => $machine,
                         'min_stock' => $min_stock,
                         'updated_by' => Auth::user()->username,
-                        'updated_at' => Carbon::now(),
+                        'updated_at' => $now,
                     ]), $id);
                 }
             }
@@ -141,19 +163,24 @@ class MasterNeedleController extends Controller
 
     public function hapus(Request $request, $id)
     {
+        $now = Carbon::now();
         try {
             DB::beginTransaction();
             Stock::where('master_needle_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
-                'deleted_at' => Carbon::now(),
+                'deleted_at' => $now,
+            ]);
+            DeadStock::where('master_needle_id', $id)->update([
+                'deleted_by' => Auth::user()->username,
+                'deleted_at' => $now,
             ]);
             Needle::where('master_needle_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
-                'deleted_at' => Carbon::now(),
+                'deleted_at' => $now,
             ]);
             MasterNeedle::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
-                'deleted_at' => Carbon::now(),
+                'deleted_at' => $now,
             ]);
             HelperController::activityLog("DELETE MASTER NEEDLE", 'master_needles', 'delete', $request->ip(), $request->userAgent(), null, $id);
             DB::commit();

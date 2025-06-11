@@ -32,6 +32,14 @@ class RoleSeeder extends Seeder
                 'description' => 'Stock'
             ],
             [
+                'name' => 'warehouse',
+                'description' => 'Warehouse'
+            ],
+            [
+                'name' => 'dead-stock',
+                'description' => 'Dead Stock'
+            ],
+            [
                 'name' => 'approval',
                 'description' => 'Approval'
             ],
@@ -84,6 +92,20 @@ class RoleSeeder extends Seeder
         // STOCK
         $permission = Permission::whereIn('name', ['user-stock'])->get();
         $role = Role::findByName('stock');
+        foreach ($permission as $p) {
+            $role->givePermissionTo([(int) $p->id]);
+        }
+
+        // WAREHOUSE
+        $permission = Permission::whereIn('name', ['user-warehouse'])->get();
+        $role = Role::findByName('warehouse');
+        foreach ($permission as $p) {
+            $role->givePermissionTo([(int) $p->id]);
+        }
+
+        // DEAD STOCK
+        $permission = Permission::whereIn('name', ['user-dead-stock'])->get();
+        $role = Role::findByName('dead-stock');
         foreach ($permission as $p) {
             $role->givePermissionTo([(int) $p->id]);
         }

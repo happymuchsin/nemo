@@ -139,15 +139,18 @@ class KaryawanSeeder extends Seeder
         $smsYanti = MasterLine::where('name', 'LINE SMS YANTI')->first()->id;
 
         foreach ($lineAceng as $l) {
-            $i = User::firstOrCreate([
-                'username' => $l['username'],
-                'name' => trim(strtoupper($l['name'])),
-                'master_division_id' => $l['master_division_id'],
-                'master_position_id' => $l['master_position_id'],
-                'password' => bcrypt($l['username']),
-                'join_date' => date('Y-m-d', strtotime($l['join_date'])),
-                'created_by' => 'developer',
-            ]);
+            $i = User::where('username', $l['username'])->first();
+            if (!$i) {
+                $i = User::firstOrCreate([
+                    'username' => $l['username'],
+                    'name' => trim(strtoupper($l['name'])),
+                    'master_division_id' => $l['master_division_id'],
+                    'master_position_id' => $l['master_position_id'],
+                    'password' => bcrypt($l['username']),
+                    'join_date' => date('Y-m-d', strtotime($l['join_date'])),
+                    'created_by' => 'developer',
+                ]);
+            }
             MasterPlacement::firstOrCreate([
                 'user_id' => $i->id,
                 'reff' => $reff,
@@ -157,15 +160,18 @@ class KaryawanSeeder extends Seeder
         }
 
         foreach ($lineOtong as $l) {
-            $i = User::firstOrCreate([
-                'username' => $l['username'],
-                'name' => trim(strtoupper($l['name'])),
-                'master_division_id' => $l['master_division_id'],
-                'master_position_id' => $l['master_position_id'],
-                'password' => bcrypt($l['username']),
-                'join_date' => date('Y-m-d', strtotime($l['join_date'])),
-                'created_by' => 'developer',
-            ]);
+            $i = User::where('username', $l['username'])->first();
+            if (!$i) {
+                $i = User::firstOrCreate([
+                    'username' => $l['username'],
+                    'name' => trim(strtoupper($l['name'])),
+                    'master_division_id' => $l['master_division_id'],
+                    'master_position_id' => $l['master_position_id'],
+                    'password' => bcrypt($l['username']),
+                    'join_date' => date('Y-m-d', strtotime($l['join_date'])),
+                    'created_by' => 'developer',
+                ]);
+            }
             MasterPlacement::firstOrCreate([
                 'user_id' => $i->id,
                 'reff' => $reff,
@@ -175,15 +181,18 @@ class KaryawanSeeder extends Seeder
         }
 
         foreach ($lineYanti as $l) {
-            $i = User::firstOrCreate([
-                'username' => $l['username'],
-                'name' => trim(strtoupper($l['name'])),
-                'master_division_id' => $l['master_division_id'],
-                'master_position_id' => $l['master_position_id'],
-                'password' => bcrypt($l['username']),
-                'join_date' => date('Y-m-d', strtotime($l['join_date'])),
-                'created_by' => 'developer',
-            ]);
+            $i = User::where('username', $l['username'])->first();
+            if (!$i) {
+                $i = User::firstOrCreate([
+                    'username' => $l['username'],
+                    'name' => trim(strtoupper($l['name'])),
+                    'master_division_id' => $l['master_division_id'],
+                    'master_position_id' => $l['master_position_id'],
+                    'password' => bcrypt($l['username']),
+                    'join_date' => date('Y-m-d', strtotime($l['join_date'])),
+                    'created_by' => 'developer',
+                ]);
+            }
             MasterPlacement::firstOrCreate([
                 'user_id' => $i->id,
                 'reff' => $reff,
@@ -193,15 +202,18 @@ class KaryawanSeeder extends Seeder
         }
 
         foreach ($lineSunarti as $l) {
-            $i = User::firstOrCreate([
-                'username' => $l['username'],
-                'name' => trim(strtoupper($l['name'])),
-                'master_division_id' => $l['master_division_id'],
-                'master_position_id' => $l['master_position_id'],
-                'password' => bcrypt($l['username']),
-                'join_date' => date('Y-m-d', strtotime($l['join_date'])),
-                'created_by' => 'developer',
-            ]);
+            $i = User::where('username', $l['username'])->first();
+            if (!$i) {
+                $i = User::firstOrCreate([
+                    'username' => $l['username'],
+                    'name' => trim(strtoupper($l['name'])),
+                    'master_division_id' => $l['master_division_id'],
+                    'master_position_id' => $l['master_position_id'],
+                    'password' => bcrypt($l['username']),
+                    'join_date' => date('Y-m-d', strtotime($l['join_date'])),
+                    'created_by' => 'developer',
+                ]);
+            }
             MasterPlacement::firstOrCreate([
                 'user_id' => $i->id,
                 'reff' => $reff,
@@ -211,15 +223,18 @@ class KaryawanSeeder extends Seeder
         }
 
         foreach ($lineSmsMurni as $l) {
-            $i = User::firstOrCreate([
-                'username' => $l['username'],
-                'name' => trim(strtoupper($l['name'])),
-                'master_division_id' => $l['master_division_id'],
-                'master_position_id' => $l['master_position_id'],
-                'password' => bcrypt($l['username']),
-                'join_date' => date('Y-m-d', strtotime($l['join_date'])),
-                'created_by' => 'developer',
-            ]);
+            $i = User::where('username', $l['username'])->first();
+            if (!$i) {
+                $i = User::firstOrCreate([
+                    'username' => $l['username'],
+                    'name' => trim(strtoupper($l['name'])),
+                    'master_division_id' => $l['master_division_id'],
+                    'master_position_id' => $l['master_position_id'],
+                    'password' => bcrypt($l['username']),
+                    'join_date' => date('Y-m-d', strtotime($l['join_date'])),
+                    'created_by' => 'developer',
+                ]);
+            }
             MasterPlacement::firstOrCreate([
                 'user_id' => $i->id,
                 'reff' => $reff,
@@ -229,15 +244,18 @@ class KaryawanSeeder extends Seeder
         }
 
         foreach ($lineSmsYanti as $l) {
-            $i = User::firstOrCreate([
-                'username' => $l['username'],
-                'name' => trim(strtoupper($l['name'])),
-                'master_division_id' => $l['master_division_id'],
-                'master_position_id' => $l['master_position_id'],
-                'password' => bcrypt($l['username']),
-                'join_date' => date('Y-m-d', strtotime($l['join_date'])),
-                'created_by' => 'developer',
-            ]);
+            $i = User::where('username', $l['username'])->first();
+            if (!$i) {
+                $i = User::firstOrCreate([
+                    'username' => $l['username'],
+                    'name' => trim(strtoupper($l['name'])),
+                    'master_division_id' => $l['master_division_id'],
+                    'master_position_id' => $l['master_position_id'],
+                    'password' => bcrypt($l['username']),
+                    'join_date' => date('Y-m-d', strtotime($l['join_date'])),
+                    'created_by' => 'developer',
+                ]);
+            }
             MasterPlacement::firstOrCreate([
                 'user_id' => $i->id,
                 'reff' => $reff,
