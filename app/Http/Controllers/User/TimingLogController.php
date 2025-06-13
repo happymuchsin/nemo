@@ -34,11 +34,13 @@ class TimingLogController extends Controller
 
     public function data(Request $request)
     {
-        $filter_tanggal = $request->filter_tanggal;
+        $range_date = explode(' - ', $request->filter_range_date);
+        $start = $range_date[0] ? $range_date[0] : Carbon::today();
+        $end = $range_date[1] ? $range_date[1] : Carbon::today();
 
         $data = [];
 
-        $needle = Needle::with(['user'])->whereDate('created_at', $filter_tanggal)->get();
+        $needle = Needle::with(['user'])->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->get();
         foreach ($needle as $n) {
             $d = new stdClass;
             $d->name = $n->user->name;

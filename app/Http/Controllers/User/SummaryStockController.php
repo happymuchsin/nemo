@@ -30,19 +30,23 @@ class SummaryStockController extends Controller
     public function data(Request $request)
     {
         $period = $request->filter_period;
-        $filter_month = $request->filter_month;
-        $tahun = $request->filter_year;
 
         if ($period == 'yearly') {
-            $start = Carbon::parse("$tahun-01-01");
-            $end = Carbon::parse("$tahun-12-31");
-        } else {
+            $filter_year = $request->filter_year;
+            $start = Carbon::parse("$filter_year-01-01");
+            $end = Carbon::parse("$filter_year-12-31");
+        } else if ($period == 'monthly') {
+            $filter_month = $request->filter_month;
             $x = explode('-', $filter_month);
             $tahun = $x[0];
             $bulan = $x[1];
             $lastDay = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
             $start = Carbon::parse("$tahun-$bulan-01");
             $end = Carbon::parse("$tahun-$bulan-$lastDay");
+        } else if ($period == 'range') {
+            $range_date = explode(' - ', $request->filter_range_date);
+            $start = $range_date[0] ? $range_date[0] : Carbon::today()->subMonth();
+            $end = $range_date[1] ? $range_date[1] : Carbon::today();
         }
 
         $data = [];

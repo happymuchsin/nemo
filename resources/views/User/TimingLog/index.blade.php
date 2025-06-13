@@ -6,10 +6,9 @@
         <x-slot:body>
             <x-filter.user-filter>
                 <x-slot:filter>
-                    <x-filter.filter :tipe="'date'" :label="'Date'" :id="'filter_tanggal'" :colom="'col-sm-auto'" />
+                    <x-filter.filter :colom="'col-sm-auto'" :tipe="'text'" :label="'Range Date'" :id="'filter_range_date'" />
                     <div class="form-group">
-                        <x-layout.button :class="'btn-primary'" :id="'cari'" :onclick="'table.ajax.reload()'" :icon="'fa fa-search'"
-                            :name="'SEARCH'" />
+                        <x-layout.button :class="'btn-primary'" :id="'cari'" :onclick="'table.ajax.reload()'" :icon="'fa fa-search'" :name="'SEARCH'" />
                     </div>
                 </x-slot:filter>
             </x-filter.user-filter>
@@ -41,7 +40,18 @@
             $('#collSidebar').attr('hidden', true);
             $('#table').addClass('nowrap');
 
-            $('#filter_tanggal').val("{{ date('Y-m-d') }}").trigger('change');
+            $('#filter_range_date').val("{{ date('Y-m-d') . ' - ' . date('Y-m-d') }}")
+
+            $("#filter_range_date").daterangepicker({
+                autoUpdateInput: false,
+                locale: {
+                    format: 'YYYY-MM-DD'
+                }
+            });
+            $('#filter_range_date').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format(
+                    'YYYY-MM-DD'));
+            });
 
             setTimeout(() => {
                 table = initDataTable('table', '', '', '', {
@@ -55,7 +65,7 @@
                     ajax: {
                         url: "{{ route('user.timing-log.data') }}",
                         data: function(d) {
-                            d.filter_tanggal = $('#filter_tanggal').val();
+                            d.filter_range_date = $('#filter_range_date').val();
                         },
                     },
                     columns: [{

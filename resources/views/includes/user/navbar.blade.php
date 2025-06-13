@@ -18,7 +18,7 @@
                 </a>
             </li>
             <li id=""
-                class="nav-item text-center dropdown dropdown-hover {{ in_array($page, ['user_summary_stock', 'user_usage_needle', 'user_daily_stock', 'user_timing_log']) ? 'rounded-lg bg-warning' : '' }}">
+                class="nav-item text-center dropdown dropdown-hover {{ in_array($page, ['user_summary_stock', 'user_usage_needle', 'user_daily_stock', 'user_timing_log', 'user_track_by_operator', 'user_track_by_needle']) ? 'rounded-lg bg-warning' : '' }}">
                 <a id="dropdownSubMenuX" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">
                     <b class="text-center text-black"><i class="fa fa-list-dropdown"></i> Report</b>
                 </a>
@@ -41,6 +41,16 @@
                     <li>
                         <a class="dropdown-item custom-dropdown-item {{ $page == 'user_timing_log' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.timing-log') }}">
                             Timing Log
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_track_by_operator' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.track-by-operator') }}">
+                            Tracking by Operator
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_track_by_needle' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.track-by-needle') }}">
+                            Tracking by Needle Type
                         </a>
                     </li>
                 </ul>

@@ -6,22 +6,22 @@
         <x-slot:body>
             <x-filter.user-filter>
                 <x-slot:filter>
-                    <x-filter.filter :tipe="'select'" :label="'Period'" :id="'filter_period'" :colom="'col-sm-auto'"
-                        :alloption="false">
+                    <x-filter.filter :tipe="'select'" :label="'Period'" :id="'filter_period'" :colom="'col-sm-auto'" :alloption="false">
                         <x-slot:option>
+                            <option value="range">Range Date</option>
                             <option value="daily">Daily</option>
                             <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
                         </x-slot:option>
                     </x-filter.filter>
+                    <x-filter.filter :tipe="'text'" :label="'Range Date'" :id="'filter_range_date'" :colom="'col-sm-auto filter-range-date'" />
                     <x-filter.filter :tipe="'date'" :label="'Daily'" :id="'filter_daily'" :colom="'col-sm-auto filter-daily'" />
                     <x-filter.filter :tipe="'week'" :label="'Weekly'" :id="'filter_weekly'" :colom="'col-sm-auto filter-weekly'" />
                     <x-filter.filter :tipe="'month'" :label="'Month'" :id="'filter_month'" :colom="'col-sm-auto filter-month'" />
                     <x-filter.filter :tipe="'number'" :label="'Year'" :id="'filter_year'" :colom="'col-sm-auto filter-year'" />
                     <div class="form-group">
-                        <x-layout.button :class="'btn-primary'" :id="'cari'" :onclick="'cari()'" :icon="'fa fa-search'"
-                            :name="'SEARCH'" />
+                        <x-layout.button :class="'btn-primary'" :id="'cari'" :onclick="'cari()'" :icon="'fa fa-search'" :name="'SEARCH'" />
                     </div>
                 </x-slot:filter>
             </x-filter.user-filter>
@@ -42,33 +42,55 @@
             $('#collSidebar').attr('hidden', true);
             $('#table').addClass('nowrap');
             $('#filter_period').on('change', function() {
-                if ($(this).val() == 'daily') {
+                if ($(this).val() == 'range') {
+                    $('.filter-range-date').show();
+                    $('.filter-daily').hide();
+                    $('.filter-weekly').hide();
+                    $('.filter-month').hide();
+                    $('.filter-year').hide();
+                } else if ($(this).val() == 'daily') {
+                    $('.filter-range-date').hide();
                     $('.filter-daily').show();
                     $('.filter-weekly').hide();
                     $('.filter-month').hide();
                     $('.filter-year').hide();
                 } else if ($(this).val() == 'weekly') {
+                    $('.filter-range-date').hide();
                     $('.filter-daily').hide();
                     $('.filter-weekly').show();
                     $('.filter-month').hide();
                     $('.filter-year').hide();
                 } else if ($(this).val() == 'monthly') {
+                    $('.filter-range-date').hide();
                     $('.filter-daily').hide();
                     $('.filter-weekly').hide();
                     $('.filter-month').show();
                     $('.filter-year').hide();
                 } else if ($(this).val() == 'yearly') {
+                    $('.filter-range-date').hide();
                     $('.filter-daily').hide();
                     $('.filter-weekly').hide();
                     $('.filter-month').hide();
                     $('.filter-year').show();
                 }
             });
-            $('#filter_period').val('daily').trigger('change');
+            $('#filter_period').val('range').trigger('change');
             $('#filter_daily').val("{{ date('Y-m-d') }}").trigger('change');
             $('#filter_weekly').val("{{ date('Y') . '-W' . date('W') }}").trigger('change');
             $('#filter_month').val("{{ date('Y-m') }}").trigger('change');
             $('#filter_year').val("{{ date('Y') }}").trigger('change');
+            $('#filter_range_date').val("{{ date('Y-m-d', strtotime('-1 month')) . ' - ' . date('Y-m-d') }}")
+
+            $("#filter_range_date").daterangepicker({
+                autoUpdateInput: false,
+                locale: {
+                    format: 'YYYY-MM-DD'
+                }
+            });
+            $('#filter_range_date').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format(
+                    'YYYY-MM-DD'));
+            });
         })
 
         function cari() {
@@ -82,6 +104,7 @@
                     filter_weekly: $('#filter_weekly').val(),
                     filter_month: $('#filter_month').val(),
                     filter_year: $('#filter_year').val(),
+                    filter_range_date: $('#filter_range_date').val(),
                 },
                 success: function(response) {
                     unwaitAlert();
@@ -217,6 +240,7 @@
                     filter_weekly: $('#filter_weekly').val(),
                     filter_month: $('#filter_month').val(),
                     filter_year: $('#filter_year').val(),
+                    filter_range_date: $('#filter_range_date').val(),
                 },
                 beforeSend: function() {
                     waitAlert();

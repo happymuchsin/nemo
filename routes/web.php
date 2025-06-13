@@ -36,6 +36,8 @@ use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\StockController;
 use App\Http\Controllers\User\SummaryStockController;
 use App\Http\Controllers\User\TimingLogController;
+use App\Http\Controllers\User\TrackByNeedleController;
+use App\Http\Controllers\User\TrackByOperatorController;
 use App\Http\Controllers\User\UsageNeedleController;
 use App\Http\Controllers\User\WarehouseController;
 
@@ -111,6 +113,20 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::get('', [TimingLogController::class, 'index'])->name('user.timing-log');
                     Route::get('data', [TimingLogController::class, 'data'])->name('user.timing-log.data');
                     Route::post('unduh', [TimingLogController::class, 'unduh'])->name('user.timing-log.unduh');
+                });
+
+            Route::prefix('/track-by-operator')
+                ->middleware(['permission:user-report'])
+                ->group(function () {
+                    Route::get('', [TrackByOperatorController::class, 'index'])->name('user.track-by-operator');
+                    Route::get('data', [TrackByOperatorController::class, 'data'])->name('user.track-by-operator.data');
+                });
+
+            Route::prefix('/track-by-needle')
+                ->middleware(['permission:user-report'])
+                ->group(function () {
+                    Route::get('', [TrackByNeedleController::class, 'index'])->name('user.track-by-needle');
+                    Route::get('data', [TrackByNeedleController::class, 'data'])->name('user.track-by-needle.data');
                 });
 
             Route::prefix('/needle-report')

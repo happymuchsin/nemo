@@ -39,21 +39,25 @@ class DailyStockController extends Controller
     public function data(Request $request)
     {
         $filter_period = $request->filter_period;
-        $filter_status = $request->filter_status;
-        $filter_daily = $request->filter_daily;
-        $filter_weekly = $request->filter_weekly;
-        $filter_monthly = $request->filter_month;
-        $filter_yearly = $request->filter_year;
 
         $data = [];
 
-        if ($filter_period == 'daily') {
+        if ($filter_period == 'range') {
+            $range_date = explode(' - ', $request->filter_range_date);
+            $start = $range_date[0] ? Carbon::parse($range_date[0]) : Carbon::today()->subMonth();
+            $end = $range_date[1] ? Carbon::parse($range_date[1]) : Carbon::today();
+            $range = ["$start 00:00:00", "$end 23:59:59"];
+            $ys = $range_date[0] ? Carbon::parse($range_date[0]) : Carbon::today()->subMonth();
+            $ye = $range_date[1] ? Carbon::parse($range_date[1]) : Carbon::today();
+        } else if ($filter_period == 'daily') {
+            $filter_daily = $request->filter_daily;
             $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
             $start = Carbon::parse($filter_daily);
             $end = Carbon::parse($filter_daily);
             $ys = Carbon::parse($filter_daily);
             $ye = Carbon::parse($filter_daily);
         } else if ($filter_period == 'weekly') {
+            $filter_weekly = $request->filter_weekly;
             $x = explode('-W', $filter_weekly);
             $year = $x[0];
             $week = $x[1];
@@ -63,6 +67,7 @@ class DailyStockController extends Controller
             $ye = Carbon::now()->setISODate($year, $week)->endOfWeek();
             $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
         } else if ($filter_period == 'monthly') {
+            $filter_monthly = $request->filter_month;
             $x = explode('-', $filter_monthly);
             $tahun = $x[0];
             $bulan = $x[1];
@@ -73,6 +78,7 @@ class DailyStockController extends Controller
             $ys = Carbon::parse("$tahun-$bulan-01");
             $ye = Carbon::parse("$tahun-$bulan-$lastDay");
         } else if ($filter_period == 'yearly') {
+            $filter_yearly = $request->filter_year;
             $range = ["$filter_yearly-01-01 00:00:00", "$filter_yearly-12-31 23:59:59"];
             $start = Carbon::parse("$filter_yearly-01-01");
             $end = Carbon::parse("$filter_yearly-12-31");
@@ -135,13 +141,17 @@ class DailyStockController extends Controller
     public function unduh(Request $request)
     {
         $filter_period = $request->filter_period;
-        $filter_status = $request->filter_status;
-        $filter_daily = $request->filter_daily;
-        $filter_weekly = $request->filter_weekly;
-        $filter_monthly = $request->filter_month;
-        $filter_yearly = $request->filter_year;
 
-        if ($filter_period == 'daily') {
+        if ($filter_period == 'range') {
+            $range_date = explode(' - ', $request->filter_range_date);
+            $start = $range_date[0] ? Carbon::parse($range_date[0]) : Carbon::today()->subMonth();
+            $end = $range_date[1] ? Carbon::parse($range_date[1]) : Carbon::today();
+            $range = ["$start 00:00:00", "$end 23:59:59"];
+            $ys = $range_date[0] ? Carbon::parse($range_date[0]) : Carbon::today()->subMonth();
+            $ye = $range_date[1] ? Carbon::parse($range_date[1]) : Carbon::today();
+            $judul = 'Daily Stock ' . $start->format('Y-m-d') . ' - ' . $end->format('Y-m-d');
+        } else if ($filter_period == 'daily') {
+            $filter_daily = $request->filter_daily;
             $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
             $start = Carbon::parse($filter_daily);
             $end = Carbon::parse($filter_daily);
@@ -149,6 +159,7 @@ class DailyStockController extends Controller
             $ye = Carbon::parse($filter_daily);
             $judul = 'Daily Stock ' . $filter_daily;
         } else if ($filter_period == 'weekly') {
+            $filter_weekly = $request->filter_weekly;
             $x = explode('-W', $filter_weekly);
             $year = $x[0];
             $week = $x[1];
@@ -159,6 +170,7 @@ class DailyStockController extends Controller
             $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
             $judul = 'Daily Stock ' . $filter_weekly;
         } else if ($filter_period == 'monthly') {
+            $filter_monthly = $request->filter_month;
             $x = explode('-', $filter_monthly);
             $tahun = $x[0];
             $bulan = $x[1];
@@ -170,6 +182,7 @@ class DailyStockController extends Controller
             $ye = Carbon::parse("$tahun-$bulan-$lastDay");
             $judul = 'Daily Stock ' . $filter_monthly;
         } else if ($filter_period == 'yearly') {
+            $filter_yearly = $request->filter_year;
             $range = ["$filter_yearly-01-01 00:00:00", "$filter_yearly-12-31 23:59:59"];
             $start = Carbon::parse("$filter_yearly-01-01");
             $end = Carbon::parse("$filter_yearly-12-31");
