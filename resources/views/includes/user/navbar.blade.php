@@ -30,17 +30,17 @@
                     </li>
                     <li>
                         <a class="dropdown-item custom-dropdown-item {{ $page == 'user_usage_needle' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.usage-needle') }}">
-                            Usage Needle
+                            Usage Needle All Operator
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item custom-dropdown-item {{ $page == 'user_daily_stock' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.daily-stock') }}">
-                            Daily Stock
+                            Needle Stock
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item custom-dropdown-item {{ $page == 'user_timing_log' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.timing-log') }}">
-                            Timing Log
+                            Timing Log All Operator
                         </a>
                     </li>
                     <li>
