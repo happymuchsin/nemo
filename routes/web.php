@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\Master\MasterApprovalController;
 use App\Http\Controllers\Admin\Master\MasterAreaController;
 use App\Http\Controllers\Admin\Master\MasterBoxController;
+use App\Http\Controllers\Admin\Master\MasterBoxNeedleController;
 use App\Http\Controllers\Admin\Master\MasterBuyerController;
 use App\Http\Controllers\Admin\Master\MasterCategoryController;
 use App\Http\Controllers\Admin\Master\MasterCounterController;
@@ -264,6 +265,17 @@ Route::group(['middleware' => ['auth']], function () {
                             Route::post('crup', [MasterBoxController::class, 'crup'])->name('admin.master.box.crup');
                             Route::get('edit/{id?}', [MasterBoxController::class, 'edit'])->name('admin.master.box.edit');
                             Route::get('hapus/{id?}', [MasterBoxController::class, 'hapus'])->name('admin.master.box.hapus');
+                        });
+
+                    Route::prefix('/box-needle')
+                        ->middleware(['permission:admin-master-box'])
+                        ->group(function () {
+                            Route::get('', [MasterBoxNeedleController::class, 'index'])->name('admin.master.box-needle');
+                            Route::get('data', [MasterBoxNeedleController::class, 'data'])->name('admin.master.box-needle.data');
+                            Route::post('spinner', [MasterBoxNeedleController::class, 'spinner'])->name('admin.master.box-needle.spinner');
+                            Route::post('needle', [MasterBoxNeedleController::class, 'needle'])->name('admin.master.box-needle.needle');
+                            Route::post('store', [MasterBoxNeedleController::class, 'store'])->name('admin.master.box-needle.store');
+                            Route::get('hapus/{id?}', [MasterBoxNeedleController::class, 'hapus'])->name('admin.master.box-needle.hapus');
                         });
 
                     Route::prefix('/placement')
