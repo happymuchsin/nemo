@@ -120,7 +120,7 @@
                     $('.filter-year').show();
                 }
             });
-            $('#filter_period').val('range').trigger('change');
+            $('#filter_period').val('daily').trigger('change');
             $('#filter_daily').val("{{ date('Y-m-d') }}").trigger('change');
             $('#filter_weekly').val("{{ date('Y') . '-W' . date('W') }}").trigger('change');
             $('#filter_month').val("{{ date('Y-m') }}").trigger('change');
