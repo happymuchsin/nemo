@@ -28,9 +28,9 @@ class UsageNeedleController extends Controller
     public function index(Request $request)
     {
         $page = 'user_usage_needle';
-        $title = 'USER USAGE NEEDLE';
+        $title = 'USER USAGE NEEDLE ALL OPERATOR';
 
-        HelperController::activityLog('OPEN USER USAGE NEEDLE', null, 'read', $request->ip(), $request->userAgent());
+        HelperController::activityLog('OPEN USER USAGE NEEDLE ALL OPERATOR', null, 'read', $request->ip(), $request->userAgent());
 
         $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
 
@@ -178,13 +178,13 @@ class UsageNeedleController extends Controller
             $start = $range_date[0] ? $range_date[0] : Carbon::today()->subMonth();
             $end = $range_date[1] ? $range_date[1] : Carbon::today();
             $range = ["$start 00:00:00", "$end 23:59:59"];
-            $judul = 'Usage Needle ' . $start . ' - ' . $end;
+            $judul = 'Usage Needle All Operator ' . $start . ' - ' . $end;
         } else if ($filter_period == 'daily') {
             $filter_daily = $request->filter_daily;
             $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
             $start = Carbon::parse($filter_daily);
             $end = Carbon::parse($filter_daily);
-            $judul = 'Usage Needle ' . $filter_daily;
+            $judul = 'Usage Needle All Operator ' . $filter_daily;
         } else if ($filter_period == 'weekly') {
             $filter_weekly = $request->filter_weekly;
             $x = explode('-W', $filter_weekly);
@@ -193,7 +193,7 @@ class UsageNeedleController extends Controller
             $start = Carbon::now()->setISODate($year, $week)->startOfWeek();
             $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
             $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
-            $judul = 'Usage Needle ' . $filter_weekly;
+            $judul = 'Usage Needle All Operator ' . $filter_weekly;
         } else if ($filter_period == 'monthly') {
             $filter_monthly = $request->filter_month;
             $x = explode('-', $filter_monthly);
@@ -203,13 +203,13 @@ class UsageNeedleController extends Controller
             $range = ["$tahun-$bulan-01 00:00:00", "$tahun-$bulan-$lastDay 23:59:59"];
             $start = Carbon::parse("$tahun-$bulan-01");
             $end = Carbon::parse("$tahun-$bulan-$lastDay");
-            $judul = 'Usage Needle ' . $filter_monthly;
+            $judul = 'Usage Needle All Operator ' . $filter_monthly;
         } else if ($filter_period == 'yearly') {
             $filter_yearly = $request->filter_year;
             $range = ["$filter_yearly-01-01 00:00:00", "$filter_yearly-12-31 23:59:59"];
             $start = Carbon::parse("$filter_yearly-01-01");
             $end = Carbon::parse("$filter_yearly-12-31");
-            $judul = 'Usage Needle ' . $filter_yearly;
+            $judul = 'Usage Needle All Operator ' . $filter_yearly;
         }
 
         try {

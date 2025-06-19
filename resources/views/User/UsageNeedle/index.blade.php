@@ -2,7 +2,7 @@
 @section('title', $title)
 
 @section('page-content')
-    <x-layout.content :name="'Usage Needle'">
+    <x-layout.content :name="'Usage Needle All Operator'">
         <x-slot:body>
             <x-filter.user-filter>
                 <x-slot:filter>

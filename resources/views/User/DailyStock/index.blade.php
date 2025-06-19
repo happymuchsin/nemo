@@ -2,7 +2,7 @@
 @section('title', $title)
 
 @section('page-content')
-    <x-layout.content :name="'Daily Stock'">
+    <x-layout.content :name="'Needle Stock'">
         <x-slot:body>
             <x-filter.user-filter>
                 <x-slot:filter>

@@ -27,9 +27,9 @@ class DailyStockController extends Controller
     public function index(Request $request)
     {
         $page = 'user_daily_stock';
-        $title = 'USER DAILY STOCK';
+        $title = 'USER NEEDLE STOCK';
 
-        HelperController::activityLog('OPEN USER DAILY STOCK', null, 'read', $request->ip(), $request->userAgent());
+        HelperController::activityLog('OPEN USER NEEDLE STOCK', null, 'read', $request->ip(), $request->userAgent());
 
         $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
 
@@ -149,7 +149,7 @@ class DailyStockController extends Controller
             $range = ["$start 00:00:00", "$end 23:59:59"];
             $ys = $range_date[0] ? Carbon::parse($range_date[0]) : Carbon::today()->subMonth();
             $ye = $range_date[1] ? Carbon::parse($range_date[1]) : Carbon::today();
-            $judul = 'Daily Stock ' . $start->format('Y-m-d') . ' - ' . $end->format('Y-m-d');
+            $judul = 'Needle Stock ' . $start->format('Y-m-d') . ' - ' . $end->format('Y-m-d');
         } else if ($filter_period == 'daily') {
             $filter_daily = $request->filter_daily;
             $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
@@ -157,7 +157,7 @@ class DailyStockController extends Controller
             $end = Carbon::parse($filter_daily);
             $ys = Carbon::parse($filter_daily);
             $ye = Carbon::parse($filter_daily);
-            $judul = 'Daily Stock ' . $filter_daily;
+            $judul = 'Needle Stock ' . $filter_daily;
         } else if ($filter_period == 'weekly') {
             $filter_weekly = $request->filter_weekly;
             $x = explode('-W', $filter_weekly);
@@ -168,7 +168,7 @@ class DailyStockController extends Controller
             $ys = Carbon::now()->setISODate($year, $week)->startOfWeek();
             $ye = Carbon::now()->setISODate($year, $week)->endOfWeek();
             $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
-            $judul = 'Daily Stock ' . $filter_weekly;
+            $judul = 'Needle Stock ' . $filter_weekly;
         } else if ($filter_period == 'monthly') {
             $filter_monthly = $request->filter_month;
             $x = explode('-', $filter_monthly);
@@ -180,7 +180,7 @@ class DailyStockController extends Controller
             $end = Carbon::parse("$tahun-$bulan-$lastDay");
             $ys = Carbon::parse("$tahun-$bulan-01");
             $ye = Carbon::parse("$tahun-$bulan-$lastDay");
-            $judul = 'Daily Stock ' . $filter_monthly;
+            $judul = 'Needle Stock ' . $filter_monthly;
         } else if ($filter_period == 'yearly') {
             $filter_yearly = $request->filter_year;
             $range = ["$filter_yearly-01-01 00:00:00", "$filter_yearly-12-31 23:59:59"];
@@ -188,7 +188,7 @@ class DailyStockController extends Controller
             $end = Carbon::parse("$filter_yearly-12-31");
             $ys = Carbon::parse("$filter_yearly-01-01");
             $ye = Carbon::parse("$filter_yearly-12-31");
-            $judul = 'Daily Stock ' . $filter_yearly;
+            $judul = 'Needle Stock ' . $filter_yearly;
         }
 
         try {
