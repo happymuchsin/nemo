@@ -138,125 +138,294 @@
                     'YYYY-MM-DD'));
             });
 
-            setTimeout(() => {
-                tableSummary = initDataTable('tableSummary', 'toolbarSummary', '', '', {
-                    dom: '<"toolbarSummary"B>flrtip',
-                    buttons: [{
-                        text: 'Excel',
-                        action: function(e, dt, node, config) {
-                            unduh();
-                        },
-                    }, ],
-                    ajax: {
-                        url: "{{ route('user.usage-needle.data') }}",
-                        data: function(d) {
-                            d.mode = 'summary';
-                            d.filter_period = $('#filter_period').val();
-                            d.filter_status = $('#filter_status').val();
-                            d.filter_daily = $('#filter_daily').val();
-                            d.filter_weekly = $('#filter_weekly').val();
-                            d.filter_month = $('#filter_month').val();
-                            d.filter_year = $('#filter_year').val();
-                            d.filter_range_date = $('#filter_range_date').val();
-                        },
-                    },
-                    columns: [{
-                            data: 'x'
-                        },
-                        {
-                            data: 'total'
-                        },
-                        @foreach ($master_needle as $d)
-                            {
-                                data: 'x{{ $d->id }}'
-                            },
-                        @endforeach
-                    ],
-                    paging: false,
-                    info: false,
-                    searching: false,
-                });
-            }, 250);
+            // setTimeout(() => {
+            //     tableSummary = initDataTable('tableSummary', 'toolbarSummary', '', '', {
+            //         dom: '<"toolbarSummary"B>flrtip',
+            //         buttons: [{
+            //             text: 'Excel',
+            //             action: function(e, dt, node, config) {
+            //                 unduh();
+            //             },
+            //         }, ],
+            //         ajax: {
+            //             url: "{{ route('user.usage-needle.data') }}",
+            //             data: function(d) {
+            //                 d.mode = 'summary';
+            //                 d.filter_period = $('#filter_period').val();
+            //                 d.filter_status = $('#filter_status').val();
+            //                 d.filter_daily = $('#filter_daily').val();
+            //                 d.filter_weekly = $('#filter_weekly').val();
+            //                 d.filter_month = $('#filter_month').val();
+            //                 d.filter_year = $('#filter_year').val();
+            //                 d.filter_range_date = $('#filter_range_date').val();
+            //             },
+            //         },
+            //         columns: [{
+            //                 data: 'x'
+            //             },
+            //             {
+            //                 data: 'total'
+            //             },
+            //             @foreach ($master_needle as $d)
+            //                 {
+            //                     data: 'x{{ $d->id }}'
+            //                 },
+            //             @endforeach
+            //         ],
+            //         paging: false,
+            //         info: false,
+            //         searching: false,
+            //     });
+            // }, 250);
 
-            setTimeout(() => {
-                table = initDataTable('table', '', '', '', {
-                    ajax: {
-                        url: "{{ route('user.usage-needle.data') }}",
-                        data: function(d) {
-                            d.mode = 'data';
-                            d.filter_period = $('#filter_period').val();
-                            d.filter_status = $('#filter_status').val();
-                            d.filter_daily = $('#filter_daily').val();
-                            d.filter_weekly = $('#filter_weekly').val();
-                            d.filter_month = $('#filter_month').val();
-                            d.filter_year = $('#filter_year').val();
-                            d.filter_range_date = $('#filter_range_date').val();
-                        },
-                    },
-                    columns: [{
-                            data: null,
-                            name: 'nomor',
-                            orderable: false,
-                            searchable: false,
-                            render: function(data, type, row, meta) {
-                                return meta.row + meta.settings._iDisplayStart + 1;
-                            }
-                        },
-                        {
-                            data: 'username'
-                        },
-                        {
-                            data: 'name'
-                        },
-                        {
-                            data: 'division'
-                        },
-                        {
-                            data: 'position'
-                        },
-                        {
-                            data: 'tipe'
-                        },
-                        {
-                            data: 'location'
-                        },
-                        {
-                            data: 'counter'
-                        },
-                        {
-                            data: 'total'
-                        },
-                        @foreach ($master_needle as $d)
-                            {
-                                data: 'x{{ $d->id }}'
-                            },
-                        @endforeach
-                    ],
-                    paging: false,
-                    rowCallback: function(row, data, index) {
-                        // Ubah isi kolom pertama (index ke-0) jadi nomor urut
-                        $('td:eq(0)', row).html(table.page.info().start + index + 1);
-                    },
-                    // footerCallback: function(tfoot, data, start, end, display) {
-                    //     var api = this.api();
-                    //     if (end > 0) {
-                    //         for (var s = 8; s <= api.columns().count() - 1; s++) {
-                    //             var x = api.column(s, {
-                    //                 search: 'applied'
-                    //             }).data().reduce(function(a, b) {
-                    //                 return +a + +b;
-                    //             }, 0);
-                    //             $(api.column(s).footer()).html(x);
-                    //         }
-                    //     }
-                    // }
-                });
-            }, 500);
+            // setTimeout(() => {
+            //     table = initDataTable('table', '', '', '', {
+            //         ajax: {
+            //             url: "{{ route('user.usage-needle.data') }}",
+            //             data: function(d) {
+            //                 d.mode = 'data';
+            //                 d.filter_period = $('#filter_period').val();
+            //                 d.filter_status = $('#filter_status').val();
+            //                 d.filter_daily = $('#filter_daily').val();
+            //                 d.filter_weekly = $('#filter_weekly').val();
+            //                 d.filter_month = $('#filter_month').val();
+            //                 d.filter_year = $('#filter_year').val();
+            //                 d.filter_range_date = $('#filter_range_date').val();
+            //             },
+            //         },
+            //         columns: [{
+            //                 data: null,
+            //                 name: 'nomor',
+            //                 orderable: false,
+            //                 searchable: false,
+            //                 render: function(data, type, row, meta) {
+            //                     return meta.row + meta.settings._iDisplayStart + 1;
+            //                 }
+            //             },
+            //             {
+            //                 data: 'username'
+            //             },
+            //             {
+            //                 data: 'name'
+            //             },
+            //             {
+            //                 data: 'division'
+            //             },
+            //             {
+            //                 data: 'position'
+            //             },
+            //             {
+            //                 data: 'tipe'
+            //             },
+            //             {
+            //                 data: 'location'
+            //             },
+            //             {
+            //                 data: 'counter'
+            //             },
+            //             {
+            //                 data: 'total'
+            //             },
+            //             @foreach ($master_needle as $d)
+            //                 {
+            //                     data: 'x{{ $d->id }}'
+            //                 },
+            //             @endforeach
+            //         ],
+            //         paging: false,
+            //         rowCallback: function(row, data, index) {
+            //             // Ubah isi kolom pertama (index ke-0) jadi nomor urut
+            //             $('td:eq(0)', row).html(table.page.info().start + index + 1);
+            //         },
+            //         // footerCallback: function(tfoot, data, start, end, display) {
+            //         //     var api = this.api();
+            //         //     if (end > 0) {
+            //         //         for (var s = 8; s <= api.columns().count() - 1; s++) {
+            //         //             var x = api.column(s, {
+            //         //                 search: 'applied'
+            //         //             }).data().reduce(function(a, b) {
+            //         //                 return +a + +b;
+            //         //             }, 0);
+            //         //             $(api.column(s).footer()).html(x);
+            //         //         }
+            //         //     }
+            //         // }
+            //     });
+            // }, 500);
+
+            setTable();
         })
 
         function cari() {
-            tableSummary.ajax.reload();
-            table.ajax.reload();
+            setTable();
+        }
+
+        function setTable() {
+            return new Promise((resolve, reject) => {
+                try {
+                    waitAlert();
+                    const promiseSummary = new Promise((res, rej) => {
+                        if ($.fn.DataTable.isDataTable("#tableSummary")) {
+                            $('#tableSummary').html('');
+                            $('#tableSummary').DataTable().clear().destroy();
+                        }
+                        setTimeout(() => {
+                            tableSummary = initDataTable('tableSummary', 'toolbarSummary', '', '', {
+                                dom: '<"toolbarSummary"B>flrtip',
+                                buttons: [{
+                                    text: 'Excel',
+                                    action: function(e, dt, node, config) {
+                                        unduh();
+                                    },
+                                }, ],
+                                ajax: {
+                                    url: "{{ route('user.usage-needle.data') }}",
+                                    data: function(d) {
+                                        d.mode = 'summary';
+                                        d.filter_period = $('#filter_period').val();
+                                        d.filter_status = $('#filter_status').val();
+                                        d.filter_daily = $('#filter_daily').val();
+                                        d.filter_weekly = $('#filter_weekly').val();
+                                        d.filter_month = $('#filter_month').val();
+                                        d.filter_year = $('#filter_year').val();
+                                        d.filter_range_date = $('#filter_range_date').val();
+                                    },
+                                    beforeSend: function() {
+
+                                    },
+                                    complete: function() {
+
+                                    },
+                                },
+                                columns: [{
+                                        data: 'x'
+                                    },
+                                    {
+                                        data: 'total'
+                                    },
+                                    @foreach ($master_needle as $d)
+                                        {
+                                            data: 'x{{ $d->id }}'
+                                        },
+                                    @endforeach
+                                ],
+                                paging: false,
+                                info: false,
+                                searching: false,
+                                initComplete: function() {
+                                    res(true);
+                                },
+                            });
+                        }, 250);
+                    });
+
+                    const promiseTable = new Promise((res, rej) => {
+                        if ($.fn.DataTable.isDataTable("#table")) {
+                            $('#table').html('');
+                            $('#table').DataTable().clear().destroy();
+                        }
+                        setTimeout(() => {
+                            table = initDataTable('table', '', '', '', {
+                                ajax: {
+                                    url: "{{ route('user.usage-needle.data') }}",
+                                    data: function(d) {
+                                        d.mode = 'data';
+                                        d.filter_period = $('#filter_period').val();
+                                        d.filter_status = $('#filter_status').val();
+                                        d.filter_daily = $('#filter_daily').val();
+                                        d.filter_weekly = $('#filter_weekly').val();
+                                        d.filter_month = $('#filter_month').val();
+                                        d.filter_year = $('#filter_year').val();
+                                        d.filter_range_date = $('#filter_range_date').val();
+                                    },
+                                    beforeSend: function() {
+
+                                    },
+                                    complete: function() {
+
+                                    },
+                                },
+                                columns: [{
+                                        data: null,
+                                        name: 'nomor',
+                                        orderable: false,
+                                        searchable: false,
+                                        render: function(data, type, row, meta) {
+                                            return meta.row + meta.settings._iDisplayStart + 1;
+                                        }
+                                    },
+                                    {
+                                        data: 'username'
+                                    },
+                                    {
+                                        data: 'name'
+                                    },
+                                    {
+                                        data: 'division'
+                                    },
+                                    {
+                                        data: 'position'
+                                    },
+                                    {
+                                        data: 'tipe'
+                                    },
+                                    {
+                                        data: 'location'
+                                    },
+                                    {
+                                        data: 'counter'
+                                    },
+                                    {
+                                        data: 'total'
+                                    },
+                                    @foreach ($master_needle as $d)
+                                        {
+                                            data: 'x{{ $d->id }}'
+                                        },
+                                    @endforeach
+                                ],
+                                paging: false,
+                                rowCallback: function(row, data, index) {
+                                    // Ubah isi kolom pertama (index ke-0) jadi nomor urut
+                                    $('td:eq(0)', row).html(table.page.info().start + index + 1);
+                                },
+                                // footerCallback: function(tfoot, data, start, end, display) {
+                                //     var api = this.api();
+                                //     if (end > 0) {
+                                //         for (var s = 8; s <= api.columns().count() - 1; s++) {
+                                //             var x = api.column(s, {
+                                //                 search: 'applied'
+                                //             }).data().reduce(function(a, b) {
+                                //                 return +a + +b;
+                                //             }, 0);
+                                //             $(api.column(s).footer()).html(x);
+                                //         }
+                                //     }
+                                // }
+                                initComplete: function() {
+                                    res(true);
+                                },
+                            });
+                        }, 250);
+                    });
+
+                    // Menunggu kedua promise selesai
+                    Promise.all([promiseSummary, promiseTable])
+                        .then((results) => {
+                            resolve({
+                                message: true,
+                            });
+                            unwaitAlert();
+                        })
+                        .catch((error) => {
+                            unwaitAlert();
+                            reject(error);
+                        });
+                } catch (e) {
+                    unwaitAlert();
+                    reject(e);
+                }
+            });
         }
 
         function unduh() {
