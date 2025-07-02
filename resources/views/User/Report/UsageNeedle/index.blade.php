@@ -67,14 +67,6 @@
                         @endforeach
                     </tr>
                 </x-slot:thead>
-                {{-- <x-slot:tfoot>
-                    <tr>
-                        <th colspan="8" class="text-center">Total</th>
-                        @foreach ($master_needle as $d)
-                            <th></th>
-                        @endforeach
-                    </tr>
-                </x-slot:tfoot> --}}
             </x-layout.table>
         </x-slot:body>
     </x-layout.content>
@@ -138,121 +130,6 @@
                     'YYYY-MM-DD'));
             });
 
-            // setTimeout(() => {
-            //     tableSummary = initDataTable('tableSummary', 'toolbarSummary', '', '', {
-            //         dom: '<"toolbarSummary"B>flrtip',
-            //         buttons: [{
-            //             text: 'Excel',
-            //             action: function(e, dt, node, config) {
-            //                 unduh();
-            //             },
-            //         }, ],
-            //         ajax: {
-            //             url: "{{ route('user.usage-needle.data') }}",
-            //             data: function(d) {
-            //                 d.mode = 'summary';
-            //                 d.filter_period = $('#filter_period').val();
-            //                 d.filter_status = $('#filter_status').val();
-            //                 d.filter_daily = $('#filter_daily').val();
-            //                 d.filter_weekly = $('#filter_weekly').val();
-            //                 d.filter_month = $('#filter_month').val();
-            //                 d.filter_year = $('#filter_year').val();
-            //                 d.filter_range_date = $('#filter_range_date').val();
-            //             },
-            //         },
-            //         columns: [{
-            //                 data: 'x'
-            //             },
-            //             {
-            //                 data: 'total'
-            //             },
-            //             @foreach ($master_needle as $d)
-            //                 {
-            //                     data: 'x{{ $d->id }}'
-            //                 },
-            //             @endforeach
-            //         ],
-            //         paging: false,
-            //         info: false,
-            //         searching: false,
-            //     });
-            // }, 250);
-
-            // setTimeout(() => {
-            //     table = initDataTable('table', '', '', '', {
-            //         ajax: {
-            //             url: "{{ route('user.usage-needle.data') }}",
-            //             data: function(d) {
-            //                 d.mode = 'data';
-            //                 d.filter_period = $('#filter_period').val();
-            //                 d.filter_status = $('#filter_status').val();
-            //                 d.filter_daily = $('#filter_daily').val();
-            //                 d.filter_weekly = $('#filter_weekly').val();
-            //                 d.filter_month = $('#filter_month').val();
-            //                 d.filter_year = $('#filter_year').val();
-            //                 d.filter_range_date = $('#filter_range_date').val();
-            //             },
-            //         },
-            //         columns: [{
-            //                 data: null,
-            //                 name: 'nomor',
-            //                 orderable: false,
-            //                 searchable: false,
-            //                 render: function(data, type, row, meta) {
-            //                     return meta.row + meta.settings._iDisplayStart + 1;
-            //                 }
-            //             },
-            //             {
-            //                 data: 'username'
-            //             },
-            //             {
-            //                 data: 'name'
-            //             },
-            //             {
-            //                 data: 'division'
-            //             },
-            //             {
-            //                 data: 'position'
-            //             },
-            //             {
-            //                 data: 'tipe'
-            //             },
-            //             {
-            //                 data: 'location'
-            //             },
-            //             {
-            //                 data: 'counter'
-            //             },
-            //             {
-            //                 data: 'total'
-            //             },
-            //             @foreach ($master_needle as $d)
-            //                 {
-            //                     data: 'x{{ $d->id }}'
-            //                 },
-            //             @endforeach
-            //         ],
-            //         paging: false,
-            //         rowCallback: function(row, data, index) {
-            //             // Ubah isi kolom pertama (index ke-0) jadi nomor urut
-            //             $('td:eq(0)', row).html(table.page.info().start + index + 1);
-            //         },
-            //         // footerCallback: function(tfoot, data, start, end, display) {
-            //         //     var api = this.api();
-            //         //     if (end > 0) {
-            //         //         for (var s = 8; s <= api.columns().count() - 1; s++) {
-            //         //             var x = api.column(s, {
-            //         //                 search: 'applied'
-            //         //             }).data().reduce(function(a, b) {
-            //         //                 return +a + +b;
-            //         //             }, 0);
-            //         //             $(api.column(s).footer()).html(x);
-            //         //         }
-            //         //     }
-            //         // }
-            //     });
-            // }, 500);
-
             setTable();
         })
 
@@ -279,7 +156,7 @@
                                     },
                                 }, ],
                                 ajax: {
-                                    url: "{{ route('user.usage-needle.data') }}",
+                                    url: "{{ route('user.report.usage-needle.data') }}",
                                     data: function(d) {
                                         d.mode = 'summary';
                                         d.filter_period = $('#filter_period').val();
@@ -327,7 +204,7 @@
                         setTimeout(() => {
                             table = initDataTable('table', '', '', '', {
                                 ajax: {
-                                    url: "{{ route('user.usage-needle.data') }}",
+                                    url: "{{ route('user.report.usage-needle.data') }}",
                                     data: function(d) {
                                         d.mode = 'data';
                                         d.filter_period = $('#filter_period').val();
@@ -386,22 +263,8 @@
                                 ],
                                 paging: false,
                                 rowCallback: function(row, data, index) {
-                                    // Ubah isi kolom pertama (index ke-0) jadi nomor urut
                                     $('td:eq(0)', row).html(table.page.info().start + index + 1);
                                 },
-                                // footerCallback: function(tfoot, data, start, end, display) {
-                                //     var api = this.api();
-                                //     if (end > 0) {
-                                //         for (var s = 8; s <= api.columns().count() - 1; s++) {
-                                //             var x = api.column(s, {
-                                //                 search: 'applied'
-                                //             }).data().reduce(function(a, b) {
-                                //                 return +a + +b;
-                                //             }, 0);
-                                //             $(api.column(s).footer()).html(x);
-                                //         }
-                                //     }
-                                // }
                                 initComplete: function() {
                                     res(true);
                                 },
@@ -430,7 +293,7 @@
 
         function unduh() {
             $.ajax({
-                url: "{{ route('user.usage-needle.unduh', ['locale' => app()->getLocale()]) }}",
+                url: "{{ route('user.report.usage-needle.unduh', ['locale' => app()->getLocale()]) }}",
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",
@@ -486,7 +349,7 @@
         }
 
         socket.on('nemoReload', () => {
-            table.ajax.reload();
+            setTable();
         })
     </script>
 @endsection

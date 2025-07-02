@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\User\Report;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
@@ -26,14 +26,14 @@ class DailyStockController extends Controller
 
     public function index(Request $request)
     {
-        $page = 'user_daily_stock';
-        $title = 'USER NEEDLE STOCK';
+        $page = 'user_report_daily_stock';
+        $title = 'USER REPORT NEEDLE STOCK';
 
-        HelperController::activityLog('OPEN USER NEEDLE STOCK', null, 'read', $request->ip(), $request->userAgent());
+        HelperController::activityLog('OPEN USER REPORT NEEDLE STOCK', null, 'read', $request->ip(), $request->userAgent());
 
         $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
 
-        return view('User.DailyStock.index', compact('title', 'page', 'master_needle'));
+        return view('User.Report.DailyStock.index', compact('title', 'page', 'master_needle'));
     }
 
     public function data(Request $request)

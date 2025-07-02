@@ -63,7 +63,7 @@
                         },
                     }, ],
                     ajax: {
-                        url: "{{ route('user.timing-log.data') }}",
+                        url: "{{ route('user.report.timing-log.data') }}",
                         data: function(d) {
                             d.filter_range_date = $('#filter_range_date').val();
                         },
@@ -101,7 +101,7 @@
 
         function unduh() {
             $.ajax({
-                url: "{{ route('user.timing-log.unduh', ['locale' => app()->getLocale()]) }}",
+                url: "{{ route('user.report.timing-log.unduh', ['locale' => app()->getLocale()]) }}",
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",

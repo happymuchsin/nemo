@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\User\Report;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
@@ -24,12 +24,12 @@ class TimingLogController extends Controller
 
     public function index(Request $request)
     {
-        $page = 'user_timing_log';
-        $title = 'USER TIMING LOG';
+        $page = 'user_report_timing_log';
+        $title = 'USER REPORT TIMING LOG';
 
-        HelperController::activityLog('OPEN USER TIMING LOG', null, 'read', $request->ip(), $request->userAgent());
+        HelperController::activityLog('OPEN USER REPORT TIMING LOG', null, 'read', $request->ip(), $request->userAgent());
 
-        return view('User.TimingLog.index', compact('title', 'page'));
+        return view('User.Report.TimingLog.index', compact('title', 'page'));
     }
 
     public function data(Request $request)

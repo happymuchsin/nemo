@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\User\Report;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use stdClass;
 
-class TrackByOperatorController extends Controller
+class TrackByNeedleController extends Controller
 {
     public function __construct()
     {
@@ -19,12 +19,12 @@ class TrackByOperatorController extends Controller
 
     public function index(Request $request)
     {
-        $page = 'user_track_by_operator';
-        $title = 'USER TRACK BY OPERATOR';
+        $page = 'user_report_track_by_needle';
+        $title = 'USER REPORT TRACK BY NEEDLE';
 
-        HelperController::activityLog('OPEN USER TRACK BY OPERATOR', null, 'read', $request->ip(), $request->userAgent());
+        HelperController::activityLog('OPEN USER REPORT TRACK BY NEEDLE', null, 'read', $request->ip(), $request->userAgent());
 
-        return view('User.TrackByOperator.index', compact('title', 'page'));
+        return view('User.Report.TrackByNeedle.index', compact('title', 'page'));
     }
 
     public function data(Request $request)
@@ -85,6 +85,7 @@ class TrackByOperatorController extends Controller
             $d->tipe = $n->needle->tipe;
             $d->size = $n->needle->size;
             $d->code = $n->needle->code;
+            $d->machine = $n->needle->machine;
             $d->style = $n->style->name;
             $d->srf = $n->style->srf;
             $d->description = $n->master_status->name;

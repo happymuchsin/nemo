@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\User\Report;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
@@ -27,14 +27,14 @@ class UsageNeedleController extends Controller
 
     public function index(Request $request)
     {
-        $page = 'user_usage_needle';
-        $title = 'USER USAGE NEEDLE ALL OPERATOR';
+        $page = 'user_report_usage_needle';
+        $title = 'USER REPORT USAGE NEEDLE ALL OPERATOR';
 
-        HelperController::activityLog('OPEN USER USAGE NEEDLE ALL OPERATOR', null, 'read', $request->ip(), $request->userAgent());
+        HelperController::activityLog('OPEN USER REPORT USAGE NEEDLE ALL OPERATOR', null, 'read', $request->ip(), $request->userAgent());
 
         $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
 
-        return view('User.UsageNeedle.index', compact('title', 'page', 'master_needle'));
+        return view('User.Report.UsageNeedle.index', compact('title', 'page', 'master_needle'));
     }
 
     public function data(Request $request)

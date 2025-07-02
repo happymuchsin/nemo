@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\User\Report;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
@@ -19,12 +19,12 @@ class SummaryStockController extends Controller
 
     public function index(Request $request)
     {
-        $page = 'user_summary_stock';
-        $title = 'USER SUMMARY STOCK';
+        $page = 'user_report_summary_stock';
+        $title = 'USER REPORT SUMMARY STOCK';
 
-        HelperController::activityLog('OPEN USER SUMMARY STOCK', null, 'read', $request->ip(), $request->userAgent());
+        HelperController::activityLog('OPEN USER REPORT SUMMARY STOCK', null, 'read', $request->ip(), $request->userAgent());
 
-        return view('User.SummaryStock.index', compact('title', 'page'));
+        return view('User.Report.SummaryStock.index', compact('title', 'page'));
     }
 
     public function data(Request $request)

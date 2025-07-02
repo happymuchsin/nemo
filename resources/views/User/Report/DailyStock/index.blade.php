@@ -95,7 +95,7 @@
 
         function cari() {
             sendAjax('', {
-                url: "{{ route('user.daily-stock.data') }}",
+                url: "{{ route('user.report.daily-stock.data') }}",
                 type: "POST",
                 data: {
                     filter_period: $('#filter_period').val(),
@@ -230,7 +230,7 @@
 
         function unduh() {
             $.ajax({
-                url: "{{ route('user.daily-stock.unduh', ['locale' => app()->getLocale()]) }}",
+                url: "{{ route('user.report.daily-stock.unduh', ['locale' => app()->getLocale()]) }}",
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",

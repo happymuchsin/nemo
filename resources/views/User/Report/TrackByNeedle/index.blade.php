@@ -2,7 +2,7 @@
 @section('title', $title)
 
 @section('page-content')
-    <x-layout.content :name="'Track By Operator'">
+    <x-layout.content :name="'Track By Needle Type'">
         <x-slot:body>
             <x-filter.user-filter>
                 <x-slot:filter>
@@ -36,8 +36,10 @@
             <div class="my-1">
                 <x-filter.user-filter>
                     <x-slot:filter>
-                        <x-filter.filter :tipe="'text'" :label="'NIK / Username'" :id="'cari_username'" :colom="'col-sm-auto'" />
-                        <x-filter.filter :tipe="'text'" :label="'Name'" :id="'cari_name'" :colom="'col-sm-auto'" />
+                        <x-filter.filter :tipe="'text'" :label="'Machine'" :id="'cari_machine'" :colom="'col-sm-auto'" />
+                        <x-filter.filter :tipe="'text'" :label="'Brand'" :id="'cari_brand'" :colom="'col-sm-auto'" />
+                        <x-filter.filter :tipe="'text'" :label="'Type'" :id="'cari_type'" :colom="'col-sm-auto'" />
+                        <x-filter.filter :tipe="'text'" :label="'Size'" :id="'cari_size'" :colom="'col-sm-auto'" />
                     </x-slot:filter>
                 </x-filter.user-filter>
             </div>
@@ -51,6 +53,7 @@
                         <th>Type</th>
                         <th>Size</th>
                         <th>Code</th>
+                        <th>Machine</th>
                         <th>Style / Article</th>
                         <th>No. SRF</th>
                         <th>Description</th>
@@ -116,7 +119,7 @@
                     'YYYY-MM-DD'));
             });
 
-            $('#cari_username, #cari_name').on('keyup change', function() {
+            $('#cari_machine, #cari_brand, #cari_type, #cari_size').on('keyup change', function() {
                 filterTable();
             });
 
@@ -138,11 +141,11 @@
                             } else if ($('#filter_period').val() == 'range') {
                                 x = $('#filter_range_date').val();
                             }
-                            return 'Track By Operator ' + x;
+                            return 'Track By Needle Type ' + x;
                         },
                     }, ],
                     ajax: {
-                        url: "{{ route('user.track-by-operator.data') }}",
+                        url: "{{ route('user.report.track-by-needle.data') }}",
                         data: function(d) {
                             d.filter_period = $('#filter_period').val();
                             d.filter_daily = $('#filter_daily').val();
@@ -175,6 +178,9 @@
                             data: 'code'
                         },
                         {
+                            data: 'machine'
+                        },
+                        {
                             data: 'style'
                         },
                         {
@@ -190,8 +196,10 @@
         })
 
         function filterTable() {
-            table.column(1).search($('#cari_username').val());
-            table.column(2).search($('#cari_name').val());
+            table.column(7).search($('#cari_machine').val());
+            table.column(3).search($('#cari_brand').val());
+            table.column(4).search($('#cari_type').val());
+            table.column(5).search($('#cari_size').val());
             table.draw();
         }
 

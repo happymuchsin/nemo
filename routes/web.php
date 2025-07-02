@@ -29,17 +29,17 @@ use App\Http\Controllers\Admin\Tools\ToolsUserController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\NotifController;
 use App\Http\Controllers\User\ApprovalController;
-use App\Http\Controllers\User\DailyStockController;
 use App\Http\Controllers\User\DashboardController as UserDashboard;
 use App\Http\Controllers\User\DeadStockController;
 use App\Http\Controllers\User\NeedleReportController;
+use App\Http\Controllers\User\Report\DailyStockController;
+use App\Http\Controllers\User\Report\SummaryStockController;
+use App\Http\Controllers\User\Report\TimingLogController;
+use App\Http\Controllers\User\Report\TrackByNeedleController;
+use App\Http\Controllers\User\Report\TrackByOperatorController;
+use App\Http\Controllers\User\Report\UsageNeedleController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\StockController;
-use App\Http\Controllers\User\SummaryStockController;
-use App\Http\Controllers\User\TimingLogController;
-use App\Http\Controllers\User\TrackByNeedleController;
-use App\Http\Controllers\User\TrackByOperatorController;
-use App\Http\Controllers\User\UsageNeedleController;
 use App\Http\Controllers\User\WarehouseController;
 
 /*
@@ -83,51 +83,45 @@ Route::group(['middleware' => ['auth']], function () {
                 ->group(function () {
                     Route::get('', [ReportController::class, 'index'])->name('user.report');
                     Route::get('data', [ReportController::class, 'data'])->name('user.report.data');
-                });
 
-            Route::prefix('/summary-stock')
-                ->middleware(['permission:user-report'])
-                ->group(function () {
-                    Route::get('', [SummaryStockController::class, 'index'])->name('user.summary-stock');
-                    Route::get('data', [SummaryStockController::class, 'data'])->name('user.summary-stock.data');
-                });
+                    Route::prefix('/summary-stock')
+                        ->group(function () {
+                            Route::get('', [SummaryStockController::class, 'index'])->name('user.report.summary-stock');
+                            Route::get('data', [SummaryStockController::class, 'data'])->name('user.report.summary-stock.data');
+                        });
 
-            Route::prefix('/usage-needle')
-                ->middleware(['permission:user-report'])
-                ->group(function () {
-                    Route::get('', [UsageNeedleController::class, 'index'])->name('user.usage-needle');
-                    Route::get('data', [UsageNeedleController::class, 'data'])->name('user.usage-needle.data');
-                    Route::post('unduh', [UsageNeedleController::class, 'unduh'])->name('user.usage-needle.unduh');
-                });
+                    Route::prefix('/usage-needle')
+                        ->group(function () {
+                            Route::get('', [UsageNeedleController::class, 'index'])->name('user.report.usage-needle');
+                            Route::get('data', [UsageNeedleController::class, 'data'])->name('user.report.usage-needle.data');
+                            Route::post('unduh', [UsageNeedleController::class, 'unduh'])->name('user.report.usage-needle.unduh');
+                        });
 
-            Route::prefix('/daily-stock')
-                ->middleware(['permission:user-report'])
-                ->group(function () {
-                    Route::get('', [DailyStockController::class, 'index'])->name('user.daily-stock');
-                    Route::post('data', [DailyStockController::class, 'data'])->name('user.daily-stock.data');
-                    Route::post('unduh', [DailyStockController::class, 'unduh'])->name('user.daily-stock.unduh');
-                });
+                    Route::prefix('/daily-stock')
+                        ->group(function () {
+                            Route::get('', [DailyStockController::class, 'index'])->name('user.report.daily-stock');
+                            Route::post('data', [DailyStockController::class, 'data'])->name('user.report.daily-stock.data');
+                            Route::post('unduh', [DailyStockController::class, 'unduh'])->name('user.report.daily-stock.unduh');
+                        });
 
-            Route::prefix('/timing-log')
-                ->middleware(['permission:user-report'])
-                ->group(function () {
-                    Route::get('', [TimingLogController::class, 'index'])->name('user.timing-log');
-                    Route::get('data', [TimingLogController::class, 'data'])->name('user.timing-log.data');
-                    Route::post('unduh', [TimingLogController::class, 'unduh'])->name('user.timing-log.unduh');
-                });
+                    Route::prefix('/timing-log')
+                        ->group(function () {
+                            Route::get('', [TimingLogController::class, 'index'])->name('user.report.timing-log');
+                            Route::get('data', [TimingLogController::class, 'data'])->name('user.report.timing-log.data');
+                            Route::post('unduh', [TimingLogController::class, 'unduh'])->name('user.report.timing-log.unduh');
+                        });
 
-            Route::prefix('/track-by-operator')
-                ->middleware(['permission:user-report'])
-                ->group(function () {
-                    Route::get('', [TrackByOperatorController::class, 'index'])->name('user.track-by-operator');
-                    Route::get('data', [TrackByOperatorController::class, 'data'])->name('user.track-by-operator.data');
-                });
+                    Route::prefix('/track-by-operator')
+                        ->group(function () {
+                            Route::get('', [TrackByOperatorController::class, 'index'])->name('user.report.track-by-operator');
+                            Route::get('data', [TrackByOperatorController::class, 'data'])->name('user.report.track-by-operator.data');
+                        });
 
-            Route::prefix('/track-by-needle')
-                ->middleware(['permission:user-report'])
-                ->group(function () {
-                    Route::get('', [TrackByNeedleController::class, 'index'])->name('user.track-by-needle');
-                    Route::get('data', [TrackByNeedleController::class, 'data'])->name('user.track-by-needle.data');
+                    Route::prefix('/track-by-needle')
+                        ->group(function () {
+                            Route::get('', [TrackByNeedleController::class, 'index'])->name('user.report.track-by-needle');
+                            Route::get('data', [TrackByNeedleController::class, 'data'])->name('user.report.track-by-needle.data');
+                        });
                 });
 
             Route::prefix('/needle-report')
