@@ -22,7 +22,7 @@ class ClosingController extends Controller
 
             DB::beginTransaction();
 
-            $stat = MasterStatus::where('name', '!=', 'RETURN')->first();
+            $stat = MasterStatus::where('name', '!=', 'RETURN')->pluck('id');
 
             $master_needle = MasterNeedle::when($master_needle_id, function ($q) use ($master_needle_id) {
                 $q->where('id', $master_needle_id);
@@ -37,7 +37,7 @@ class ClosingController extends Controller
                         ->sum('in');
                     $out = Needle::whereDate('created_at', $tanggal)
                         ->where('master_needle_id', $m->id)
-                        ->where('master_status_id', $stat->id)
+                        ->whereIn('master_status_id', $stat)
                         ->count();
 
                     $dc = DailyClosing::where('master_needle_id', $m->id)
