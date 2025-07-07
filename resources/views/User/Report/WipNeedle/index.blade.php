@@ -108,7 +108,7 @@
             $('#filter_weekly').val("{{ date('Y') . '-W' . date('W') }}").trigger('change');
             $('#filter_month').val("{{ date('Y-m') }}").trigger('change');
             $('#filter_year').val("{{ date('Y') }}").trigger('change');
-            $('#filter_range_date').val("{{ date('Y-m-d', strtotime('-1 month')) . ' - ' . date('Y-m-d') }}")
+            $('#filter_range_date').val("{{ date('Y-m-d') . ' - ' . date('Y-m-d') }}")
 
             $("#filter_range_date").daterangepicker({
                 autoUpdateInput: false,
