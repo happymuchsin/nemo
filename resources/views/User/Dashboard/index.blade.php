@@ -15,22 +15,14 @@
                 </div>
                 <div class="col-sm-10">
                     <div class="row">
-                        <x-layout.small-box :innerStyle="'color:black;background-color: #3698d8'" :footerStyle="'color:black'" :id="'ava_single_needle'" :inner="'Single Needle'"
-                            :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
-                        <x-layout.small-box :innerStyle="'color:black;background-color: #25cb76'" :footerStyle="'color:black'" :id="'ava_obras'" :inner="'Obras'"
-                            :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
-                        <x-layout.small-box :innerStyle="'color:black;background-color: #e67f32'" :footerStyle="'color:black'" :id="'ava_double_needle'" :inner="'Double Needle'"
-                            :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
-                        <x-layout.small-box :innerStyle="'color:black;background-color: #e84e42'" :footerStyle="'color:black'" :id="'ava_kansai'" :inner="'Kansai'"
-                            :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
-                        <x-layout.small-box :innerStyle="'color:black;background-color: #85c1e7'" :footerStyle="'color:black'" :id="'rep_single_needle'" :inner="'Single Needle'"
-                            :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
-                        <x-layout.small-box :innerStyle="'color:black;background-color: #80dfac'" :footerStyle="'color:black'" :id="'rep_obras'" :inner="'Obras'"
-                            :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
-                        <x-layout.small-box :innerStyle="'color:black;background-color: #f0b27f'" :footerStyle="'color:black'" :id="'rep_double_needle'" :inner="'Double Needle'"
-                            :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
-                        <x-layout.small-box :innerStyle="'color:black;background-color: #f1958c'" :footerStyle="'color:black'" :id="'rep_kansai'" :inner="'Kansai'"
-                            :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #3698d8'" :footerStyle="'color:black'" :id="'ava_single_needle'" :inner="'Single Needle'" :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #25cb76'" :footerStyle="'color:black'" :id="'ava_obras'" :inner="'Obras'" :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #e67f32'" :footerStyle="'color:black'" :id="'ava_double_needle'" :inner="'Double Needle'" :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #e84e42'" :footerStyle="'color:black'" :id="'ava_kansai'" :inner="'Kansai'" :icon="'fa-shelves'" :footer="'Available Stock for Usage'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #85c1e7'" :footerStyle="'color:black'" :id="'rep_single_needle'" :inner="'Single Needle'" :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #80dfac'" :footerStyle="'color:black'" :id="'rep_obras'" :inner="'Obras'" :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #f0b27f'" :footerStyle="'color:black'" :id="'rep_double_needle'" :inner="'Double Needle'" :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
+                        <x-layout.small-box :innerStyle="'color:black;background-color: #f1958c'" :footerStyle="'color:black'" :id="'rep_kansai'" :inner="'Kansai'" :icon="'fa-arrows-rotate'" :footer="'Replacement Current Month'" />
                     </div>
                 </div>
             </div>

@@ -154,6 +154,7 @@ class CardController extends Controller
                                 'scan_box' => $scan_box,
                                 'status' => '',
                                 'remark' => '',
+                                'note' => 'FROM APPROVAL',
                                 'created_by' => $username,
                                 'created_at' => $now,
                             ]);
@@ -168,6 +169,7 @@ class CardController extends Controller
                                 'scan_box' => $scan_box,
                                 'status' => '',
                                 'remark' => '',
+                                'note' => 'FROM APPROVAL',
                                 'created_by' => $username,
                                 'created_at' => $now,
                             ]), null, $username);

@@ -47,6 +47,7 @@ class TimingLogController extends Controller
             $d->rfid = $n->scan_rfid;
             $d->box = $n->scan_box;
             $d->duration = $n->scan_rfid && $n->scan_box ? Carbon::parse($n->scan_rfid)->diff(Carbon::parse($n->scan_box))->format('%H:%i:%s') : '-';
+            $d->note = $n->note;
             $data[] = $d;
         }
 
@@ -65,11 +66,11 @@ class TimingLogController extends Controller
             $judul = 'Timing Log ' . $filter_tanggal;
 
             $ws->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-            $ws->mergeCells('A1:E1')->getCell('A1')->setValue(strtoupper($judul))->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $ws->mergeCells('A1:F1')->getCell('A1')->setValue(strtoupper($judul))->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-            $ws->getStyle('A3:E5')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-            $ws->getStyle('A3:E5')->getFont()->setBold(true);
-            $ws->getStyle('A3:E5')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $ws->getStyle('A3:F5')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $ws->getStyle('A3:F5')->getFont()->setBold(true);
+            $ws->getStyle('A3:F5')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $ws->mergeCells('A3:A5')->getCell('A3')->setValue('No');
             $ws->mergeCells('B3:B5')->getCell('B3')->setValue('Name');
             $ws->mergeCells('C3:D3')->getCell('C3')->setValue('RFID');
@@ -77,6 +78,7 @@ class TimingLogController extends Controller
             $ws->getCell('C5')->setValue('Scan RFID Operator');
             $ws->getCell('D5')->setValue('Scan Box Needle');
             $ws->mergeCells('E3:E5')->getCell('E3')->setValue('Duration');
+            $ws->mergeCells('F3:F5')->getCell('F3')->setValue('Remarks');
 
             $k = 5;
             $i = 0;
@@ -84,12 +86,13 @@ class TimingLogController extends Controller
             foreach ($needle as $n) {
                 $k++;
                 $i++;
-                $ws->getStyle("A$k:E$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                $ws->getStyle("A$k:F$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                 $ws->getCell("A$k")->setValue($i);
                 $ws->getCell("B$k")->setValue($n->user->name);
                 $ws->getCell("C$k")->setValue($n->scan_rfid);
                 $ws->getCell("D$k")->setValue($n->scan_box);
                 $ws->getCell("E$k")->setValue($n->scan_rfid && $n->scan_box ? Carbon::parse($n->scan_rfid)->diff(Carbon::parse($n->scan_box))->format('%H:%i:%s') : '-');
+                $ws->getCell("F$k")->setValue($n->note);
             }
 
             foreach ($ws->getColumnIterator() as $column) {

@@ -64,6 +64,11 @@ class PermissionSeeder extends Seeder
                 'description' => 'Master'
             ],
             [
+                'name' => 'admin-master-holiday',
+                'display_name' => 'admin-master-holiday',
+                'description' => 'Master Holiday'
+            ],
+            [
                 'name' => 'admin-master-division',
                 'display_name' => 'admin-master-division',
                 'description' => 'Master Division'

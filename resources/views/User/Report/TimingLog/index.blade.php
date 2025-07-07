@@ -19,6 +19,7 @@
                         <th rowspan="3">Name</th>
                         <th colspan="2" class="text-center">RFID</th>
                         <th rowspan="3">Duration</th>
+                        <th rowspan="3">Remarks</th>
                     </tr>
                     <tr>
                         <th colspan="2" class="text-center">Data Time Scan</th>
@@ -88,6 +89,9 @@
                         },
                         {
                             data: 'duration'
+                        },
+                        {
+                            data: 'note'
                         },
                     ],
                     paging: false,

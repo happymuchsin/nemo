@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\Master\MasterCategoryController;
 use App\Http\Controllers\Admin\Master\MasterCounterController;
 use App\Http\Controllers\Admin\Master\MasterDivisionController;
 use App\Http\Controllers\Admin\Master\MasterFabricController;
+use App\Http\Controllers\Admin\Master\MasterHolidayController;
 use App\Http\Controllers\Admin\Master\MasterLineController;
 use App\Http\Controllers\Admin\Master\MasterNeedleController;
 use App\Http\Controllers\Admin\Master\MasterPlacementController;
@@ -33,14 +34,22 @@ use App\Http\Controllers\User\DashboardController as UserDashboard;
 use App\Http\Controllers\User\DeadStockController;
 use App\Http\Controllers\User\NeedleReportController;
 use App\Http\Controllers\User\Report\DailyStockController;
+use App\Http\Controllers\User\Report\HighUserController;
+use App\Http\Controllers\User\Report\IntervalUserController;
 use App\Http\Controllers\User\Report\SummaryStockController;
+use App\Http\Controllers\User\Report\SummaryWipController;
 use App\Http\Controllers\User\Report\TimingLogController;
 use App\Http\Controllers\User\Report\TrackByNeedleController;
 use App\Http\Controllers\User\Report\TrackByOperatorController;
 use App\Http\Controllers\User\Report\UsageNeedleController;
+use App\Http\Controllers\User\Report\WipNeedleController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\User\StockController;
 use App\Http\Controllers\User\WarehouseController;
+use App\Mail\DailyAlertStock;
+use App\Models\MasterNeedle;
+use App\Models\Warehouse;
+use Illuminate\Support\Facades\Mail;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,6 +69,36 @@ Route::get('/download/{apk?}', [DownloadController::class, 'download'])->name('d
 
 Auth::routes();
 Route::group(['middleware' => ['auth']], function () {
+    // Route::get('/mailable', function () {
+    //     $data  = [];
+
+    //     $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
+    //     foreach ($master_needle as $m) {
+    //         $d = new stdClass;
+    //         $d->brand = $m->brand;
+    //         $d->tipe = $m->tipe;
+    //         $d->size = $m->size;
+    //         $d->code = $m->code;
+    //         $d->min = 5;
+
+    //         $in = Warehouse::where('master_needle_id', $m->id)->sum('in');
+    //         $out = Warehouse::where('master_needle_id', $m->id)->sum('out');
+
+    //         if ($in - $out <= $d->min) {
+    //             $d->stock = $in - $out;
+    //         } else {
+    //             continue;
+    //         }
+
+    //         $data[] = $d;
+    //     }
+
+    //     if (count($data) > 0) {
+    //         return new DailyAlertStock($data);
+    //         // Mail::to('happymuchsin@gmail.com')->send(new DailyAlertStock($data));
+    //     }
+    // });
+
     Route::get('/logout', function () {
         Auth::logout();
 
@@ -121,6 +160,32 @@ Route::group(['middleware' => ['auth']], function () {
                         ->group(function () {
                             Route::get('', [TrackByNeedleController::class, 'index'])->name('user.report.track-by-needle');
                             Route::get('data', [TrackByNeedleController::class, 'data'])->name('user.report.track-by-needle.data');
+                        });
+
+                    Route::prefix('/wip-needle')
+                        ->group(function () {
+                            Route::get('', [WipNeedleController::class, 'index'])->name('user.report.wip-needle');
+                            Route::get('data', [WipNeedleController::class, 'data'])->name('user.report.wip-needle.data');
+                            Route::post('unduh', [WipNeedleController::class, 'unduh'])->name('user.report.wip-needle.unduh');
+                        });
+
+                    Route::prefix('/summary-wip')
+                        ->group(function () {
+                            Route::get('', [SummaryWipController::class, 'index'])->name('user.report.summary-wip');
+                            Route::get('data', [SummaryWipController::class, 'data'])->name('user.report.summary-wip.data');
+                        });
+
+                    Route::prefix('/high-user')
+                        ->group(function () {
+                            Route::get('', [HighUserController::class, 'index'])->name('user.report.high-user');
+                            Route::get('data', [HighUserController::class, 'data'])->name('user.report.high-user.data');
+                            Route::post('unduh', [HighUserController::class, 'unduh'])->name('user.report.high-user.unduh');
+                        });
+                    Route::prefix('/interval-user')
+                        ->group(function () {
+                            Route::get('', [IntervalUserController::class, 'index'])->name('user.report.interval-user');
+                            Route::post('data', [IntervalUserController::class, 'data'])->name('user.report.interval-user.data');
+                            Route::post('unduh', [IntervalUserController::class, 'unduh'])->name('user.report.interval-user.unduh');
                         });
                 });
 
@@ -192,6 +257,14 @@ Route::group(['middleware' => ['auth']], function () {
             Route::prefix('/master')
                 ->middleware(['permission:admin-master'])
                 ->group(function () {
+                    Route::prefix('/holiday')
+                        ->middleware(['permission:admin-master-holiday'])
+                        ->group(function () {
+                            Route::get('', [MasterHolidayController::class, 'index'])->name('admin.master.holiday');
+                            Route::post('calendar', [MasterHolidayController::class, 'calendar'])->name('admin.master.holiday.calendar');
+                            Route::post('crup', [MasterHolidayController::class, 'crup'])->name('admin.master.holiday.crup');
+                        });
+
                     Route::prefix('/division')
                         ->middleware(['permission:admin-master-division'])
                         ->group(function () {

@@ -42,55 +42,16 @@ class DailyStockController extends Controller
 
         $data = [];
 
-        if ($filter_period == 'range') {
-            $range_date = explode(' - ', $request->filter_range_date);
-            $start = $range_date[0] ? Carbon::parse($range_date[0]) : Carbon::today()->subMonth();
-            $end = $range_date[1] ? Carbon::parse($range_date[1]) : Carbon::today();
-            $range = ["$start 00:00:00", "$end 23:59:59"];
-            $ys = $range_date[0] ? Carbon::parse($range_date[0]) : Carbon::today()->subMonth();
-            $ye = $range_date[1] ? Carbon::parse($range_date[1]) : Carbon::today();
-        } else if ($filter_period == 'daily') {
-            $filter_daily = $request->filter_daily;
-            $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
-            $start = Carbon::parse($filter_daily);
-            $end = Carbon::parse($filter_daily);
-            $ys = Carbon::parse($filter_daily);
-            $ye = Carbon::parse($filter_daily);
-        } else if ($filter_period == 'weekly') {
-            $filter_weekly = $request->filter_weekly;
-            $x = explode('-W', $filter_weekly);
-            $year = $x[0];
-            $week = $x[1];
-            $start = Carbon::now()->setISODate($year, $week)->startOfWeek();
-            $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
-            $ys = Carbon::now()->setISODate($year, $week)->startOfWeek();
-            $ye = Carbon::now()->setISODate($year, $week)->endOfWeek();
-            $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
-        } else if ($filter_period == 'monthly') {
-            $filter_monthly = $request->filter_month;
-            $x = explode('-', $filter_monthly);
-            $tahun = $x[0];
-            $bulan = $x[1];
-            $lastDay = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
-            $range = ["$tahun-$bulan-01 00:00:00", "$tahun-$bulan-$lastDay 23:59:59"];
-            $start = Carbon::parse("$tahun-$bulan-01");
-            $end = Carbon::parse("$tahun-$bulan-$lastDay");
-            $ys = Carbon::parse("$tahun-$bulan-01");
-            $ye = Carbon::parse("$tahun-$bulan-$lastDay");
-        } else if ($filter_period == 'yearly') {
-            $filter_yearly = $request->filter_year;
-            $range = ["$filter_yearly-01-01 00:00:00", "$filter_yearly-12-31 23:59:59"];
-            $start = Carbon::parse("$filter_yearly-01-01");
-            $end = Carbon::parse("$filter_yearly-12-31");
-            $ys = Carbon::parse("$filter_yearly-01-01");
-            $ye = Carbon::parse("$filter_yearly-12-31");
-        }
+        $xx = HelperController::period($filter_period, $request->filter_range_date, $request->filter_daily, $request->filter_weekly, $request->filter_month, $request->filter_year, 'Needle Stock');
 
-        $daily_closing = DailyClosing::whereBetween('tanggal', [$start, $end])->get();
+        $daily_closing = DailyClosing::whereBetween('tanggal', [$xx->start, $xx->end])->get();
         $collect_daily_closing = collect($daily_closing);
 
         $issue = [];
         $add = [];
+
+        $ys = Carbon::parse($xx->start);
+        $ye = Carbon::parse($xx->end);
 
         while ($ys->lte($ye)) {
             $tanggal = $ys->toDateString();
@@ -125,8 +86,8 @@ class DailyStockController extends Controller
                 $d->$cout = $out;
                 $d->$cin = $in;
             }
-            $d->opening = $dc->where('tanggal', $start->toDateString())->value('opening') ?? 0;
-            $d->closing = $dc->where('tanggal', $end->toDateString())->value('closing') ?? 0;
+            $d->opening = $dc->where('tanggal', $xx->start)->value('opening') ?? 0;
+            $d->closing = $dc->where('tanggal', $xx->end)->value('closing') ?? 0;
             $data[] = $d;
         }
 
@@ -142,62 +103,18 @@ class DailyStockController extends Controller
     {
         $filter_period = $request->filter_period;
 
-        if ($filter_period == 'range') {
-            $range_date = explode(' - ', $request->filter_range_date);
-            $start = $range_date[0] ? Carbon::parse($range_date[0]) : Carbon::today()->subMonth();
-            $end = $range_date[1] ? Carbon::parse($range_date[1]) : Carbon::today();
-            $range = ["$start 00:00:00", "$end 23:59:59"];
-            $ys = $range_date[0] ? Carbon::parse($range_date[0]) : Carbon::today()->subMonth();
-            $ye = $range_date[1] ? Carbon::parse($range_date[1]) : Carbon::today();
-            $judul = 'Needle Stock ' . $start->format('Y-m-d') . ' - ' . $end->format('Y-m-d');
-        } else if ($filter_period == 'daily') {
-            $filter_daily = $request->filter_daily;
-            $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
-            $start = Carbon::parse($filter_daily);
-            $end = Carbon::parse($filter_daily);
-            $ys = Carbon::parse($filter_daily);
-            $ye = Carbon::parse($filter_daily);
-            $judul = 'Needle Stock ' . $filter_daily;
-        } else if ($filter_period == 'weekly') {
-            $filter_weekly = $request->filter_weekly;
-            $x = explode('-W', $filter_weekly);
-            $year = $x[0];
-            $week = $x[1];
-            $start = Carbon::now()->setISODate($year, $week)->startOfWeek();
-            $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
-            $ys = Carbon::now()->setISODate($year, $week)->startOfWeek();
-            $ye = Carbon::now()->setISODate($year, $week)->endOfWeek();
-            $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
-            $judul = 'Needle Stock ' . $filter_weekly;
-        } else if ($filter_period == 'monthly') {
-            $filter_monthly = $request->filter_month;
-            $x = explode('-', $filter_monthly);
-            $tahun = $x[0];
-            $bulan = $x[1];
-            $lastDay = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
-            $range = ["$tahun-$bulan-01 00:00:00", "$tahun-$bulan-$lastDay 23:59:59"];
-            $start = Carbon::parse("$tahun-$bulan-01");
-            $end = Carbon::parse("$tahun-$bulan-$lastDay");
-            $ys = Carbon::parse("$tahun-$bulan-01");
-            $ye = Carbon::parse("$tahun-$bulan-$lastDay");
-            $judul = 'Needle Stock ' . $filter_monthly;
-        } else if ($filter_period == 'yearly') {
-            $filter_yearly = $request->filter_year;
-            $range = ["$filter_yearly-01-01 00:00:00", "$filter_yearly-12-31 23:59:59"];
-            $start = Carbon::parse("$filter_yearly-01-01");
-            $end = Carbon::parse("$filter_yearly-12-31");
-            $ys = Carbon::parse("$filter_yearly-01-01");
-            $ye = Carbon::parse("$filter_yearly-12-31");
-            $judul = 'Needle Stock ' . $filter_yearly;
-        }
+        $xx = HelperController::period($filter_period, $request->filter_range_date, $request->filter_daily, $request->filter_weekly, $request->filter_month, $request->filter_year, 'Needle Stock');
 
         try {
-            $daily_closing = DailyClosing::whereBetween('tanggal', [$start, $end])->get();
+            $daily_closing = DailyClosing::whereBetween('tanggal', [$xx->start, $xx->end])->get();
             $collect_daily_closing = collect($daily_closing);
 
             $issue = [];
             $add = [];
             $data = [];
+
+            $ys = Carbon::parse($xx->start);
+            $ye = Carbon::parse($xx->end);
 
             while ($ys->lte($ye)) {
                 $tanggal = $ys->toDateString();
@@ -233,8 +150,8 @@ class DailyStockController extends Controller
                     $d->$cout = $out;
                     $d->$cin = $in;
                 }
-                $d->opening = $dc->where('tanggal', $start->toDateString())->value('opening') ?? 0;
-                $d->closing = $dc->where('tanggal', $end->toDateString())->value('closing') ?? 0;
+                $d->opening = $dc->where('tanggal', $xx->start)->value('opening') ?? 0;
+                $d->closing = $dc->where('tanggal', $xx->end)->value('closing') ?? 0;
                 $data[] = $d;
             }
 
@@ -287,7 +204,7 @@ class DailyStockController extends Controller
             $ws->getStyle('A3:' . $col . '5')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             $ws->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-            $ws->mergeCells('A1:' . $col . '1')->getCell('A1')->setValue($judul)->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $ws->mergeCells('A1:' . $col . '1')->getCell('A1')->setValue($xx->judul)->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             $kStart = 5;
             $k = 5;
@@ -345,7 +262,7 @@ class DailyStockController extends Controller
 
             $writer = new Xlsx($sp);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment; filename="' .  $judul . '.xlsx"');
+            header('Content-Disposition: attachment; filename="' .  $xx->judul . '.xlsx"');
             $writer->save('php://output');
             exit();
         } catch (Exception $e) {

@@ -67,6 +67,21 @@
                         @endforeach
                     </tr>
                 </x-slot:thead>
+                <x-slot:tfoot>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th class="text-center">Total</th>
+                        @foreach ($master_needle as $d)
+                            <th></th>
+                        @endforeach
+                    </tr>
+                </x-slot:tfoot>
             </x-layout.table>
         </x-slot:body>
     </x-layout.content>
@@ -264,6 +279,19 @@
                                 paging: false,
                                 rowCallback: function(row, data, index) {
                                     $('td:eq(0)', row).html(table.page.info().start + index + 1);
+                                },
+                                footerCallback: function(tfoot, data, start, end, display) {
+                                    var api = this.api();
+                                    if (end > 0) {
+                                        for (var s = 8; s <= api.columns().count() - 1; s++) {
+                                            var x = api.column(s, {
+                                                search: 'applied'
+                                            }).data().reduce(function(a, b) {
+                                                return +a + +b;
+                                            }, 0);
+                                            $(api.column(s).footer()).html(x);
+                                        }
+                                    }
                                 },
                                 initComplete: function() {
                                     res(true);

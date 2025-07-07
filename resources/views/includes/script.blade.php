@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="{{ asset('plugins/dropzone/min/dropzone.min.css') }}">
 
 <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/fullcalendar/main.css') }}">
 
 <style>
     .form-group.floating>label {
@@ -121,10 +122,12 @@
 <script src="{{ asset('plugins/amchart4/animated.js') }}"></script>
 
 <script src="{{ asset('plugins/multidatespicker/jquery-ui.multidatespicker.js') }}"></script>
+<script src="{{ asset('plugins/popper/popper.js') }}"></script>
+<script src="{{ asset('plugins/tippy/tippy.js') }}"></script>
+<script src="{{ asset('plugins/fullcalendar/main.js') }}"></script>
 
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
-    integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous">
-</script>
+<script src="{{ asset('plugins/socket/socket.js') }}"></script>
+
 <script>
     const socket = io("{{ env('APP_URL') }}:3000");
 </script>

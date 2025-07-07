@@ -18,7 +18,20 @@
                 </a>
             </li>
             <li id=""
-                class="nav-item text-center dropdown dropdown-hover {{ in_array($page, ['user_report_summary_stock', 'user_report_usage_needle', 'user_report_daily_stock', 'user_report_timing_log', 'user_report_track_by_operator', 'user_report_track_by_needle']) ? 'rounded-lg bg-warning' : '' }}">
+                class="nav-item text-center dropdown dropdown-hover {{ in_array($page, [
+                    'user_report_summary_stock',
+                    'user_report_usage_needle',
+                    'user_report_daily_stock',
+                    'user_report_timing_log',
+                    'user_report_track_by_operator',
+                    'user_report_track_by_needle',
+                    'user_report_wip_needle',
+                    'user_report_summary_wip',
+                    'user_report_high_user',
+                    'user_report_interval_user',
+                ])
+                    ? 'rounded-lg bg-warning'
+                    : '' }}">
                 <a id="dropdownSubMenuX" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">
                     <b class="text-center text-black"><i class="fa fa-list-dropdown"></i> Report</b>
                 </a>
@@ -51,6 +64,26 @@
                     <li>
                         <a class="dropdown-item custom-dropdown-item {{ $page == 'user_report_track_by_needle' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.report.track-by-needle') }}">
                             Tracking by Needle Type
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_report_wip_needle' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.report.wip-needle') }}">
+                            WIP Needle
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_report_summary_wip' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.report.summary-wip') }}">
+                            Summary WIP (Date)
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_report_high_user' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.report.high-user') }}">
+                            High User
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_report_interval_user' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.report.interval-user') }}">
+                            Interval User
                         </a>
                     </li>
                 </ul>

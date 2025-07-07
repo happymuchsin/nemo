@@ -4,8 +4,10 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
+use App\Models\DailyClosing;
 use App\Models\MasterNeedle;
 use App\Models\Stock;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use stdClass;
@@ -74,47 +76,37 @@ class DashboardController extends Controller
                 </li>';
                 break;
             }
-            $stock = Stock::join('master_areas as ma', 'ma.id', 'stocks.master_area_id')
-                ->join('master_counters as mc', 'mc.id', 'stocks.master_counter_id')
-                ->join('master_boxes as mb', 'mb.id', 'stocks.master_box_id')
-                ->join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')
-                ->selectRaw('stocks.id as id, ma.name as area, mc.name as counter, mb.name as box, mn.brand as brand, mn.tipe as tipe, mn.size as size, mn.code as code, mn.machine as machine, mn.min_stock as min_stock, stocks.`in` as `in`, stocks.`out` as `out`, stocks.is_clear as is_clear')
-                ->where('is_clear', 'not')
-                ->get();
-            $m = 0;
-            foreach ($stock as $s) {
-                $last = $s->in - $s->out;
-                if ($last < $s->min_stock) {
-                    $m = 1;
+            $x = 0;
+            $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
+            foreach ($master_needle as $m) {
+                $in = Warehouse::where('master_needle_id', $m->id)->sum('in');
+                $out = Warehouse::where('master_needle_id', $m->id)->sum('out');
+
+                if ($in - $out <= $m->min_stock) {
+                    $x = 1;
                     break;
                 }
             }
-            if ($m == 1) {
+            if ($x == 1) {
                 $h .= '<li style="text-align:left;text-indent:-20px;padding-left:20px;">
-                    <a href="' . route('user.stock') . '" style="color:black;font-weight:bold;">
+                    <a href="' . route('user.warehouse') . '" style="color:black;font-weight:bold;">
                         There is stock that is below the minimum limit
                     </a>
                 </li>';
             }
             return response()->json($h, 200);
         } else if ($tipe == 'box') {
-            $inSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('in');
-            $outSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('out');
-            $inDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('in');
-            $outDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('out');
-            $inObras = Stock::whereIn('master_needle_id', $idObras)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('in');
-            $outObras = Stock::whereIn('master_needle_id', $idObras)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('out');
-            $inKansai = Stock::whereIn('master_needle_id', $idKansai)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('in');
-            $outKansai = Stock::whereIn('master_needle_id', $idKansai)->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan)->sum('out');
+            $daily_closing = DailyClosing::whereYear('tanggal', $tahun)->whereMonth('tanggal', $bulan)->get();
+            $collect_daily_closing = collect($daily_closing);
 
-            $ava_single_needle = $inSingleNeedle - $outSingleNeedle;
-            $ava_double_needle = $inDoubleNeedle - $outDoubleNeedle;
-            $ava_obras = $inObras - $outObras;
-            $ava_kansai = $inKansai - $outKansai;
-            $rep_single_needle = $outSingleNeedle;
-            $rep_double_needle = $outDoubleNeedle;
-            $rep_obras = $outObras;
-            $rep_kansai = $outKansai;
+            $ava_single_needle = $collect_daily_closing->whereIn('master_needle_id', $idSingleNeedle)->max('opening') ?? 0;
+            $ava_double_needle = $collect_daily_closing->whereIn('master_needle_id', $idDoubleNeedle)->max('opening') ?? 0;
+            $ava_obras = $collect_daily_closing->whereIn('master_needle_id', $idObras)->max('opening') ?? 0;
+            $ava_kansai = $collect_daily_closing->whereIn('master_needle_id', $idKansai)->max('opening') ?? 0;
+            $rep_single_needle = $collect_daily_closing->whereIn('master_needle_id', $idSingleNeedle)->max('out') ?? 0;
+            $rep_double_needle = $collect_daily_closing->whereIn('master_needle_id', $idDoubleNeedle)->max('out') ?? 0;
+            $rep_obras = $collect_daily_closing->whereIn('master_needle_id', $idObras)->max('out') ?? 0;
+            $rep_kansai = $collect_daily_closing->whereIn('master_needle_id', $idKansai)->max('out') ?? 0;
 
             return response()->json([
                 'ava_single_needle' => $ava_single_needle,
@@ -129,25 +121,19 @@ class DashboardController extends Controller
         } else if ($tipe == 'chart') {
             $data = [];
             for ($i = 1; $i <= 12; $i++) {
-                $inSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('in');
-                $outSingleNeedle = Stock::whereIn('master_needle_id', $idSingleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('out');
-                $inDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('in');
-                $outDoubleNeedle = Stock::whereIn('master_needle_id', $idDoubleNeedle)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('out');
-                $inObras = Stock::whereIn('master_needle_id', $idObras)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('in');
-                $outObras = Stock::whereIn('master_needle_id', $idObras)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('out');
-                $inKansai = Stock::whereIn('master_needle_id', $idKansai)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('in');
-                $outKansai = Stock::whereIn('master_needle_id', $idKansai)->whereYear('created_at', $tahun)->whereMonth('created_at', $i)->sum('out');
+                $daily_closing = DailyClosing::whereYear('tanggal', $tahun)->whereMonth('tanggal', $i)->get();
+                $collect_daily_closing = collect($daily_closing);
 
                 $d = new stdClass;
                 $d->date = date('M', strtotime(date('Y-' . $i . '-01')));
-                $d->ava_single_needle = $inSingleNeedle - $outSingleNeedle;
-                $d->ava_double_needle = $inDoubleNeedle - $outDoubleNeedle;
-                $d->ava_obras = $inObras - $outObras;
-                $d->ava_kansai = $inKansai - $outKansai;
-                $d->rep_single_needle = $outSingleNeedle;
-                $d->rep_double_needle = $outDoubleNeedle;
-                $d->rep_obras = $outObras;
-                $d->rep_kansai = $outKansai;
+                $d->ava_single_needle = $collect_daily_closing->whereIn('master_needle_id', $idSingleNeedle)->max('opening') ?? 0;
+                $d->ava_double_needle = $collect_daily_closing->whereIn('master_needle_id', $idDoubleNeedle)->max('opening') ?? 0;
+                $d->ava_obras = $collect_daily_closing->whereIn('master_needle_id', $idObras)->max('opening') ?? 0;
+                $d->ava_kansai = $collect_daily_closing->whereIn('master_needle_id', $idKansai)->max('opening') ?? 0;
+                $d->rep_single_needle = $collect_daily_closing->whereIn('master_needle_id', $idSingleNeedle)->max('out') ?? 0;
+                $d->rep_double_needle = $collect_daily_closing->whereIn('master_needle_id', $idDoubleNeedle)->max('out') ?? 0;
+                $d->rep_obras = $collect_daily_closing->whereIn('master_needle_id', $idObras)->max('out') ?? 0;
+                $d->rep_kansai = $collect_daily_closing->whereIn('master_needle_id', $idKansai)->max('out') ?? 0;
                 $data[$i] = $d;
             }
 

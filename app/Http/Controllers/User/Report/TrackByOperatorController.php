@@ -29,51 +29,20 @@ class TrackByOperatorController extends Controller
 
     public function data(Request $request)
     {
-        $period = $request->filter_period;
-        $status = $request->filter_status;
+        $filter_period = $request->filter_period;
+        $filter_status = $request->filter_status;
 
-        if ($period == 'range') {
-            $range_date = explode(' - ', $request->filter_range_date);
-            $start = $range_date[0] ? $range_date[0] : Carbon::today()->subMonth();
-            $end = $range_date[1] ? $range_date[1] : Carbon::today();
-            $range = ["$start 00:00:00", "$end 23:59:59"];
-        } else if ($period == 'daily') {
-            $filter_daily = $request->filter_daily;
-            $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
-            $start = Carbon::parse($filter_daily);
-            $end = Carbon::parse($filter_daily);
-        } else if ($period == 'weekly') {
-            $filter_weekly = $request->filter_weekly;
-            $x = explode('-W', $filter_weekly);
-            $year = $x[0];
-            $week = $x[1];
-            $start = Carbon::now()->setISODate($year, $week)->startOfWeek();
-            $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
-            $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
-        } else if ($period == 'monthly') {
-            $filter_month = $request->filter_month;
-            $x = explode('-', $filter_month);
-            $tahun = $x[0];
-            $bulan = $x[1];
-            $lastDay = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
-            $range = ["$tahun-$bulan-01 00:00:00", "$tahun-$bulan-$lastDay 23:59:59"];
-            $start = Carbon::parse("$tahun-$bulan-01");
-            $end = Carbon::parse("$tahun-$bulan-$lastDay");
-        } else if ($period == 'yearly') {
-            $filter_year = $request->filter_year;
-            $start = Carbon::parse("$filter_year-01-01");
-            $end = Carbon::parse("$filter_year-12-31");
-        }
+        $xx = HelperController::period($filter_period, $request->filter_range_date, $request->filter_daily, $request->filter_weekly, $request->filter_month, $request->filter_year, '');
 
         $data = [];
 
         $needle = Needle::with(['user', 'needle', 'master_status', 'style'])
-            ->whereBetween('created_at', $range)
-            ->when($status == 'all', function ($q) {
+            ->whereBetween('created_at', $xx->range)
+            ->when($filter_status == 'all', function ($q) {
                 $q->whereIn('master_status_id', [1, 2, 3, 4]);
             })
-            ->when($status != 'all', function ($q) use ($status) {
-                $q->where('master_status_id', $status);
+            ->when($filter_status != 'all', function ($q) use ($filter_status) {
+                $q->where('master_status_id', $filter_status);
             })
             ->get();
         foreach ($needle as $n) {

@@ -23,28 +23,28 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PermissionSeeder::class,
             RoleSeeder::class,
-            MasterDivisionSeeder::class,
-            MasterPositionSeeder::class,
-            MasterStatusSeeder::class,
-            MasterAreaSeeder::class,
-            MasterLineSeeder::class,
+            // MasterDivisionSeeder::class,
+            // MasterPositionSeeder::class,
+            // MasterStatusSeeder::class,
+            // MasterAreaSeeder::class,
+            // MasterLineSeeder::class,
             UserSeeder::class,
-            KaryawanSeeder::class,
-            MasterApprovalSeeder::class,
-            MasterNeedleSeeder::class,
-            MasterBuyerSeeder::class,
-            MasterCategorySeeder::class,
-            MasterSubCategorySeeder::class,
-            MasterSampleSeeder::class,
-            MasterFabricSeeder::class,
+            // KaryawanSeeder::class,
+            // MasterApprovalSeeder::class,
+            // MasterNeedleSeeder::class,
+            // MasterBuyerSeeder::class,
+            // MasterCategorySeeder::class,
+            // MasterSubCategorySeeder::class,
+            // MasterSampleSeeder::class,
+            // MasterFabricSeeder::class,
         ]);
 
         if (env('APP_ENV') == 'local') {
             $this->call([
-                MasterCounterSeeder::class,
-                MasterBoxSeeder::class,
-                MasterStyleSeeder::class,
-                StockSeeder::class,
+                // MasterCounterSeeder::class,
+                // MasterBoxSeeder::class,
+                // MasterStyleSeeder::class,
+                // StockSeeder::class,
             ]);
         }
     }

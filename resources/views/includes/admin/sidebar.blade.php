@@ -40,6 +40,14 @@
                         </a>
                         <ul class="nav nav-treeview">
 
+                            @can('admin-master-holiday')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.master.holiday') }}" class="nav-link {{ $page == 'admin_master_holiday' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Holiday</p>
+                                    </a>
+                                </li>
+                            @endcan
                             @can('admin-master-division')
                                 <li class="nav-item">
                                     <a href="{{ route('admin.master.division') }}" class="nav-link {{ $page == 'admin_master_division' ? 'active' : '' }}">

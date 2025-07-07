@@ -40,6 +40,7 @@ class NeedleController extends Controller
         $status = strtoupper($request->status);
         $request_status = strtoupper($request->request_status);
         $remark = strtoupper($request->remark);
+        $note = strtoupper($request->note);
         $filename = $request->filename;
         $ext = $request->ext;
         $img = $request->gambar;
@@ -193,6 +194,7 @@ class NeedleController extends Controller
                     'scan_rfid' => $scan_rfid,
                     'scan_box' => $scan_box,
                     'remark' => $remark,
+                    'note' => $note,
                     'filename' => $filename,
                     'ext' => $ext,
                     'created_by' => $username,
@@ -209,6 +211,7 @@ class NeedleController extends Controller
                     'scan_box' => $scan_box,
                     'status' => $request_status,
                     'remark' => $remark,
+                    'note' => $note,
                     'filename' => $filename,
                     'ext' => $ext,
                     'created_by' => $username,
@@ -290,6 +293,7 @@ class NeedleController extends Controller
                         'scan_box' => $scan_box,
                         'status' => $request_status,
                         'remark' => $remark,
+                        'note' => $note,
                         'filename' => $filename,
                         'ext' => $ext,
                         'created_by' => $username,
@@ -306,6 +310,7 @@ class NeedleController extends Controller
                         'scan_box' => $scan_box,
                         'status' => $request_status,
                         'remark' => $remark,
+                        'note' => $note,
                         'filename' => $filename,
                         'ext' => $ext,
                         'created_by' => $username,

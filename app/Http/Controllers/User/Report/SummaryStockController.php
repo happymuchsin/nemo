@@ -29,40 +29,29 @@ class SummaryStockController extends Controller
 
     public function data(Request $request)
     {
-        $period = $request->filter_period;
+        $filter_period = $request->filter_period;
 
-        if ($period == 'yearly') {
-            $filter_year = $request->filter_year;
-            $start = Carbon::parse("$filter_year-01-01");
-            $end = Carbon::parse("$filter_year-12-31");
-        } else if ($period == 'monthly') {
-            $filter_month = $request->filter_month;
-            $x = explode('-', $filter_month);
-            $tahun = $x[0];
-            $bulan = $x[1];
-            $lastDay = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
-            $start = Carbon::parse("$tahun-$bulan-01");
-            $end = Carbon::parse("$tahun-$bulan-$lastDay");
-        } else if ($period == 'range') {
-            $range_date = explode(' - ', $request->filter_range_date);
-            $start = $range_date[0] ? $range_date[0] : Carbon::today()->subMonth();
-            $end = $range_date[1] ? $range_date[1] : Carbon::today();
-        }
+        $xx = HelperController::period($filter_period, $request->filter_range_date, $request->filter_daily, $request->filter_weekly, $request->filter_month, $request->filter_year, 'Summary Stock');
 
         $data = [];
 
-        $daily_closing = DailyClosing::selectRaw('tanggal, sum(opening) as opening, sum(`in`) as `in`, sum(`out`) as `out`, sum(closing) as closing')
-            ->whereBetween('tanggal', [$start, $end])
-            ->groupBy('tanggal')
-            ->get();
-        foreach ($daily_closing as $dc) {
+        $daily_closing = DailyClosing::whereBetween('tanggal', [$xx->start, $xx->end])->get();
+        $collect_daily_closing = collect($daily_closing);
+
+        $ys = Carbon::parse($xx->start);
+        $ye = Carbon::parse($xx->end);
+
+        while ($ys->lte($ye)) {
             $d = new stdClass;
-            $d->tanggal = $dc->tanggal;
-            $d->opening = $dc->opening;
-            $d->in = $dc->in;
-            $d->out = $dc->out;
-            $d->closing = $dc->closing;
+            $tanggal = $ys->toDateString();
+
+            $d->tanggal = $tanggal;
+            $d->opening = $collect_daily_closing->where('tanggal', $tanggal)->sum('opening');
+            $d->in = $collect_daily_closing->where('tanggal', $tanggal)->sum('in');
+            $d->out = $collect_daily_closing->where('tanggal', $tanggal)->sum('out');
+            $d->closing = $collect_daily_closing->where('tanggal', $tanggal)->sum('closing');
             $data[] = $d;
+            $ys->addDay();
         }
 
         return datatables()->of($data)

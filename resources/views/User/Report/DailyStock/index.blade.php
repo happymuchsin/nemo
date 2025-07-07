@@ -108,18 +108,30 @@
                 },
                 success: function(response) {
                     unwaitAlert();
+                    setTable(response);
+                },
+                error: function(response) {
+                    warningAlert(response.responseText);
+                }
+            })
+        }
 
-                    if (response.found == 'not') {
-                        warningAlert('No data found');
-                        return;
-                    }
+        function setTable(response) {
+            return new Promise((resolve, reject) => {
+                try {
+                    waitAlert();
+                    const promiseTable = new Promise((res, rej) => {
+                        if (response.found == 'not') {
+                            warningAlert('No data found');
+                            return;
+                        }
 
-                    if ($.fn.DataTable.isDataTable("#table")) {
-                        $('#table').html('');
-                        $('#table').DataTable().clear().destroy();
-                    }
+                        if ($.fn.DataTable.isDataTable("#table")) {
+                            $('#table').html('');
+                            $('#table').DataTable().clear().destroy();
+                        }
 
-                    var header = `<tr>
+                        var header = `<tr>
                             <th rowspan="3">No</th>
                             <th rowspan="3">Brand</th>
                             <th rowspan="3">Type</th>
@@ -127,105 +139,120 @@
                             <th rowspan="3">Code</th>
                             <th>A</th>
                         `;
-                    if (response.issue.length > 0) {
-                        header += `<th colspan="${response.issue.length}">B</th>`;
-                    }
-                    if (response.add.length > 0) {
-                        header += `<th colspan="${response.add.length}">C</th>`;
-                    }
-                    header += `
+                        if (response.issue.length > 0) {
+                            header += `<th colspan="${response.issue.length}">B</th>`;
+                        }
+                        if (response.add.length > 0) {
+                            header += `<th colspan="${response.add.length}">C</th>`;
+                        }
+                        header += `
                             <th>(A - B + C)
                         </tr>
                         <tr>
                             <th rowspan="2">QTY Opening Stock</th>`;
-                    if (response.issue.length > 0) {
-                        header += `<th colspan="${response.issue.length}">Issue to Operator</th>`;
-                    }
-                    if (response.add.length > 0) {
-                        header += `<th colspan="${response.add.length}">Add</th>`;
-                    }
-                    header += `
+                        if (response.issue.length > 0) {
+                            header += `<th colspan="${response.issue.length}">Issue to Operator</th>`;
+                        }
+                        if (response.add.length > 0) {
+                            header += `<th colspan="${response.add.length}">Add</th>`;
+                        }
+                        header += `
                             <th rowspan="2">QTY Closing Stock</th>
                         </tr>
                         <tr>
                         `;
-                    $.each(response.issue, function(ki, vi) {
-                        header += `<th>${vi}</th>`;
-                    });
-                    $.each(response.add, function(ka, va) {
-                        header += `<th>${va}</th>`;
-                    });
-                    header += `</tr>`;
+                        $.each(response.issue, function(ki, vi) {
+                            header += `<th>${vi}</th>`;
+                        });
+                        $.each(response.add, function(ka, va) {
+                            header += `<th>${va}</th>`;
+                        });
+                        header += `</tr>`;
 
-                    var footer = `<tr>
+                        var footer = `<tr>
                             <th colspan="5" class="text-center">Total</th>
                             <th></th>
                         `;
-                    $.each(response.issue, function(ki, vi) {
-                        footer += `<th></th>`;
-                    });
-                    $.each(response.add, function(ka, va) {
-                        footer += `<th></th>`;
-                    });
-                    footer += `<th></th>
+                        $.each(response.issue, function(ki, vi) {
+                            footer += `<th></th>`;
+                        });
+                        $.each(response.add, function(ka, va) {
+                            footer += `<th></th>`;
+                        });
+                        footer += `<th></th>
                         </tr>`;
 
-                    $('#tableHead').html(header);
-                    $('#tableFoot').html(footer);
+                        $('#tableHead').html(header);
+                        $('#tableFoot').html(footer);
 
-                    setTimeout(() => {
-                        table = initDataTable('table', '', '', '', {
-                            dom: '<"toolbarSummary"B>flrtip',
-                            buttons: [{
-                                text: 'Excel',
-                                action: function(e, dt, node, config) {
-                                    unduh();
+                        setTimeout(() => {
+                            table = initDataTable('table', '', '', '', {
+                                dom: '<"toolbar"B>flrtip',
+                                buttons: [{
+                                    text: 'Excel',
+                                    action: function(e, dt, node, config) {
+                                        unduh();
+                                    },
+                                }, ],
+                                paging: false,
+                                rowCallback: function(row, data, index) {
+                                    // Ubah isi kolom pertama (index ke-0) jadi nomor urut
+                                    $('td:eq(0)', row).html(table.page.info().start + index +
+                                        1);
                                 },
-                            }, ],
-                            paging: false,
-                            rowCallback: function(row, data, index) {
-                                // Ubah isi kolom pertama (index ke-0) jadi nomor urut
-                                $('td:eq(0)', row).html(table.page.info().start + index +
-                                    1);
-                            },
-                            footerCallback: function(tfoot, data, start, end, display) {
-                                var api = this.api();
-                                if (end > 0) {
-                                    for (var s = 5; s <= api.columns().count() - 1; s++) {
-                                        var x = api.column(s, {
-                                            search: 'applied'
-                                        }).data().reduce(function(a, b) {
-                                            return +a + +b;
-                                        }, 0);
-                                        $(api.column(s).footer()).html(x);
+                                footerCallback: function(tfoot, data, start, end, display) {
+                                    var api = this.api();
+                                    if (end > 0) {
+                                        for (var s = 5; s <= api.columns().count() - 1; s++) {
+                                            var x = api.column(s, {
+                                                search: 'applied'
+                                            }).data().reduce(function(a, b) {
+                                                return +a + +b;
+                                            }, 0);
+                                            $(api.column(s).footer()).html(x);
+                                        }
                                     }
                                 }
-                            }
-                        });
-                        $.each(response.data, function(k, v) {
-                            var x = [];
-                            x.push(v.nomor);
-                            x.push(v.brand);
-                            x.push(v.tipe);
-                            x.push(v.size);
-                            x.push(v.code);
-                            x.push(v.opening);
-                            $.each(response.issue, function(ki, vi) {
-                                x.push(v['xout' + vi.replaceAll('-', '')]);
                             });
-                            $.each(response.add, function(ka, va) {
-                                x.push(v['xin' + va.replaceAll('-', '')]);
+                            $.each(response.data, function(k, v) {
+                                var x = [];
+                                x.push(v.nomor);
+                                x.push(v.brand);
+                                x.push(v.tipe);
+                                x.push(v.size);
+                                x.push(v.code);
+                                x.push(v.opening);
+                                $.each(response.issue, function(ki, vi) {
+                                    x.push(v['xout' + vi.replaceAll('-', '')]);
+                                });
+                                $.each(response.add, function(ka, va) {
+                                    x.push(v['xin' + va.replaceAll('-', '')]);
+                                });
+                                x.push(v.closing);
+                                table.row.add(x).draw(false);
                             });
-                            x.push(v.closing);
-                            table.row.add(x).draw(false);
+                            table.columns.adjust().draw();
+                            res(true);
+                        }, 250);
+                    });
+
+                    // Menunggu kedua promise selesai
+                    Promise.all([promiseTable])
+                        .then((results) => {
+                            resolve({
+                                message: true,
+                            });
+                            unwaitAlert();
+                        })
+                        .catch((error) => {
+                            unwaitAlert();
+                            reject(error);
                         });
-                        table.columns.adjust().draw();
-                    }, 250);
-                },
-                error: function(response) {
-                    warningAlert(response.responseText);
+                } catch (e) {
+                    unwaitAlert();
+                    reject(e);
                 }
-            })
+            });
         }
 
         function unduh() {
@@ -286,7 +313,7 @@
         }
 
         socket.on('nemoReload', () => {
-            table.ajax.reload();
+            cari();
         })
     </script>
 @endsection

@@ -83,7 +83,7 @@
                 <img src="{{ asset('assets/img/anggun.png') }}" height="80">
             </div>
         @endif
-        <h5 class="text-center">1.1.9</h5>
+        <h5 class="text-center">1.2.0</h5>
     </div>
     <!-- /.login-box -->
 

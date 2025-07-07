@@ -45,47 +45,15 @@ class UsageNeedleController extends Controller
 
         $data = [];
 
-        if ($filter_period == 'range') {
-            $range_date = explode(' - ', $request->filter_range_date);
-            $start = $range_date[0] ? $range_date[0] : Carbon::today()->subMonth();
-            $end = $range_date[1] ? $range_date[1] : Carbon::today();
-            $range = ["$start 00:00:00", "$end 23:59:59"];
-        } else if ($filter_period == 'daily') {
-            $filter_daily = $request->filter_daily;
-            $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
-            $start = Carbon::parse($filter_daily);
-            $end = Carbon::parse($filter_daily);
-        } else if ($filter_period == 'weekly') {
-            $filter_weekly = $request->filter_weekly;
-            $x = explode('-W', $filter_weekly);
-            $year = $x[0];
-            $week = $x[1];
-            $start = Carbon::now()->setISODate($year, $week)->startOfWeek();
-            $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
-            $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
-        } else if ($filter_period == 'monthly') {
-            $filter_monthly = $request->filter_month;
-            $x = explode('-', $filter_monthly);
-            $tahun = $x[0];
-            $bulan = $x[1];
-            $lastDay = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
-            $range = ["$tahun-$bulan-01 00:00:00", "$tahun-$bulan-$lastDay 23:59:59"];
-            $start = Carbon::parse("$tahun-$bulan-01");
-            $end = Carbon::parse("$tahun-$bulan-$lastDay");
-        } else if ($filter_period == 'yearly') {
-            $filter_yearly = $request->filter_year;
-            $range = ["$filter_yearly-01-01 00:00:00", "$filter_yearly-12-31 23:59:59"];
-            $start = Carbon::parse("$filter_yearly-01-01");
-            $end = Carbon::parse("$filter_yearly-12-31");
-        }
+        $xx = HelperController::period($filter_period, $request->filter_range_date, $request->filter_daily, $request->filter_weekly, $request->filter_month, $request->filter_year, 'Usage Needle All Operator');
 
         $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
         $collect_master_needle = collect($master_needle);
 
-        $daily_closing = DailyClosing::whereBetween('tanggal', [$start, $end])->get();
+        $daily_closing = DailyClosing::whereBetween('tanggal', [$xx->start, $xx->end])->get();
         $collect_daily_closing = collect($daily_closing);
 
-        $needle = Needle::whereBetween('created_at', $range)
+        $needle = Needle::whereBetween('created_at', $xx->range)
             ->when($filter_status == 'all', function ($q) {
                 $q->whereIn('master_status_id', [1, 2, 3, 4]);
             })
@@ -173,44 +141,7 @@ class UsageNeedleController extends Controller
         $filter_period = $request->filter_period;
         $filter_status = $request->filter_status;
 
-        if ($filter_period == 'range') {
-            $range_date = explode(' - ', $request->filter_range_date);
-            $start = $range_date[0] ? $range_date[0] : Carbon::today()->subMonth();
-            $end = $range_date[1] ? $range_date[1] : Carbon::today();
-            $range = ["$start 00:00:00", "$end 23:59:59"];
-            $judul = 'Usage Needle All Operator ' . $start . ' - ' . $end;
-        } else if ($filter_period == 'daily') {
-            $filter_daily = $request->filter_daily;
-            $range = ["$filter_daily 00:00:00", "$filter_daily 23:59:59"];
-            $start = Carbon::parse($filter_daily);
-            $end = Carbon::parse($filter_daily);
-            $judul = 'Usage Needle All Operator ' . $filter_daily;
-        } else if ($filter_period == 'weekly') {
-            $filter_weekly = $request->filter_weekly;
-            $x = explode('-W', $filter_weekly);
-            $year = $x[0];
-            $week = $x[1];
-            $start = Carbon::now()->setISODate($year, $week)->startOfWeek();
-            $end = Carbon::now()->setISODate($year, $week)->endOfWeek();
-            $range = [$start . ' 00:00:00', $end . ' 23:59:59'];
-            $judul = 'Usage Needle All Operator ' . $filter_weekly;
-        } else if ($filter_period == 'monthly') {
-            $filter_monthly = $request->filter_month;
-            $x = explode('-', $filter_monthly);
-            $tahun = $x[0];
-            $bulan = $x[1];
-            $lastDay = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
-            $range = ["$tahun-$bulan-01 00:00:00", "$tahun-$bulan-$lastDay 23:59:59"];
-            $start = Carbon::parse("$tahun-$bulan-01");
-            $end = Carbon::parse("$tahun-$bulan-$lastDay");
-            $judul = 'Usage Needle All Operator ' . $filter_monthly;
-        } else if ($filter_period == 'yearly') {
-            $filter_yearly = $request->filter_year;
-            $range = ["$filter_yearly-01-01 00:00:00", "$filter_yearly-12-31 23:59:59"];
-            $start = Carbon::parse("$filter_yearly-01-01");
-            $end = Carbon::parse("$filter_yearly-12-31");
-            $judul = 'Usage Needle All Operator ' . $filter_yearly;
-        }
+        $xx = HelperController::period($filter_period, $request->filter_range_date, $request->filter_daily, $request->filter_weekly, $request->filter_month, $request->filter_year, 'Usage Needle All Operator');
 
         try {
             $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
@@ -218,10 +149,10 @@ class UsageNeedleController extends Controller
 
             $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
 
-            $daily_closing = DailyClosing::whereBetween('tanggal', [$start, $end])->get();
+            $daily_closing = DailyClosing::whereBetween('tanggal', [$xx->start, $xx->end])->get();
             $collect_daily_closing = collect($daily_closing);
 
-            $needle = Needle::whereBetween('created_at', $range)
+            $needle = Needle::whereBetween('created_at', $xx->range)
                 ->when($filter_status == 'all', function ($q) {
                     $q->whereIn('master_status_id', [1, 2, 3, 4]);
                 })
@@ -345,10 +276,18 @@ class UsageNeedleController extends Controller
                 $ws->getCell("I$kkk")->setValue($total);
             }
 
-            $ws->getStyle("A" . $kk + 1 . ':' . $col1 . $kkk)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $ws->mergeCells("A" . $kkk + 1 . ':' . "H" . $kkk + 1)->getCell("A" . $kkk + 1)->setValue('Total')->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $last = 9;
+            foreach ($collect_master_needle->all() as $n) {
+                $col2 = HelperController::numberToLetters($last);
+                $ws->getCell($col2 . $kkk + 1)->setValue('=SUM(' . $col2 . '12:' . $col2 . $kkk . ')');
+                $last++;
+            }
+
+            $ws->getStyle("A" . $kk + 1 . ':' . $col1 . $kkk + 1)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
             $ws->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-            $ws->mergeCells('A1:' . $col1 . '1')->getCell('A1')->setValue($judul)->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $ws->mergeCells('A1:' . $col1 . '1')->getCell('A1')->setValue($xx->judul)->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             foreach ($ws->getColumnIterator() as $column) {
                 $ws->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
@@ -356,7 +295,7 @@ class UsageNeedleController extends Controller
 
             $writer = new Xlsx($sp);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment; filename="' .  $judul . '.xlsx"');
+            header('Content-Disposition: attachment; filename="' .  $xx->judul . '.xlsx"');
             $writer->save('php://output');
             exit();
         } catch (Exception $e) {
