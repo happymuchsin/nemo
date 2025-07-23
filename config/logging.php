@@ -132,6 +132,12 @@ return [
             'path' => storage_path('logs/auto/daily-closing.txt'),
             'level' => 'debug',
         ],
+
+        'DailySendAlertStock' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/auto/daily-send-alert-stock.txt'),
+            'level' => 'debug',
+        ],
     ],
 
 ];

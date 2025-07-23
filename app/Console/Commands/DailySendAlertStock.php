@@ -5,7 +5,10 @@ namespace App\Console\Commands;
 use App\Mail\DailyAlertStock;
 use App\Models\MasterNeedle;
 use App\Models\Warehouse;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use stdClass;
 
@@ -30,35 +33,42 @@ class DailySendAlertStock extends Command
      */
     public function handle()
     {
-        $to = [
-            'adm.sample@anggunkreasi.com'
-        ];
+        try {
+            Log::channel('DailySendAlertStock')->info('START DAILY SEND ALERT STOCK ' . Carbon::now()->toDateTimeString());
+            $to = [
+                'adm.sample@anggunkreasi.com'
+            ];
 
-        $data  = [];
+            $data  = [];
 
-        $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
-        foreach ($master_needle as $m) {
-            $d = new stdClass;
-            $d->brand = $m->brand;
-            $d->tipe = $m->tipe;
-            $d->size = $m->size;
-            $d->code = $m->code;
-            $d->min = $m->min_stock;
+            $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
+            foreach ($master_needle as $m) {
+                $d = new stdClass;
+                $d->brand = $m->brand;
+                $d->tipe = $m->tipe;
+                $d->size = $m->size;
+                $d->code = $m->code;
+                $d->min = $m->min_stock;
 
-            $in = Warehouse::where('master_needle_id', $m->id)->sum('in');
-            $out = Warehouse::where('master_needle_id', $m->id)->sum('out');
+                $in = Warehouse::where('master_needle_id', $m->id)->sum('in');
+                $out = Warehouse::where('master_needle_id', $m->id)->sum('out');
 
-            if ($in - $out <= $m->min_stock) {
-                $d->stock = $in - $out;
-            } else {
-                continue;
+                if ($in - $out <= $m->min_stock) {
+                    $d->stock = $in - $out;
+                } else {
+                    continue;
+                }
+
+                $data[] = $d;
             }
 
-            $data[] = $d;
-        }
-
-        if (count($data) > 0) {
-            Mail::to($to)->send(new DailyAlertStock($data));
+            if (count($data) > 0) {
+                Mail::to($to)->send(new DailyAlertStock($data));
+            }
+            Log::channel('DailySendAlertStock')->info('END DAILY SEND ALERT STOCK ' . Carbon::now()->toDateTimeString());
+        } catch (Exception $e) {
+            Log::channel('DailySendAlertStock')->info('ERROR DAILY SEND ALERT STOCK ' . $e->getMessage() . ' ' . Carbon::now()->toDateTimeString());
+            Log::channel('DailySendAlertStock')->info('END DAILY SEND ALERT STOCK ' . Carbon::now()->toDateTimeString());
         }
     }
 }
