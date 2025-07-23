@@ -40,30 +40,58 @@ class TimingLogController extends Controller
 
         $data = [];
 
+        $durations = [];
         $needle = Needle::with(['user'])->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->get();
         foreach ($needle as $n) {
+            $duration = $n->scan_rfid && $n->scan_box ? Carbon::parse($n->scan_rfid)->diff(Carbon::parse($n->scan_box))->format('%H:%i:%s') : '-';
             $d = new stdClass;
             $d->name = $n->user->name;
             $d->rfid = $n->scan_rfid;
             $d->box = $n->scan_box;
-            $d->duration = $n->scan_rfid && $n->scan_box ? Carbon::parse($n->scan_rfid)->diff(Carbon::parse($n->scan_box))->format('%H:%i:%s') : '-';
+            $d->duration = $duration;
             $d->note = $n->note;
             $data[] = $d;
+            if ($duration !== '-') {
+                $durations[] = $duration;
+            } else {
+                $durations[] = '00:00:00'; // Default to zero duration if not available
+            }
+        }
+
+        if (count($durations) > 0) {
+            $totalSeconds = 0;
+
+            foreach ($durations as $time) {
+                [$hours, $minutes, $seconds] = explode(':', $time);
+                $totalSeconds += ($hours * 3600) + ($minutes * 60) + $seconds;
+            }
+
+            $averageSeconds = $totalSeconds / count($durations);
+            $averageFormatted = gmdate('H:i:s', (int) round($averageSeconds));
+        } else {
+            $averageFormatted = '-';
         }
 
         return datatables()->of($data)
+            ->with([
+                'average' => $averageFormatted
+            ])
             ->make(true);
     }
 
     public function unduh(Request $request)
     {
-        $filter_tanggal = $request->filter_tanggal;
+        $filter_range_date = $request->filter_range_date;
 
         try {
             $sp = new Spreadsheet;
             $ws = $sp->getActiveSheet();
 
-            $judul = 'Timing Log ' . $filter_tanggal;
+            $judul = 'Timing Log ' . $filter_range_date;
+
+            $range_date = explode(' - ', $filter_range_date);
+            $start = $range_date[0] ? $range_date[0] : Carbon::today();
+            $end = $range_date[1] ? $range_date[1] : Carbon::today();
 
             $ws->getStyle('A1')->getFont()->setBold(true)->setSize(16);
             $ws->mergeCells('A1:F1')->getCell('A1')->setValue(strtoupper($judul))->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -80,20 +108,47 @@ class TimingLogController extends Controller
             $ws->mergeCells('E3:E5')->getCell('E3')->setValue('Duration');
             $ws->mergeCells('F3:F5')->getCell('F3')->setValue('Remarks');
 
+            $durations = [];
             $k = 5;
             $i = 0;
-            $needle = Needle::with(['user'])->whereDate('created_at', $filter_tanggal)->get();
+            $needle = Needle::with(['user'])->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])->get();
             foreach ($needle as $n) {
                 $k++;
                 $i++;
+                $duration = $n->scan_rfid && $n->scan_box ? Carbon::parse($n->scan_rfid)->diff(Carbon::parse($n->scan_box))->format('%H:%i:%s') : '-';
                 $ws->getStyle("A$k:F$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                 $ws->getCell("A$k")->setValue($i);
                 $ws->getCell("B$k")->setValue($n->user->name);
                 $ws->getCell("C$k")->setValue($n->scan_rfid);
                 $ws->getCell("D$k")->setValue($n->scan_box);
-                $ws->getCell("E$k")->setValue($n->scan_rfid && $n->scan_box ? Carbon::parse($n->scan_rfid)->diff(Carbon::parse($n->scan_box))->format('%H:%i:%s') : '-');
+                $ws->getCell("E$k")->setValue($duration);
                 $ws->getCell("F$k")->setValue($n->note);
+                if ($duration !== '-') {
+                    $durations[] = $duration;
+                } else {
+                    $durations[] = '00:00:00'; // Default to zero duration if not available
+                }
             }
+
+            if (count($durations) > 0) {
+                $totalSeconds = 0;
+
+                foreach ($durations as $time) {
+                    [$hours, $minutes, $seconds] = explode(':', $time);
+                    $totalSeconds += ($hours * 3600) + ($minutes * 60) + $seconds;
+                }
+
+                $averageSeconds = $totalSeconds / count($durations);
+                $averageFormatted = gmdate('H:i:s', (int) round($averageSeconds));
+            } else {
+                $averageFormatted = '-';
+            }
+
+            $ws->mergeCells("A$k:D$k")->getCell("A$k")->setValue('Average');
+            $ws->getCell("E$k")->setValue($averageFormatted);
+            $ws->getStyle("A$k:F$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $ws->getStyle("A$k:F$k")->getFont()->setBold(true);
+            $ws->getStyle("A$k:F$k")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             foreach ($ws->getColumnIterator() as $column) {
                 $ws->getColumnDimension($column->getColumnIndex())->setAutoSize(true);

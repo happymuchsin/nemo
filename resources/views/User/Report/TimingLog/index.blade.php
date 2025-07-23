@@ -29,19 +29,28 @@
                         <th>Scan Box Needle</th>
                     </tr>
                 </x-slot:thead>
+                <x-slot:tfoot>
+                    <tr>
+                        <th colspan="4" class="text-center">Average</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </x-slot:tfoot>
             </x-layout.table>
         </x-slot:body>
     </x-layout.content>
 
     <script>
         var table = null,
-            tableSummary = null;
+            tableSummary = null,
+            averageDuration = null;
 
         $(document).ready(function() {
             $('#collSidebar').attr('hidden', true);
             $('#table').addClass('nowrap');
 
-            $('#filter_range_date').val("{{ date('Y-m-d') . ' - ' . date('Y-m-d') }}")
+            // $('#filter_range_date').val("{{ date('Y-m-d') . ' - ' . date('Y-m-d') }}")
+            $('#filter_range_date').val("2025-06-01 - 2025-06-30");
 
             $("#filter_range_date").daterangepicker({
                 autoUpdateInput: false,
@@ -67,6 +76,14 @@
                         url: "{{ route('user.report.timing-log.data') }}",
                         data: function(d) {
                             d.filter_range_date = $('#filter_range_date').val();
+                        },
+                        dataSrc: function(json) {
+                            if (json.average) {
+                                averageDuration = json.average;
+                            } else {
+                                averageDuration = '-';
+                            }
+                            return json.data;
                         },
                     },
                     columns: [{
@@ -98,7 +115,13 @@
                     rowCallback: function(row, data, index) {
                         // Ubah isi kolom pertama (index ke-0) jadi nomor urut
                         $('td:eq(0)', row).html(table.page.info().start + index + 1);
-                    }
+                    },
+                    footerCallback: function(row, data, start, end, display) {
+                        var api = this.api();
+                        if (end > 0) {
+                            $(api.column(4).footer()).html(averageDuration);
+                        }
+                    },
                 });
             }, 250);
         })
@@ -109,7 +132,7 @@
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",
-                    filter_tanggal: $('#filter_tanggal').val(),
+                    filter_range_date: $('#filter_range_date').val(),
                 },
                 beforeSend: function() {
                     waitAlert();
