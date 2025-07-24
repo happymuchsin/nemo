@@ -154,10 +154,12 @@ class MasterAreaController extends Controller
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),
             ]);
-            Stock::where('master_area_id', $id)->update([
-                'deleted_by' => Auth::user()->username,
-                'deleted_at' => Carbon::now(),
-            ]);
+            Stock::where('master_area_id', $id)
+                ->whereNull('status')
+                ->update([
+                    'deleted_by' => Auth::user()->username,
+                    'deleted_at' => Carbon::now(),
+                ]);
             MasterArea::where('id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),

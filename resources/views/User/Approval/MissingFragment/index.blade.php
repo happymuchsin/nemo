@@ -2,7 +2,7 @@
 @section('title', $title)
 
 @section('page-content')
-    <x-layout.content :name="'Approval'">
+    <x-layout.content :name="'Missing Fragment'">
         <x-slot:body>
             <x-filter.user-filter>
                 <x-slot:filter>
@@ -57,7 +57,7 @@
 
             table = initDataTable('table', '', '', '', {
                 ajax: {
-                    url: "{{ route('user.approval.data') }}",
+                    url: "{{ route('user.approval.missing-fragment.data') }}",
                     data: function(d) {
                         d.bulan = $('#bulan').val();
                         d.tahun = $('#tahun').val();

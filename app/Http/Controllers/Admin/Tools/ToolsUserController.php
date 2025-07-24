@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Tools;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
-use App\Models\Approval;
+use App\Models\ApprovalMissingFragment;
 use App\Models\MasterApproval;
 use App\Models\MasterDivision;
 use App\Models\MasterPosition;
@@ -195,7 +195,7 @@ class ToolsUserController extends Controller
 
     public function check(Request $request, $id)
     {
-        $a = Approval::where('user_id', $id)->where('status', 'WAITING')->first();
+        $a = ApprovalMissingFragment::where('user_id', $id)->where('status', 'WAITING')->first();
         if ($a) {
             return response()->json(['tipe' => 'yes', 'message' => 'User has pending Approval, Are you sure want to Delete?', 'id' => $id], 200);
         } else {
@@ -214,7 +214,7 @@ class ToolsUserController extends Controller
         $username = Auth::user()->username;
         $now = Carbon::now();
 
-        $a = Approval::where('user_id', $id)->get();
+        $a = ApprovalMissingFragment::where('user_id', $id)->get();
         foreach ($a as $a) {
             $c = Carbon::parse($a->tanggal);
             if (strlen($c->month) == 1) {
@@ -227,7 +227,7 @@ class ToolsUserController extends Controller
                     unlink($file);
             }
         }
-        Approval::where('user_id', $id)->update([
+        ApprovalMissingFragment::where('user_id', $id)->update([
             'deleted_at' => $now,
             'deleted_by' => $username,
         ]);

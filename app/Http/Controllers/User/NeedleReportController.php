@@ -4,7 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
-use App\Models\Approval;
+use App\Models\ApprovalMissingFragment;
 use App\Models\MasterCounter;
 use App\Models\MasterLine;
 use App\Models\Needle;
@@ -82,11 +82,11 @@ class NeedleReportController extends Controller
                     if ($q->filename) {
                         $gambar = asset("assets/uploads/needle/$c->year/$month/$q->id.$q->ext");
                     } else {
-                        $a = Approval::where('needle_id', $q->id)->first();
+                        $a = ApprovalMissingFragment::where('needle_id', $q->id)->first();
                         if ($a) {
                             $gambar = asset("assets/uploads/needle/$c->year/$month/$a->id.$a->ext");
                         } else {
-                            $aa = Approval::where('user_id', $q->user_id)->where('master_line_id', $q->master_line_id)->where('master_style_id', $q->master_style_id)->where('updated_at', $q->created_at)->first();
+                            $aa = ApprovalMissingFragment::where('user_id', $q->user_id)->where('master_line_id', $q->master_line_id)->where('master_style_id', $q->master_style_id)->where('updated_at', $q->created_at)->first();
                             if ($aa) {
                                 $gambar = asset("assets/uploads/needle/$c->year/$month/$aa->id.$aa->ext");
                             } else {
@@ -107,6 +107,7 @@ class NeedleReportController extends Controller
                 ->selectRaw('mb.name as box, brand, mn.tipe, size, sum(`in`) as `in`, sum(`out`) as `out`')
                 ->where('stocks.master_counter_id', $filter_counter)
                 ->where('stocks.is_clear', 'not')
+                ->whereNull('status')
                 ->groupBy('master_box_id')
                 ->get();
             foreach ($s as $s) {

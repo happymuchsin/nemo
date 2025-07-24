@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Http\Resources\ApiResource;
-use App\Models\Approval;
+use App\Models\ApprovalMissingFragment;
 use Exception;
 use Illuminate\Http\Request;
 use stdClass;
@@ -22,7 +22,7 @@ class ApprovalController extends Controller
 
         try {
             $data = [];
-            $s = Approval::with(['user', 'needle' => function ($q) {
+            $s = ApprovalMissingFragment::with(['user', 'needle' => function ($q) {
                 $q->with(['box', 'needle']);
             }, 'approval' => function ($q) {
                 $q->with(['user']);

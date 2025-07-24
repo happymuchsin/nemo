@@ -40,6 +40,10 @@ class RoleSeeder extends Seeder
                 'description' => 'Dead Stock'
             ],
             [
+                'name' => 'adjustment',
+                'description' => 'Adjustment'
+            ],
+            [
                 'name' => 'approval',
                 'description' => 'Approval'
             ],
@@ -106,6 +110,13 @@ class RoleSeeder extends Seeder
         // DEAD STOCK
         $permission = Permission::whereIn('name', ['user-dead-stock'])->get();
         $role = Role::findByName('dead-stock');
+        foreach ($permission as $p) {
+            $role->givePermissionTo([(int) $p->id]);
+        }
+
+        // ADJUSTMENT
+        $permission = Permission::whereIn('name', ['user-adjustment'])->get();
+        $role = Role::findByName('adjustment');
         foreach ($permission as $p) {
             $role->givePermissionTo([(int) $p->id]);
         }

@@ -82,7 +82,11 @@ class DeadStockController extends Controller
             $dead_stock_id = $request->dead_stock_id;
             $data = [];
             $dead_stock = DeadStock::where('id', $dead_stock_id)->first();
-            $stock = Stock::where('master_area_id', $dead_stock->master_area_id)->where('master_needle_id', $dead_stock->master_needle_id)->where('is_clear', 'not')->get();
+            $stock = Stock::where('master_area_id', $dead_stock->master_area_id)
+                ->where('master_needle_id', $dead_stock->master_needle_id)
+                ->where('is_clear', 'not')
+                ->whereNull('status')
+                ->get();
             foreach ($stock as $s) {
                 $data[] = [
                     'counter' => $s->counter->name,
@@ -127,6 +131,7 @@ class DeadStockController extends Controller
                     $q->where('id', $h->ke_id);
                 }
             })
+                ->whereNull('status')
                 ->first();
             $data[] = [
                 'created_at' => $h->created_at->format('Y-m-d H:i:s'),
@@ -150,16 +155,20 @@ class DeadStockController extends Controller
             if ($mode == 'add') {
                 $total = 0;
                 foreach ($data as $d) {
-                    $stock = Stock::where('id', $d['counter_id'])->first();
+                    $stock = Stock::where('id', $d['counter_id'])
+                        ->whereNull('status')
+                        ->first();
                     if ($d['after'] < 0) {
                         DB::rollBack();
                         return response()->json('Transfer is more than Stock', 422);
                     }
-                    Stock::where('id', $d['counter_id'])->update([
-                        'out' => $stock->out + $d['qty'],
-                        'updated_by' => Auth::user()->username,
-                        'updated_at' => $now,
-                    ]);
+                    Stock::where('id', $d['counter_id'])
+                        ->whereNull('status')
+                        ->update([
+                            'out' => $stock->out + $d['qty'],
+                            'updated_by' => Auth::user()->username,
+                            'updated_at' => $now,
+                        ]);
                     HelperController::activityLog('UPDATE STOCK', 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
                         'id' => $d['counter_id'],
                         'out' => $stock->out + $d['qty'],
@@ -233,12 +242,16 @@ class DeadStockController extends Controller
             } else if ($mode == 'minus') {
                 $total = 0;
                 foreach ($data as $d) {
-                    $stock = Stock::where('id', $d['counter_id'])->first();
-                    Stock::where('id', $d['counter_id'])->update([
-                        'in' => $stock->in + $d['qty'],
-                        'updated_by' => Auth::user()->username,
-                        'updated_at' => $now,
-                    ]);
+                    $stock = Stock::where('id', $d['counter_id'])
+                        ->whereNull('status')
+                        ->first();
+                    Stock::where('id', $d['counter_id'])
+                        ->whereNull('status')
+                        ->update([
+                            'in' => $stock->in + $d['qty'],
+                            'updated_by' => Auth::user()->username,
+                            'updated_at' => $now,
+                        ]);
                     HelperController::activityLog('UPDATE STOCK', 'stocks', 'update', $request->ip(), $request->userAgent(), json_encode([
                         'id' => $d['counter_id'],
                         'in' => $stock->in + $d['qty'],
@@ -315,6 +328,7 @@ class DeadStockController extends Controller
                     'created_at' => $now,
                 ]));
             }
+            HelperController::reload();
             DB::commit();
             return response()->json('Transfer Successfully', 200);
         } catch (Exception $e) {

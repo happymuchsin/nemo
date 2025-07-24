@@ -6,7 +6,7 @@ use App\Http\Controllers\ClosingController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Http\Resources\ApiResource;
-use App\Models\Approval;
+use App\Models\ApprovalMissingFragment;
 use App\Models\HistoryOutStock;
 use App\Models\MasterBox;
 use App\Models\MasterLine;
@@ -35,7 +35,7 @@ class CardController extends Controller
             if ($u) {
                 $tipe = $request->tipe;
                 if ($tipe == 'approval') {
-                    $s = Approval::with(['approval'])->where('id', $approval)->first();
+                    $s = ApprovalMissingFragment::with(['approval'])->where('id', $approval)->first();
                     if ($s) {
                         if ($s->approval->user_id != $u->id) {
                             return new ApiResource(422, 'User Approval not registered in this Data', '');
@@ -111,7 +111,7 @@ class CardController extends Controller
                     $username = $request->username;
                     $scan_rfid = $request->scan_rfid;
                     $scan_box = $request->scan_box;
-                    $s = Approval::where('id', $approval)->first();
+                    $s = ApprovalMissingFragment::where('id', $approval)->first();
                     if ($s) {
                         if ($s->status == 'APPROVE') {
                             DB::beginTransaction();
@@ -120,24 +120,49 @@ class CardController extends Controller
 
                             if ($s->master_needle_id && $mode == 'tetap') {
                                 $master_needle_id = $s->master_needle_id;
-                                $in = Stock::where('master_box_id', $b->id)->where('master_needle_id', $master_needle_id)->where('is_clear', 'not')->sum('in');
-                                $out = Stock::where('master_box_id', $b->id)->where('master_needle_id', $master_needle_id)->where('is_clear', 'not')->sum('out');
+                                $in = Stock::where('master_box_id', $b->id)
+                                    ->where('master_needle_id', $master_needle_id)
+                                    ->where('is_clear', 'not')
+                                    ->whereNull('status')
+                                    ->sum('in');
+                                $out = Stock::where('master_box_id', $b->id)
+                                    ->where('master_needle_id', $master_needle_id)
+                                    ->where('is_clear', 'not')
+                                    ->whereNull('status')
+                                    ->sum('out');
 
                                 if ($in <= $out) {
                                     return new ApiResource(422, 'Stock in Box is empty !!!', '');
                                 }
 
-                                $stock = Stock::where('master_box_id', $b->id)->where('master_needle_id', $master_needle_id)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
+                                $stock = Stock::where('master_box_id', $b->id)
+                                    ->where('master_needle_id', $master_needle_id)
+                                    ->whereRaw('`in` > `out`')
+                                    ->where('is_clear', 'not')
+                                    ->whereNull('status')
+                                    ->orderBy('created_at')
+                                    ->first();
                             } else {
                                 $master_needle_id = null;
-                                $in = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('in');
-                                $out = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('out');
+                                $in = Stock::where('master_box_id', $b->id)
+                                    ->where('is_clear', 'not')
+                                    ->whereNull('status')
+                                    ->sum('in');
+                                $out = Stock::where('master_box_id', $b->id)
+                                    ->where('is_clear', 'not')
+                                    ->whereNull('status')
+                                    ->sum('out');
 
                                 if ($in <= $out) {
                                     return new ApiResource(422, 'Stock in Box is empty !!!', '');
                                 }
 
-                                $stock = Stock::where('master_box_id', $b->id)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
+                                $stock = Stock::where('master_box_id', $b->id)
+                                    ->whereRaw('`in` > `out`')
+                                    ->where('is_clear', 'not')
+                                    ->whereNull('status')
+                                    ->orderBy('created_at')
+                                    ->first();
                                 if ($mode == 'ubah') {
                                     $master_needle_id = $stock->master_needle_id;
                                 }
@@ -238,10 +263,20 @@ class CardController extends Controller
                         return new ApiResource(422, 'This is not Box Normal', '');
                     }
 
-                    $s = Stock::with(['needle'])->where('master_box_id', $b->id)->where('is_clear', 'not')->first();
+                    $s = Stock::with(['needle'])->where('master_box_id', $b->id)
+                        ->whereNull('status')
+                        ->where('is_clear', 'not')
+                        ->whereNull('status')
+                        ->first();
                     if ($s) {
-                        $in = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('in');
-                        $out = Stock::where('master_box_id', $b->id)->where('is_clear', 'not')->sum('out');
+                        $in = Stock::where('master_box_id', $b->id)
+                            ->where('is_clear', 'not')
+                            ->whereNull('status')
+                            ->sum('in');
+                        $out = Stock::where('master_box_id', $b->id)
+                            ->where('is_clear', 'not')
+                            ->whereNull('status')
+                            ->sum('out');
                         if ($in <= $out) {
                             return new ApiResource(422, 'Box is Empty', '');
                         }

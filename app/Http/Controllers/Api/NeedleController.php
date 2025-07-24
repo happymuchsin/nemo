@@ -6,7 +6,7 @@ use App\Http\Controllers\ClosingController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Http\Resources\ApiResource;
-use App\Models\Approval;
+use App\Models\ApprovalMissingFragment;
 use App\Models\HistoryOutStock;
 use App\Models\Needle;
 use App\Models\MasterBox;
@@ -87,7 +87,7 @@ class NeedleController extends Controller
                     $master_needle_id = null;
                 }
 
-                $ins = Approval::create([
+                $ins = ApprovalMissingFragment::create([
                     'tanggal' => $now->today(),
                     'user_id' => $user->id,
                     'master_line_id' => $line,
@@ -105,7 +105,7 @@ class NeedleController extends Controller
                     'created_by' => $username,
                     'created_at' => $now,
                 ]);
-                HelperController::activityLog("ANDROID CREATE APPROVAL", 'approvals', 'create', $request->ip(), $request->userAgent(), json_encode([
+                HelperController::activityLog("ANDROID CREATE APPROVAL MISSING FRAGMENT", 'approval_missing_fragments', 'create', $request->ip(), $request->userAgent(), json_encode([
                     'tanggal' => $now->today(),
                     'user_id' => $user->id,
                     'master_line_id' => $line,
@@ -176,8 +176,16 @@ class NeedleController extends Controller
 
                 DB::beginTransaction();
 
-                $in = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->where('is_clear', 'not')->sum('in');
-                $out = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->where('is_clear', 'not')->sum('out');
+                $in = Stock::where('master_box_id', $box->id)
+                    ->where('master_needle_id', $needle)
+                    ->where('is_clear', 'not')
+                    ->whereNull('status')
+                    ->sum('in');
+                $out = Stock::where('master_box_id', $box->id)
+                    ->where('master_needle_id', $needle)
+                    ->where('is_clear', 'not')
+                    ->whereNull('status')
+                    ->sum('out');
 
                 if ($in <= $out) {
                     return new ApiResource(422, 'Stock in Box is empty !!!', '');
@@ -220,7 +228,13 @@ class NeedleController extends Controller
 
                 $needle_id = $ins->id;
 
-                $stock = Stock::where('master_box_id', $box->id)->where('master_needle_id', $needle)->whereRaw('`in` > `out`')->where('is_clear', 'not')->orderBy('created_at')->first();
+                $stock = Stock::where('master_box_id', $box->id)
+                    ->where('master_needle_id', $needle)
+                    ->whereRaw('`in` > `out`')
+                    ->where('is_clear', 'not')
+                    ->whereNull('status')
+                    ->orderBy('created_at')
+                    ->first();
 
                 if (!$stock) {
                     return new ApiResource(422, 'Stock not found', '');
@@ -336,10 +350,7 @@ class NeedleController extends Controller
                 }
             }
 
-            HelperController::emitEvent('nemo', [
-                'event' => 'nemoReload',
-                'tipe' => 'reload',
-            ]);
+            HelperController::reload();
 
             DB::commit();
             return new ApiResource(200, 'Submit Successfully', '');
@@ -406,7 +417,7 @@ class NeedleController extends Controller
             DB::beginTransaction();
 
             $id = Str::orderedUuid();
-            Approval::insert([
+            ApprovalMissingFragment::insert([
                 'id' => $id,
                 'tanggal' => $now->today(),
                 'user_id' => $user_id,
@@ -427,7 +438,7 @@ class NeedleController extends Controller
                 'created_by' => $username,
                 'created_at' => $now,
             ]);
-            HelperController::activityLog("ANDROID CREATE APPROVAL", 'approvals', 'create', $request->ip(), $request->userAgent(), json_encode([
+            HelperController::activityLog("ANDROID CREATE APPROVAL MISSING FRAGMENT", 'approval_missing_fragments', 'create', $request->ip(), $request->userAgent(), json_encode([
                 'id' => $id,
                 'tanggal' => $now->today(),
                 'user_id' => $user_id,
@@ -482,10 +493,7 @@ class NeedleController extends Controller
                 ]);
             }
 
-            HelperController::emitEvent('nemo', [
-                'event' => 'nemoReload',
-                'tipe' => 'reload',
-            ]);
+            HelperController::reload();
 
             $path = "assets/uploads/needle/$now->year/$month/$needle->id";
             if (!file_exists($path)) {
@@ -518,6 +526,7 @@ class NeedleController extends Controller
             ->where('stocks.master_area_id', $area_id)
             ->where('stocks.master_counter_id', $lokasi_id)
             ->where('stocks.is_clear', 'not')
+            ->whereNull('status')
             ->groupBy('master_box_id')
             ->get();
         foreach ($s as $s) {

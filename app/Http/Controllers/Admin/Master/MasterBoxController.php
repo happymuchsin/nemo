@@ -144,10 +144,12 @@ class MasterBoxController extends Controller
     {
         try {
             DB::beginTransaction();
-            Stock::where('master_box_id', $id)->update([
-                'deleted_by' => Auth::user()->username,
-                'deleted_at' => Carbon::now(),
-            ]);
+            Stock::where('master_box_id', $id)
+                ->whereNull('status')
+                ->update([
+                    'deleted_by' => Auth::user()->username,
+                    'deleted_at' => Carbon::now(),
+                ]);
             Needle::where('master_box_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => Carbon::now(),

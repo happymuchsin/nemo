@@ -166,10 +166,12 @@ class MasterNeedleController extends Controller
         $now = Carbon::now();
         try {
             DB::beginTransaction();
-            Stock::where('master_needle_id', $id)->update([
-                'deleted_by' => Auth::user()->username,
-                'deleted_at' => $now,
-            ]);
+            Stock::where('master_needle_id', $id)
+                ->whereNull('status')
+                ->update([
+                    'deleted_by' => Auth::user()->username,
+                    'deleted_at' => $now,
+                ]);
             DeadStock::where('master_needle_id', $id)->update([
                 'deleted_by' => Auth::user()->username,
                 'deleted_at' => $now,

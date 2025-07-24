@@ -29,7 +29,9 @@ use App\Http\Controllers\Admin\Tools\ToolsRoleController;
 use App\Http\Controllers\Admin\Tools\ToolsUserController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\NotifController;
-use App\Http\Controllers\User\ApprovalController;
+use App\Http\Controllers\User\AdjustmentController;
+use App\Http\Controllers\User\Approval\ApprovalAdjustmentController;
+use App\Http\Controllers\User\Approval\ApprovalMissingFragmentController;
 use App\Http\Controllers\User\DashboardController as UserDashboard;
 use App\Http\Controllers\User\DeadStockController;
 use App\Http\Controllers\User\NeedleReportController;
@@ -237,12 +239,33 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::post('transfer', [DeadStockController::class, 'transfer'])->name('user.dead-stock.transfer');
                 });
 
+            Route::prefix('/adjustment')
+                ->middleware(['permission:user-adjustment'])
+                ->group(function () {
+                    Route::get('', [AdjustmentController::class, 'index'])->name('user.adjustment');
+                    Route::get('data', [AdjustmentController::class, 'data'])->name('user.adjustment.data');
+                    Route::post('item', [AdjustmentController::class, 'item'])->name('user.adjustment.item');
+                    Route::post('crup', [AdjustmentController::class, 'crup'])->name('user.adjustment.crup');
+                    Route::get('get/{id?}', [AdjustmentController::class, 'get'])->name('user.adjustment.get');
+                    Route::get('hapus/{id?}', [AdjustmentController::class, 'hapus'])->name('user.adjustment.hapus');
+                });
+
             Route::prefix('/approval')
                 ->middleware(['permission:user-approval'])
                 ->group(function () {
-                    Route::get('', [ApprovalController::class, 'index'])->name('user.approval');
-                    Route::get('data', [ApprovalController::class, 'data'])->name('user.approval.data');
-                    Route::get('approval/{id}/{status}', [ApprovalController::class, 'approval'])->name('user.approval.approval');
+                    Route::prefix('/missing-fragment')
+                        ->group(function () {
+                            Route::get('', [ApprovalMissingFragmentController::class, 'index'])->name('user.approval.missing-fragment');
+                            Route::get('data', [ApprovalMissingFragmentController::class, 'data'])->name('user.approval.missing-fragment.data');
+                            Route::get('approval/{id}/{status}', [ApprovalMissingFragmentController::class, 'approval'])->name('user.approval.missing-fragment.approval');
+                        });
+                    Route::prefix('/adjustment')
+                        ->group(function () {
+                            Route::get('', [ApprovalAdjustmentController::class, 'index'])->name('user.approval.adjustment');
+                            Route::get('data', [ApprovalAdjustmentController::class, 'data'])->name('user.approval.adjustment.data');
+                            Route::get('get/{id}', [ApprovalAdjustmentController::class, 'get'])->name('user.approval.adjustment.get');
+                            Route::post('approval', [ApprovalAdjustmentController::class, 'approval'])->name('user.approval.adjustment.approval');
+                        });
                 });
         });
 

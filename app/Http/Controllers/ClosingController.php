@@ -34,6 +34,7 @@ class ClosingController extends Controller
                 foreach ($master_needle as $m) {
                     $in = Stock::whereDate('created_at', $tanggal)
                         ->where('master_needle_id', $m->id)
+                        ->whereNull('status')
                         ->sum('in');
                     $out = Needle::whereDate('created_at', $tanggal)
                         ->where('master_needle_id', $m->id)

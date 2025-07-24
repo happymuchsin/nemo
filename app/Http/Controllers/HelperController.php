@@ -13,6 +13,14 @@ use stdClass;
 
 class HelperController extends Controller
 {
+    static function reload()
+    {
+        HelperController::emitEvent('nemo', [
+            'event' => 'nemoReload',
+            'tipe' => 'reload',
+        ]);
+    }
+
     static function period($filter_period, $filter_range_date, $filter_daily, $filter_weekly, $filter_month, $filter_year, $txt)
     {
         $d = new stdClass;

@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\User\Approval;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
-use App\Models\Approval;
+use App\Models\ApprovalMissingFragment;
 use App\Models\MasterApproval;
-use App\Models\Needle;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class ApprovalController extends Controller
+class ApprovalMissingFragmentController extends Controller
 {
     public function __construct()
     {
@@ -23,12 +22,12 @@ class ApprovalController extends Controller
 
     public function index(Request $request)
     {
-        $page = 'user_approval';
-        $title = 'USER APPROVAL';
+        $page = 'user_approval_missing_fragment';
+        $title = 'USER APPROVAL MISSING FRAGMENT';
 
-        HelperController::activityLog('OPEN USER APPROVAL', 'approvals', 'read', $request->ip(), $request->userAgent());
+        HelperController::activityLog('OPEN USER APPROVAL MISSING FRAGMENT', 'approval_missing_fragments', 'read', $request->ip(), $request->userAgent());
 
-        return view('User.Approval.index', compact('title', 'page'));
+        return view('User.Approval.MissingFragment.index', compact('title', 'page'));
     }
 
     public function data(Request $request)
@@ -44,7 +43,7 @@ class ApprovalController extends Controller
             $master_approval_id = null;
         }
 
-        $data = Approval::with(['user', 'needle', 'master_needle', 'master_line', 'master_style'])
+        $data = ApprovalMissingFragment::with(['user', 'needle', 'master_needle', 'master_line', 'master_style'])
             ->when(Auth::user()->username != 'developer', function ($q) use ($master_approval_id) {
                 $q->where('master_approval_id', $master_approval_id);
             })
@@ -113,8 +112,8 @@ class ApprovalController extends Controller
             ->addColumn('action', function ($q) {
                 $h = '';
                 if ($q->status == 'WAITING') {
-                    $h .= '<a href="#" class="text-center" title="Approve" onclick="approval(\'' . route('user.approval.approval', ['id' => $q->id, 'status' => 'approve']) . '\', \'' . 'APPROVE' . '\')"><i class="fa fa-check text-success mr-3"></i></a>';
-                    $h .= '<a href="#" class="text-center" title="Reject" onclick="approval(\'' . route('user.approval.approval', ['id' => $q->id, 'status' => 'reject']) . '\', \'' . 'REJECT' . '\')"><i class="fa fa-x text-danger mr-3"></i></a>';
+                    $h .= '<a href="#" class="text-center" title="Approve" onclick="approval(\'' . route('user.approval.missing-fragment.approval', ['id' => $q->id, 'status' => 'approve']) . '\', \'' . 'APPROVE' . '\')"><i class="fa fa-check text-success mr-3"></i></a>';
+                    $h .= '<a href="#" class="text-center" title="Reject" onclick="approval(\'' . route('user.approval.missing-fragment.approval', ['id' => $q->id, 'status' => 'reject']) . '\', \'' . 'REJECT' . '\')"><i class="fa fa-x text-danger mr-3"></i></a>';
                 } else {
                     $h .= '<a href="#" class="text-center" title="Approve"><i class="fa fa-check text-secondary mr-3"></i></a>';
                     $h .= '<a href="#" class="text-center" title="Reject"><i class="fa fa-x text-secondary mr-3"></i></a>';
@@ -131,14 +130,14 @@ class ApprovalController extends Controller
             DB::beginTransaction();
 
             $now = Carbon::now();
-            Approval::where('id', $id)->update([
+            ApprovalMissingFragment::where('id', $id)->update([
                 'status' => strtoupper($status),
                 $status => $now,
                 'updated_by' => Auth::user()->username,
                 'updated_at' => $now,
             ]);
 
-            HelperController::activityLog("UPDATE APPROVAL", 'approvals', 'update', $request->ip(), $request->userAgent(), json_encode([
+            HelperController::activityLog("UPDATE APPROVAL MISSING FRAGMENT", 'approval_missing_fragments', 'update', $request->ip(), $request->userAgent(), json_encode([
                 'id' => $id,
                 'status' => strtoupper($status),
                 $status => $now,
@@ -146,10 +145,7 @@ class ApprovalController extends Controller
                 'updated_at' => $now,
             ]), $id);
 
-            HelperController::emitEvent('nemo', [
-                'event' => 'nemoReload',
-                'tipe' => 'reload',
-            ]);
+            HelperController::reload();
 
             DB::commit();
             return response()->json(ucwords($status) . ' Successfully', 200);

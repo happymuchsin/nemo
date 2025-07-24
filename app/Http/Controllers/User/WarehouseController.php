@@ -89,7 +89,11 @@ class WarehouseController extends Controller
             $warehouse_id = $request->warehouse_id;
             $data = [];
             $warehouse = Warehouse::where('id', $warehouse_id)->first();
-            $stock = Stock::where('master_area_id', $warehouse->master_area_id)->where('master_needle_id', $warehouse->master_needle_id)->where('is_clear', 'not')->get();
+            $stock = Stock::where('master_area_id', $warehouse->master_area_id)
+                ->where('master_needle_id', $warehouse->master_needle_id)
+                ->where('is_clear', 'not')
+                ->whereNull('status')
+                ->get();
             foreach ($stock as $s) {
                 $data[] = [
                     'counter' => $s->counter->name,
@@ -181,6 +185,7 @@ class WarehouseController extends Controller
                 'created_at' => $now,
             ]));
 
+            HelperController::reload();
             DB::commit();
             return response()->json('Saved Successfully', 200);
         } catch (Exception $e) {
@@ -297,6 +302,7 @@ class WarehouseController extends Controller
                 ]));
             }
 
+            HelperController::reload();
             DB::commit();
             return response()->json('Saved Successfully', 200);
         } catch (Exception $e) {
@@ -314,6 +320,7 @@ class WarehouseController extends Controller
                 'deleted_at' => Carbon::now(),
             ]);
             HelperController::activityLog("DELETE WAREHOUSE", 'warehouses', 'delete', $request->ip(), $request->userAgent(), null, $id);
+            HelperController::reload();
             DB::commit();
             return response()->json('Delete Successfully', 200);
         } catch (Exception $e) {
@@ -414,6 +421,7 @@ class WarehouseController extends Controller
                 'created_by' => Auth::user()->username,
                 'created_at' => $now,
             ]));
+            HelperController::reload();
             DB::commit();
             return response()->json('Transfer Successfully', 200);
         } catch (Exception $e) {

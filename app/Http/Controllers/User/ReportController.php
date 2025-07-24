@@ -127,6 +127,7 @@ class ReportController extends Controller
             $collectNeedle = collect($dataNeedle);
 
             $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
+                ->whereNull('status')
                 ->orderBy('created_at')
                 ->get();
 
@@ -168,6 +169,7 @@ class ReportController extends Controller
 
             $dataStock = Stock::whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
+                ->whereNull('status')
                 ->orderBy('created_at')
                 ->get();
 
@@ -228,6 +230,7 @@ class ReportController extends Controller
             $collectNeedle = collect($dataNeedle);
 
             $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
+                ->whereNull('status')
                 ->orderBy('created_at')
                 ->get();
 
@@ -279,6 +282,7 @@ class ReportController extends Controller
             $collectNeedle = collect($dataNeedle);
 
             $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
+                ->whereNull('status')
                 ->orderBy('created_at')
                 ->get();
 
@@ -318,6 +322,7 @@ class ReportController extends Controller
             $collectNeedle = collect($dataNeedle);
 
             $dataStock = Stock::whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59'])
+                ->whereNull('status')
                 ->orderBy('created_at')
                 ->get();
 

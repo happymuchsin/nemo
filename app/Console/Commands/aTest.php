@@ -52,6 +52,7 @@ class aTest extends Command
 
             $in = Stock::whereDate('created_at', $tanggal)
                 ->where('master_needle_id', $master_needle_id)
+                ->whereNull('status')
                 ->sum('in');
             $out = Needle::whereDate('created_at', $tanggal)
                 ->where('master_needle_id', $master_needle_id)

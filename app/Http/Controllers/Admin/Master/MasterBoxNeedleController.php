@@ -51,6 +51,7 @@ class MasterBoxNeedleController extends Controller
             ->join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')
             ->selectRaw('stocks.id as id, ma.name as area, mc.name as counter, mb.name as box, mn.brand as brand, mn.tipe as tipe, mn.size as size, mn.code as code, mn.machine as machine, mn.min_stock as min_stock, stocks.`in` as `in`, stocks.`out` as `out`, stocks.is_clear as is_clear')
             ->where('is_clear', 'not')
+            ->whereNull('status')
             ->get();
         return datatables()->of($data)
             ->addColumn('stock', function ($q) {
@@ -78,7 +79,11 @@ class MasterBoxNeedleController extends Controller
         } else if ($tipe == 'box') {
             $master_counter_id = $request->master_counter_id;
             $x = [];
-            $s = Stock::where('master_area_id', $master_area_id)->where('master_counter_id', $master_counter_id)->where('is_clear', 'not')->get();
+            $s = Stock::where('master_area_id', $master_area_id)
+                ->where('master_counter_id', $master_counter_id)
+                ->where('is_clear', 'not')
+                ->whereNull('status')
+                ->get();
             foreach ($s as $s) {
                 $x[] = $s->master_box_id;
             }
