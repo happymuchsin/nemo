@@ -39,6 +39,10 @@ class DailySendAlertStock extends Command
                 'adm.sample@anggunkreasi.com'
             ];
 
+            $cc = [
+                'arasu@anggunkreasi.com'
+            ];
+
             $data  = [];
 
             $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
@@ -63,7 +67,7 @@ class DailySendAlertStock extends Command
             }
 
             if (count($data) > 0) {
-                Mail::to($to)->send(new DailyAlertStock($data));
+                Mail::to($to)->cc($cc)->send(new DailyAlertStock($data));
             }
             Log::channel('DailySendAlertStock')->info('END DAILY SEND ALERT STOCK ' . Carbon::now()->toDateTimeString());
         } catch (Exception $e) {
