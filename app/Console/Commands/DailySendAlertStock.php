@@ -36,7 +36,8 @@ class DailySendAlertStock extends Command
         try {
             Log::channel('DailySendAlertStock')->info('START DAILY SEND ALERT STOCK ' . Carbon::now()->toDateTimeString());
             $to = [
-                'adm.sample@anggunkreasi.com'
+                'adm.sample@anggunkreasi.com',
+                'arasu@anggunkreasi.com'
             ];
 
             $cc = [
