@@ -184,7 +184,7 @@ class AdjustmentController extends Controller
 
             if ($id == 0) {
                 $mode = 'add';
-                $a = Adjustment::where('tahun', $tahun)->where('bulan', $bulan)->first();
+                $a = Adjustment::where('tahun', $tahun)->where('bulan', $bulan)->where('status', '!=', 'REJECTED')->first();
                 if ($a) {
                     return response()->json('Already have Adjustment', 422);
                 }

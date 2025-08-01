@@ -124,6 +124,16 @@ class PermissionSeeder extends Seeder
                 'description' => 'Master Needle'
             ],
             [
+                'name' => 'admin-master-monthly-stock',
+                'display_name' => 'admin-master-monthly-stock',
+                'description' => 'Master Monthly Stock'
+            ],
+            [
+                'name' => 'admin-master-morning-stock',
+                'display_name' => 'admin-master-morning-stock',
+                'description' => 'Master Morning Stock'
+            ],
+            [
                 'name' => 'admin-master-buyer',
                 'display_name' => 'admin-master-buyer',
                 'description' => 'Master Buyer'

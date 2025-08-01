@@ -2,8 +2,16 @@
 @section('title', $title)
 
 @section('page-content')
-    <x-layout.content :name="'Needle'">
+    <x-layout.content :name="'Monthly Stock'">
         <x-slot:body>
+            <x-filter.user-filter>
+                <x-slot:filter>
+                    <x-filter.filter :colom="'col-sm-auto'" :tipe="'month'" :label="'Month'" :id="'filter_month'" />
+                    <div class="form-group">
+                        <x-layout.button :class="'btn-primary'" :id="'cari'" :onclick="'table.ajax.reload()'" :icon="'fa fa-search'" :name="'SEARCH'" />
+                    </div>
+                </x-slot:filter>
+            </x-filter.user-filter>
             <x-layout.table :id="'table'">
                 <x-slot:thead>
                     <tr>
@@ -12,8 +20,8 @@
                         <th>Size</th>
                         <th>Code</th>
                         <th>Machine</th>
-                        <th>Min Stock</th>
-                        <th>Is Sample</th>
+                        <th>Min</th>
+                        <th>Max</th>
                         <th>Action</th>
                     </tr>
                 </x-slot:thead>
@@ -24,13 +32,16 @@
     <x-modal.modal :name="'crup'">
         <x-slot:body>
             <input type="hidden" name="key" id="key">
-            <x-modal.body :tipe="'text'" :label="'Brand'" :id="'brand'" />
-            <x-modal.body :tipe="'text'" :label="'Type'" :id="'tipe'" />
-            <x-modal.body :tipe="'text'" :label="'Size'" :id="'size'" />
-            <x-modal.body :tipe="'text'" :label="'Code'" :id="'code'" />
-            <x-modal.body :tipe="'text'" :label="'Machine'" :id="'machine'" />
+            <x-modal.body :tipe="'month'" :label="'Month'" :id="'month'" />
+            <x-modal.body :tipe="'select'" :label="'Needle'" :id="'master_needle_id'">
+                <x-slot:option>
+                    @foreach ($master_needle as $d)
+                        <option value="{{ $d->id }}">{{ $d->brand }} - {{ $d->tipe }} - {{ $d->size }} - {{ $d->code }} - {{ $d->machine }}</option>
+                    @endforeach
+                </x-slot:option>
+            </x-modal.body>
             <x-modal.body :tipe="'number'" :label="'Min Stock'" :id="'min_stock'" :min="'1'" />
-            <x-modal.body :tipe="'checkbox'" :label="'Is Sample?'" :id="'is_sample'" />
+            <x-modal.body :tipe="'number'" :label="'Max Stock'" :id="'max_stock'" :min="'1'" />
         </x-slot:body>
         <x-slot:footer>
             <x-layout.button :class="'btn-primary'" :id="'save'" :onclick="'crup()'" :icon="'fa fa-save'" :name="'Save'" />
@@ -41,9 +52,16 @@
     <script>
         var table = null;
         $(document).ready(function() {
+            $('#filter_month').val("{{ date('Y-m') }}").trigger('change');
+
+            initSelect('master_needle_id', 'Select Needle', 'crupModal');
+
             table = initDataTable('table', '', '', '', {
                 ajax: {
-                    url: "{{ route('admin.master.needle.data') }}",
+                    url: "{{ route('admin.master.monthly-stock.data') }}",
+                    data: function(d) {
+                        d.filter_month = $('#filter_month').val();
+                    },
                 },
                 columns: [{
                         data: 'brand'
@@ -64,79 +82,77 @@
                         data: 'min_stock'
                     },
                     {
-                        data: 'is_sample'
+                        data: 'max_stock'
                     },
                     {
                         data: 'action'
                     },
                 ],
-                order: [
-                    [0, 'asc']
-                ],
             });
             $('div.toolbar').html(
-                '<button class="btn btn-sm btn-success" onclick="add();"><i class="fa fa-circle-plus" /></i> New</button>'
+                '<button class="btn btn-sm btn-success" onclick="add();"><i class="fal fa-circle-plus" /></i> New</button>'
             );
         })
 
         function add() {
-            $('#crupJudul').html('<h5 class="modal-title"><i class="fa fa-file-plus"></i> Input</h5>');
+            $('#crupJudul').html('<h5 class="modal-title"><i class="fal fa-file-plus"></i> Input</h5>');
             $('#crupHeader').addClass('bg-success');
             $('#crupHeader').removeClass('bg-info');
             $('#save').show();
             $('#update').hide();
-            $('#brand').val('');
-            $('#tipe').val('');
-            $('#size').val('');
-            $('#code').val('');
-            $('#machine').val('');
+
+            $('#month').val('').trigger('change');
+            $('#master_needle_id').val('').trigger('change');
             $('#min_stock').val('');
-            $('#is_sample').prop('checked', false);
+            $('#max_stock').val('');
+
             $('#key').val(0);
             $('#crupModal').modal('toggle');
         }
 
         function crup() {
-            if ($('#brand').val() == '') {
-                warningAlert('Please insert Brand');
-            } else if ($('#tipe').val() == '') {
-                warningAlert('Please insert Type');
-            } else if ($('#size').val() == '') {
-                warningAlert('Please insert Size');
-            } else if ($('#code').val() == '') {
-                warningAlert('Please insert Code');
-            } else if ($('#machine').val() == '') {
-                warningAlert('Please insert Machine');
+            if ($('#month').val() == '') {
+                warningAlert('Please select Month');
+            } else if ($('#master_needle_id').val() == '') {
+                warningAlert('Please select Needle');
             } else if ($('#min_stock').val() == '') {
                 warningAlert('Please insert Min Stock');
+            } else if ($('#max_stock').val() == '') {
+                warningAlert('Please insert Max Stock');
             } else {
-                sendAjax('crupModal', {
-                    url: "{{ route('admin.master.needle.crup') }}",
-                    type: "POST",
-                    data: {
-                        'id': $('#key').val(),
-                        'brand': $('#brand').val(),
-                        'tipe': $('#tipe').val(),
-                        'size': $('#size').val(),
-                        'code': $('#code').val(),
-                        'machine': $('#machine').val(),
-                        'min_stock': $('#min_stock').val(),
-                        'is_sample': $('#is_sample').prop('checked'),
-                    },
-                    success: function(response) {
-                        $('#crupModal').modal('toggle');
-                        successAlert(response);
-                        closeAlert();
-                        setTimeout(() => {
-                            table.ajax.reload();
-                        }, 1000);
-                    },
-                    error: function(response) {
-                        warningAlert(response.responseText);
+                customAlert({
+                    icon: 'question',
+                    title: 'Is the data correct?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    confirmButtonColor: '#08fe3e',
+                    callback: function() {
+                        sendAjax('crupModal', {
+                            url: "{{ route('admin.master.monthly-stock.crup') }}",
+                            type: "POST",
+                            data: {
+                                id: $('#key').val(),
+                                month: $('#month').val(),
+                                master_needle_id: $('#master_needle_id').val(),
+                                min_stock: $('#min_stock').val(),
+                                max_stock: $('#max_stock').val(),
+                            },
+                            success: function(response) {
+                                $('#crupModal').modal('toggle');
+                                successAlert(response);
+                                closeAlert();
+                                setTimeout(() => {
+                                    table.ajax.reload();
+                                }, 1000);
+                            },
+                            error: function(response) {
+                                warningAlert(response.responseText);
+                            }
+                        })
                     }
                 })
             }
-        };
+        }
 
         function edit(url) {
             sendAjax('', {
@@ -144,19 +160,17 @@
                 type: "get",
                 success: function(response) {
                     unwaitAlert();
-                    $('#crupJudul').html(
-                        '<h5 class="modal-title"><i class="fa fa-file-pen"></i> Edit</h5>');
+                    $('#crupJudul').html('<h5 class="modal-title"><i class="fa fa-file-pen"></i> Edit</h5>');
                     $('#crupHeader').removeClass('bg-success');
                     $('#crupHeader').addClass('bg-info');
                     $('#save').hide();
                     $('#update').show();
-                    $('#brand').val(response.brand);
-                    $('#tipe').val(response.tipe);
-                    $('#size').val(response.size);
-                    $('#code').val(response.code);
-                    $('#machine').val(response.machine);
+
+                    $('#month').val(response.tahun + '-' + response.bulan).trigger('change');
+                    $('#master_needle_id').val(response.master_needle_id).trigger('change');
                     $('#min_stock').val(response.min_stock);
-                    $('#is_sample').prop('checked', response.is_sample);
+                    $('#max_stock').val(response.max_stock);
+
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');
                 },

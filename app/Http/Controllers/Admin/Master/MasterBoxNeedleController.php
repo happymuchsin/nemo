@@ -51,7 +51,7 @@ class MasterBoxNeedleController extends Controller
             ->join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')
             ->selectRaw('stocks.id as id, ma.name as area, mc.name as counter, mb.name as box, mn.brand as brand, mn.tipe as tipe, mn.size as size, mn.code as code, mn.machine as machine, mn.min_stock as min_stock, stocks.`in` as `in`, stocks.`out` as `out`, stocks.is_clear as is_clear')
             ->where('is_clear', 'not')
-            ->whereNull('status')
+            ->whereNull('stocks.status')
             ->get();
         return datatables()->of($data)
             ->addColumn('stock', function ($q) {

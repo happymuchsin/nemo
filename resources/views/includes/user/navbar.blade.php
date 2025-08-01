@@ -29,6 +29,7 @@
                     'user_report_summary_wip',
                     'user_report_high_user',
                     'user_report_interval_user',
+                    'user_report_daily_broken_needle',
                 ])
                     ? 'rounded-lg bg-warning'
                     : '' }}">
@@ -84,6 +85,12 @@
                     <li>
                         <a class="dropdown-item custom-dropdown-item {{ $page == 'user_report_interval_user' ? 'rounded-lg bg-warning' : '' }}" href="{{ route('user.report.interval-user') }}">
                             Interval User
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item custom-dropdown-item {{ $page == 'user_report_daily_broken_needle' ? 'rounded-lg bg-warning' : '' }}"
+                            href="{{ route('user.report.daily-broken-needle') }}">
+                            Daily Broken Needle
                         </a>
                     </li>
                 </ul>

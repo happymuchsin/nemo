@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\Master\MasterDivisionController;
 use App\Http\Controllers\Admin\Master\MasterFabricController;
 use App\Http\Controllers\Admin\Master\MasterHolidayController;
 use App\Http\Controllers\Admin\Master\MasterLineController;
+use App\Http\Controllers\Admin\Master\MasterMonthlyStockController;
+use App\Http\Controllers\Admin\Master\MasterMorningStockController;
 use App\Http\Controllers\Admin\Master\MasterNeedleController;
 use App\Http\Controllers\Admin\Master\MasterPlacementController;
 use App\Http\Controllers\Admin\Master\MasterPositionController;
@@ -35,6 +37,7 @@ use App\Http\Controllers\User\Approval\ApprovalMissingFragmentController;
 use App\Http\Controllers\User\DashboardController as UserDashboard;
 use App\Http\Controllers\User\DeadStockController;
 use App\Http\Controllers\User\NeedleReportController;
+use App\Http\Controllers\User\Report\DailyBrokenNeedleController;
 use App\Http\Controllers\User\Report\DailyStockController;
 use App\Http\Controllers\User\Report\HighUserController;
 use App\Http\Controllers\User\Report\IntervalUserController;
@@ -188,6 +191,12 @@ Route::group(['middleware' => ['auth']], function () {
                             Route::get('', [IntervalUserController::class, 'index'])->name('user.report.interval-user');
                             Route::post('data', [IntervalUserController::class, 'data'])->name('user.report.interval-user.data');
                             Route::post('unduh', [IntervalUserController::class, 'unduh'])->name('user.report.interval-user.unduh');
+                        });
+                    Route::prefix('/daily-broken-needle')
+                        ->group(function () {
+                            Route::get('', [DailyBrokenNeedleController::class, 'index'])->name('user.report.daily-broken-needle');
+                            Route::get('data', [DailyBrokenNeedleController::class, 'data'])->name('user.report.daily-broken-needle.data');
+                            Route::post('unduh', [DailyBrokenNeedleController::class, 'unduh'])->name('user.report.daily-broken-needle.unduh');
                         });
                 });
 
@@ -397,6 +406,26 @@ Route::group(['middleware' => ['auth']], function () {
                             Route::post('crup', [MasterNeedleController::class, 'crup'])->name('admin.master.needle.crup');
                             Route::get('edit/{id?}', [MasterNeedleController::class, 'edit'])->name('admin.master.needle.edit');
                             Route::get('hapus/{id?}', [MasterNeedleController::class, 'hapus'])->name('admin.master.needle.hapus');
+                        });
+
+                    Route::prefix('/monthly-stock')
+                        ->middleware(['permission:admin-master-monthly-stock'])
+                        ->group(function () {
+                            Route::get('', [MasterMonthlyStockController::class, 'index'])->name('admin.master.monthly-stock');
+                            Route::get('data', [MasterMonthlyStockController::class, 'data'])->name('admin.master.monthly-stock.data');
+                            Route::post('crup', [MasterMonthlyStockController::class, 'crup'])->name('admin.master.monthly-stock.crup');
+                            Route::get('edit/{id?}', [MasterMonthlyStockController::class, 'edit'])->name('admin.master.monthly-stock.edit');
+                            Route::get('hapus/{id?}', [MasterMonthlyStockController::class, 'hapus'])->name('admin.master.monthly-stock.hapus');
+                        });
+
+                    Route::prefix('/morning-stock')
+                        ->middleware(['permission:admin-master-morning-stock'])
+                        ->group(function () {
+                            Route::get('', [MasterMorningStockController::class, 'index'])->name('admin.master.morning-stock');
+                            Route::get('data', [MasterMorningStockController::class, 'data'])->name('admin.master.morning-stock.data');
+                            Route::post('crup', [MasterMorningStockController::class, 'crup'])->name('admin.master.morning-stock.crup');
+                            Route::get('edit/{id?}', [MasterMorningStockController::class, 'edit'])->name('admin.master.morning-stock.edit');
+                            Route::get('hapus/{id?}', [MasterMorningStockController::class, 'hapus'])->name('admin.master.morning-stock.hapus');
                         });
 
                     Route::prefix('/buyer')

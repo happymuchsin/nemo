@@ -45,7 +45,7 @@ class DailySendAlertStock extends Command
 
             $data  = [];
 
-            $master_needle = MasterNeedle::orderBy('tipe')->orderBy('size')->get();
+            $master_needle = MasterNeedle::where('is_sample', 1)->orderBy('tipe')->orderBy('size')->get();
             foreach ($master_needle as $m) {
                 $d = new stdClass;
                 $d->brand = $m->brand;

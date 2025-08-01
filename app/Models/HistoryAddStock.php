@@ -17,4 +17,9 @@ class HistoryAddStock extends Model
     {
         return $this->belongsTo(User::class, 'created_by', 'username');
     }
+
+    public function stock()
+    {
+        return $this->belongsTo(Stock::class, 'stock_id', 'id');
+    }
 }

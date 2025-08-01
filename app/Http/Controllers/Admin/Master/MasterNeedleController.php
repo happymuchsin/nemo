@@ -39,6 +39,9 @@ class MasterNeedleController extends Controller
     {
         $data = MasterNeedle::get();
         return datatables()->of($data)
+            ->editColumn('is_sample', function ($q) {
+                return $q->is_sample == 1 ? 'Yes' : 'No';
+            })
             ->addColumn('action', function ($q) {
                 return view('includes.admin.action', [
                     'edit' => route('admin.master.needle.edit', ['id' => $q->id]),
@@ -57,6 +60,7 @@ class MasterNeedleController extends Controller
         $code = strtoupper($request->code);
         $machine = strtoupper($request->machine);
         $min_stock = $request->min_stock;
+        $is_sample = $request->is_sample;
         $now = Carbon::now();
 
         try {
@@ -74,6 +78,7 @@ class MasterNeedleController extends Controller
                         'code' => $code,
                         'machine' => $machine,
                         'min_stock' => $min_stock,
+                        'is_sample' => $is_sample,
                         'created_by' => Auth::user()->username,
                         'created_at' => $now,
                     ]);
@@ -84,6 +89,7 @@ class MasterNeedleController extends Controller
                         'code' => $code,
                         'machine' => $machine,
                         'min_stock' => $min_stock,
+                        'is_sample' => $is_sample,
                         'created_by' => Auth::user()->username,
                         'created_at' => $now,
                     ]));
@@ -111,8 +117,7 @@ class MasterNeedleController extends Controller
                 $c = 0;
                 $s = MasterNeedle::where('id', $id)->first();
                 if ($s->brand != $brand && $s->tipe != $tipe && $s->size != $size && $s->code != $code && $s->machine != $machine) {
-                    $u =
-                        MasterNeedle::where('brand', $brand)->where('tipe', $tipe)->where('size', $size)->where('code', $code)->where('machine', $machine)->first();
+                    $u = MasterNeedle::where('brand', $brand)->where('tipe', $tipe)->where('size', $size)->where('code', $code)->where('machine', $machine)->first();
                     if ($u) {
                         return response()->json('Brand Tipe Size Code Machine already used', 422);
                     } else {
@@ -130,6 +135,7 @@ class MasterNeedleController extends Controller
                         'code' => $code,
                         'machine' => $machine,
                         'min_stock' => $min_stock,
+                        'is_sample' => $is_sample,
                         'updated_by' => Auth::user()->username,
                         'updated_at' => $now,
                     ]);
@@ -141,6 +147,7 @@ class MasterNeedleController extends Controller
                         'code' => $code,
                         'machine' => $machine,
                         'min_stock' => $min_stock,
+                        'is_sample' => $is_sample,
                         'updated_by' => Auth::user()->username,
                         'updated_at' => $now,
                     ]), $id);

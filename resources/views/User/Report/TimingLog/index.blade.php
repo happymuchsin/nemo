@@ -49,8 +49,8 @@
             $('#collSidebar').attr('hidden', true);
             $('#table').addClass('nowrap');
 
-            // $('#filter_range_date').val("{{ date('Y-m-d') . ' - ' . date('Y-m-d') }}")
-            $('#filter_range_date').val("2025-06-01 - 2025-06-30");
+            $('#filter_range_date').val("{{ date('Y-m-d') . ' - ' . date('Y-m-d') }}")
+            // $('#filter_range_date').val("2025-06-01 - 2025-06-30");
 
             $("#filter_range_date").daterangepicker({
                 autoUpdateInput: false,
