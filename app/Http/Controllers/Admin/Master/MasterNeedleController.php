@@ -14,6 +14,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class MasterNeedleController extends Controller
 {
@@ -40,7 +41,7 @@ class MasterNeedleController extends Controller
         $data = MasterNeedle::get();
         return datatables()->of($data)
             ->editColumn('is_sample', function ($q) {
-                return $q->is_sample == 1 ? 'Yes' : 'No';
+                return $q->is_sample == '1' ? 'Yes' : 'No';
             })
             ->addColumn('action', function ($q) {
                 return view('includes.admin.action', [
@@ -165,7 +166,15 @@ class MasterNeedleController extends Controller
     public function edit($id)
     {
         $s = MasterNeedle::find($id);
-        return response()->json($s, 200);
+        $d = new stdClass;
+        $d->brand = $s->brand;
+        $d->tipe = $s->tipe;
+        $d->size = $s->size;
+        $d->code = $s->code;
+        $d->machine = $s->machine;
+        $d->min_stock = $s->min_stock;
+        $d->is_sample = $s->is_sample == '1' ? true : false;
+        return response()->json($d, 200);
     }
 
     public function hapus(Request $request, $id)
