@@ -94,7 +94,7 @@ class AdjustmentController extends Controller
         $tahun = substr($period, 0, 4);
         $bulan = substr($period, 5, 2);
         $sebelumnya = Carbon::parse($tahun . '-' . $bulan . '-01');
-        if ($sebelumnya < '2025-08-01') {
+        if ($sebelumnya < '2025-09-01') {
             $previous = true;
         } else {
             $previous = false;
