@@ -167,6 +167,7 @@ class MasterNeedleController extends Controller
     {
         $s = MasterNeedle::find($id);
         $d = new stdClass;
+        $d->id = $s->id;
         $d->brand = $s->brand;
         $d->tipe = $s->tipe;
         $d->size = $s->size;
