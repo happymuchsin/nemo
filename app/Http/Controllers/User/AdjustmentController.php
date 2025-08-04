@@ -124,6 +124,7 @@ class AdjustmentController extends Controller
                 $q->whereNull('status');
             })
             ->where('is_clear', 'not')
+            ->whereHas('needle', fn($q) => $q->where('is_sample', '1'))
             ->groupBy('master_area_id', 'master_counter_id', 'master_box_id', 'master_needle_id')
             ->get();
         foreach ($stock as $k => $s) {
