@@ -242,7 +242,7 @@
                         tableItem = initDataTable(divTable, divToolbar, modal, 0.4, {
                             paging: false,
                             ordering: false,
-                            searching: false,
+                            // searching: false,
                             ajax: {
                                 url: "{{ route('user.adjustment.item', ['locale' => app()->getLocale()]) }}",
                                 type: "POST",
