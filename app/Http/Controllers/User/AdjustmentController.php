@@ -111,7 +111,7 @@ class AdjustmentController extends Controller
         $stock = Stock::with(['area', 'counter', 'box', 'needle'])
             ->selectRaw('sum(`in`) as `in`, sum(`out`) as `out`, master_area_id, master_counter_id, master_box_id, master_needle_id, id')
             ->when($previous, function ($q) use ($sebelumnya) {
-                $q->whereDate('created_at', '<', $sebelumnya);
+                $q->whereDate('created_at', '<', '2025-09-01');
             })
             ->when(!$previous, function ($q) use ($tahun, $bulan) {
                 $q->whereYear('created_at', $tahun)
