@@ -379,6 +379,12 @@ class AdjustmentController extends Controller
             $after += $da->after;
         }
 
+        $adj->before = $before;
+        $adj->after = $after;
+        $adj->updated_by = Auth::user()->username;
+        $adj->updated_at = Carbon::now();
+        $adj->save();
+
         return response()->json('Recalculate Successfully', 200);
     }
 
