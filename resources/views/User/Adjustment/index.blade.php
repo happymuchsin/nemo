@@ -423,6 +423,33 @@
             })
         }
 
+        function recalculate(url) {
+            customAlert({
+                icon: 'question',
+                title: "Are you sure want to Recalculate this Data?",
+                showCancelButton: true,
+                confirmButtonText: "Confirm Recalculate",
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: "Cancel",
+                callback: function() {
+                    sendAjax('', {
+                        url: url,
+                        type: "GET",
+                        success: function(response) {
+                            successAlert(response);
+                            closeAlert();
+                            setTimeout(() => {
+                                table.ajax.reload();
+                            }, 1000);
+                        },
+                        error: function(response) {
+                            warningAlert(response.responseText);
+                        }
+                    });
+                }
+            })
+        }
+
         socket.on('nemoReload', () => {
             table.ajax.reload();
         })

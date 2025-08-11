@@ -257,6 +257,7 @@ Route::group(['middleware' => ['auth']], function () {
                     Route::post('crup', [AdjustmentController::class, 'crup'])->name('user.adjustment.crup');
                     Route::get('get/{id?}', [AdjustmentController::class, 'get'])->name('user.adjustment.get');
                     Route::get('hapus/{id?}', [AdjustmentController::class, 'hapus'])->name('user.adjustment.hapus');
+                    Route::get('recalculate/{id?}', [AdjustmentController::class, 'recalculate'])->name('user.adjustment.recalculate');
                 });
 
             Route::prefix('/approval')

@@ -70,6 +70,7 @@ class AdjustmentController extends Controller
                 $color2 = 'text-secondary';
             }
             $h = '';
+            $h .= '<a href="#" class="text-center" title="Recalculate" onclick="recalculate(\'' . route('user.adjustment.recalculate', ['id' => $a->id]) . '\')"><i class="fa fa-sync-alt text-success mr-3"></i></a>';
             $h .= '<a href="#" class="text-center" title="Edit" ' . $onclick1 . '><i class="fa fa-edit ' . $color1 . ' mr-3"></i></a>';
             $h .= '<a href="#" class="text-center" title="Delete" ' . $onclick2 . '><i class="fa fa-trash-alt ' . $color2 . ' mr-3"></i></a>';
             $d->action = $h;
@@ -364,6 +365,21 @@ class AdjustmentController extends Controller
             DB::rollBack();
             return response()->json(__('global.delete-failed'), 422);
         }
+    }
+
+    public function recalculate(Request $request)
+    {
+        $id = $request->id;
+        $adj = Adjustment::where('id', $id)->first();
+
+        $before = 0;
+        $after = 0;
+        foreach ($adj->detail_adjustment as $da) {
+            $before += $da->before;
+            $after += $da->after;
+        }
+
+        return response()->json('Recalculate Successfully', 200);
     }
 
     static function createApproval($now, $approval, $id, $ip, $userAgent)
