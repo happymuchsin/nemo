@@ -86,8 +86,8 @@ class DailyStockController extends Controller
                 $d->$cout = $out;
                 $d->$cin = $in;
             }
-            $d->opening = $dc->where('tanggal', $xx->start)->value('opening') ?? 0;
-            $d->closing = $dc->where('tanggal', $xx->end)->value('closing') ?? 0;
+            $d->opening = $dc->where('tanggal', date('Y-m-d', strtotime($xx->start)))->value('opening') ?? 0;
+            $d->closing = $dc->where('tanggal', date('Y-m-d', strtotime($xx->end)))->value('closing') ?? 0;
             $data[] = $d;
         }
 
