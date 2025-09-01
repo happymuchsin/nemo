@@ -295,7 +295,7 @@ class DailyBrokenNeedleController extends Controller
             $day = $collect_needle->where('master_needle_id', $mn->id)->count();
             $morning = $collect_master_morning_stock->where('master_needle_id', $mn->id);
             $morning_stock = $morning->value('value') ?? 0;
-            $d->morning_stock = $morning_stock - $day;
+            $d->morning_stock = $morning_stock;
             $incoming_stock = $collect_history_add_stock->where('stock.master_needle_id', $mn->id)->sum('qty');
             $d->incoming_stock = $incoming_stock;
             $deformed = 0;
