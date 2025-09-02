@@ -126,7 +126,9 @@
                         dom: '<"toolbar"B>flrtip',
                         buttons: [{
                             extend: 'excelHtml5',
-                            title: 'Daily ' + $('#filter_date').val(),
+                            title: function() {
+                                return 'Daily ' + $('#filter_date').val();
+                            },
                         }, ],
                         ajax: {
                             url: "{{ route('user.needle-report.data') }}",
