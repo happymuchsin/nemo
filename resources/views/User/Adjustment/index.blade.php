@@ -165,7 +165,7 @@
                     paging: false,
                 });
                 $('div.toolbar').html(
-                    '<button class="btn btn-sm btn-success" onclick="add();"><i class="fal fa-circle-plus" /></i> New</button>'
+                    '<button class="btn btn-sm btn-success" onclick="add();"><i class="fal fa-circle-plus" /></i> New</button> <button class="btn btn-sm btn-success" onclick="unduh(\'table\');"><i class="fal fa-file-excel" /></i> Export</button>'
                 );
             }, 250);
         })
@@ -302,6 +302,11 @@
                                 resolve(true);
                             },
                         });
+                        if (mode == 'detail') {
+                            $('div.' + divToolbar).html(
+                                '<button class="btn btn-sm btn-success" onclick="unduh(\'detail\');"><i class="fal fa-file-excel" /></i> Export</button>'
+                            );
+                        }
                     }, 500);
                 } catch (e) {
                     reject(e);
@@ -446,6 +451,59 @@
                             warningAlert(response.responseText);
                         }
                     });
+                }
+            })
+        }
+
+        function unduh(x) {
+            $.ajax({
+                url: "{{ route('user.adjustment.unduh', ['locale' => app()->getLocale()]) }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    tahun: $('#tahun').val(),
+                    detail_key: $('#detail_key').val(),
+                    x: x,
+                },
+                beforeSend: function() {
+                    waitAlert();
+                },
+                complete: function() {
+                    // unwaitAlert();
+                },
+                xhr: function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 2) {
+                            if (xhr.status == 200) {
+                                xhr.responseType = "blob";
+                            } else {
+                                xhr.responseType = "text";
+                            }
+                        }
+                    };
+                    return xhr;
+                },
+                success: function(response, status, xhr) {
+                    unwaitAlert();
+                    var filename = "";
+                    var disposition = xhr.getResponseHeader('Content-Disposition');
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        var matches = filenameRegex.exec(disposition);
+                        if (matches != null && matches[1]) filename = matches[1].replace(
+                            /['"]/g, '');
+                    }
+                    downloadUrl = URL.createObjectURL(response);
+                    var a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                },
+                error: function(response) {
+                    warningAlert(response.responseText);
                 }
             })
         }

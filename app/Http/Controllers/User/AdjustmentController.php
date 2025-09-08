@@ -17,6 +17,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use stdClass;
 
 class AdjustmentController extends Controller
@@ -453,5 +457,142 @@ class AdjustmentController extends Controller
             'updated_by' => Auth::user()->username,
             'updated_at' => $now,
         ]), $id);
+    }
+
+    public function unduh(Request $request)
+    {
+        $x = $request->x;
+        $tahun = $request->tahun;
+        $detail_key = $request->detail_key;
+
+        try {
+            $sp = new Spreadsheet;
+            $ws = $sp->getActiveSheet();
+
+            if ($x == 'table') {
+                $data = Adjustment::when($tahun != 'all', function ($q) use ($tahun) {
+                    $q->where('tahun', $tahun);
+                })
+                    ->get();
+
+                $name = 'Adjustment Report ' . $tahun;
+                $ws->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+                $ws->mergeCells('A1:E1')->getCell('A1')->setValue($name)->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $ws->getStyle("A3:E4")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                $ws->getStyle("A3:E4")->getFont()->setBold(true);
+                $ws->getStyle("A3:E4")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $ws->mergeCells("A3:A4")->getCell("A3")->setValue('Period');
+                $ws->mergeCells("B3:C3")->getCell("B3")->setValue('Qty');
+                $ws->getCell("B4")->setValue('System');
+                $ws->getCell("C4")->setValue('Actual');
+                $ws->mergeCells("D3:D4")->getCell("D3")->setValue('Remark');
+                $ws->mergeCells("E3:E4")->getCell("E3")->setValue('Status');
+                $k = 4;
+                foreach ($data as $d) {
+                    $k++;
+                    $ws->getStyle("A$k:E$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                    $ws->getCell("A$k")->setValue($d->tahun . ' - ' . $d->bulan);
+                    $ws->getCell("B$k")->setValue($d->before);
+                    $ws->getCell("C$k")->setValue($d->after);
+                    $ws->getCell("D$k")->setValue($d->remark);
+                    $ws->getCell("E$k")->setValue($d->status);
+                }
+            } else if ($x == 'detail') {
+                $adjustment = Adjustment::where('id', $detail_key)->first();
+                if ($adjustment) {
+                    $status = $adjustment->status;
+                } else {
+                    $status = 'WAITING';
+                }
+                $sebelumnya = Carbon::parse($tahun . '-' . $adjustment->bulan . '-01');
+                if ($sebelumnya < '2025-09-01') {
+                    $previous = true;
+                } else {
+                    $previous = false;
+                }
+                $detail_adjustment = DetailAdjustment::where('adjustment_id', $detail_key)->get();
+                $collect_detail_adjustment = collect($detail_adjustment);
+
+                $data = Stock::with(['area', 'counter', 'box', 'needle'])
+                    ->selectRaw('sum(`in`) as `in`, sum(`out`) as `out`, master_area_id, master_counter_id, master_box_id, master_needle_id, id')
+                    ->when($previous, function ($q) use ($sebelumnya) {
+                        $q->whereDate('created_at', '<', '2025-09-01');
+                    })
+                    ->when(!$previous, function ($q) use ($tahun, $adjustment) {
+                        $q->whereYear('created_at', $tahun)
+                            ->whereMonth('created_at', $adjustment->bulan);
+                    })
+                    ->when($status == 'APPROVED', function ($q) {
+                        $q->where('status', 'adjustment');
+                    })
+                    ->when($status == 'REJECTED' || $status == 'WAITING', function ($q) {
+                        $q->whereNull('status');
+                    })
+                    ->where('is_clear', 'not')
+                    ->whereHas('needle', fn($q) => $q->where('is_sample', '1'))
+                    ->groupBy('master_area_id', 'master_counter_id', 'master_box_id', 'master_needle_id')
+                    ->get();
+
+                $name = 'Adjustment Report Detail ' . $tahun . ' - ' . $adjustment->bulan;
+                $ws->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+                $ws->mergeCells('A1:L1')->getCell('A1')->setValue($name)->getStyle()->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $ws->getStyle("A3:L3")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                $ws->getStyle("A3:L3")->getFont()->setBold(true);
+                $ws->getStyle("A3:L3")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER)->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $ws->getCell("A3")->setValue('Area');
+                $ws->getCell("B3")->setValue('Counter');
+                $ws->getCell("C3")->setValue('Box');
+                $ws->getCell("D3")->setValue('Brand');
+                $ws->getCell("E3")->setValue('Type');
+                $ws->getCell("F3")->setValue('Size');
+                $ws->getCell("G3")->setValue('Code');
+                $ws->getCell("H3")->setValue('Machine');
+                $ws->getCell("I3")->setValue('System');
+                $ws->getCell("J3")->setValue('Actual');
+                $ws->getCell("K3")->setValue('Balance');
+                $ws->getCell("L3")->setValue('Remark');
+                $k = 3;
+                foreach ($data as $d) {
+                    $k++;
+                    $ws->getStyle("A$k:L$k")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                    $ws->getCell("A$k")->setValue($d->area->name);
+                    $ws->getCell("B$k")->setValue($d->counter->name);
+                    $ws->getCell("C$k")->setValue($d->box->name);
+                    $ws->getCell("D$k")->setValue($d->needle->brand);
+                    $ws->getCell("E$k")->setValue($d->needle->tipe);
+                    $ws->getCell("F$k")->setValue($d->needle->size);
+                    $ws->getCell("G$k")->setValue($d->needle->code);
+                    $ws->getCell("H$k")->setValue($d->needle->machine);
+
+                    $qty = $d->in - $d->out;
+
+                    $da = $collect_detail_adjustment->where('master_area_id', $d->area->id)
+                        ->where('master_counter_id', $d->counter->id)
+                        ->where('master_box_id', $d->box->id)
+                        ->where('master_needle_id', $d->needle->id);
+
+                    $ws->getCell("I$k")->setValue($qty);
+                    $ws->getCell("J$k")->setValue($da->value('after') ?? 0);
+                    $ws->getCell("K$k")->setValue($qty - $da->value('after'));
+                    $ws->getCell("L$k")->setValue($da->value('remark'));
+                }
+            }
+
+            foreach ($ws->getColumnIterator() as $column) {
+                $ws->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+            }
+
+            $writer = new Xlsx($sp);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="' .  $name . '.xlsx"');
+            $writer->save('php://output');
+            exit();
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 422);
+        }
     }
 }
