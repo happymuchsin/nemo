@@ -191,42 +191,61 @@ class NeedleController extends Controller
                     return new ApiResource(422, 'Stock in Box is empty !!!', '');
                 }
 
-                $ins = Needle::create([
-                    'user_id' => $user->id,
-                    'master_line_id' => $line,
-                    'master_style_id' => $style,
-                    'master_box_id' => $box->id,
-                    'master_needle_id' => $needle,
-                    'master_status_id' => $stat->id,
-                    'status' => $request_status,
-                    'scan_rfid' => $scan_rfid,
-                    'scan_box' => $scan_box,
-                    'remark' => $remark,
-                    'note' => $note,
-                    'filename' => $filename,
-                    'ext' => $ext,
-                    'created_by' => $username,
-                    'created_at' => $now,
-                ]);
-                HelperController::activityLog("ANDROID CREATE NEEDLE", 'needles', 'create', $request->ip(), $request->userAgent(), json_encode([
-                    'user_id' => $user->id,
-                    'master_line_id' => $line,
-                    'master_style_id' => $style,
-                    'master_box_id' => $box->id,
-                    'master_needle_id' => $needle,
-                    'master_status_id' => $stat->id,
-                    'scan_rfid' => $scan_rfid,
-                    'scan_box' => $scan_box,
-                    'status' => $request_status,
-                    'remark' => $remark,
-                    'note' => $note,
-                    'filename' => $filename,
-                    'ext' => $ext,
-                    'created_by' => $username,
-                    'created_at' => $now,
-                ]), null, $username);
-
-                $needle_id = $ins->id;
+                $select_needle = Needle::where('user_id', $user->id)
+                    ->where('master_line_id', $line)
+                    ->where('master_style_id', $style)
+                    ->where('master_box_id', $box->id)
+                    ->where('master_needle_id', $needle)
+                    ->where('master_status_id', $stat->id)
+                    ->where('status', $request_status)
+                    ->where('scan_rfid', $scan_rfid)
+                    ->where('scan_box', $scan_box)
+                    ->where('remark', $remark)
+                    ->where('note', $note)
+                    ->where('filename', $filename)
+                    ->where('ext', $ext)
+                    ->where('created_by', $username)
+                    ->where('created_at', $now)
+                    ->first();
+                if (!$select_needle) {
+                    $ins = Needle::create([
+                        'user_id' => $user->id,
+                        'master_line_id' => $line,
+                        'master_style_id' => $style,
+                        'master_box_id' => $box->id,
+                        'master_needle_id' => $needle,
+                        'master_status_id' => $stat->id,
+                        'status' => $request_status,
+                        'scan_rfid' => $scan_rfid,
+                        'scan_box' => $scan_box,
+                        'remark' => $remark,
+                        'note' => $note,
+                        'filename' => $filename,
+                        'ext' => $ext,
+                        'created_by' => $username,
+                        'created_at' => $now,
+                    ]);
+                    HelperController::activityLog("ANDROID CREATE NEEDLE", 'needles', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'user_id' => $user->id,
+                        'master_line_id' => $line,
+                        'master_style_id' => $style,
+                        'master_box_id' => $box->id,
+                        'master_needle_id' => $needle,
+                        'master_status_id' => $stat->id,
+                        'scan_rfid' => $scan_rfid,
+                        'scan_box' => $scan_box,
+                        'status' => $request_status,
+                        'remark' => $remark,
+                        'note' => $note,
+                        'filename' => $filename,
+                        'ext' => $ext,
+                        'created_by' => $username,
+                        'created_at' => $now,
+                    ]), null, $username);
+                    $needle_id = $ins->id;
+                } else {
+                    $needle_id = $select_needle->id;
+                }
 
                 $stock = Stock::where('master_box_id', $box->id)
                     ->where('master_needle_id', $needle)
@@ -306,7 +325,7 @@ class NeedleController extends Controller
                         'scan_rfid' => $scan_rfid,
                         'scan_box' => $scan_box,
                         'status' => $request_status,
-                        'remark' => $remark,
+                        'remark' => $remark . ' FROM RETURN',
                         'note' => $note,
                         'filename' => $filename,
                         'ext' => $ext,
@@ -323,7 +342,7 @@ class NeedleController extends Controller
                         'scan_rfid' => $scan_rfid,
                         'scan_box' => $scan_box,
                         'status' => $request_status,
-                        'remark' => $remark,
+                        'remark' => $remark . ' FROM RETURN',
                         'note' => $note,
                         'filename' => $filename,
                         'ext' => $ext,
