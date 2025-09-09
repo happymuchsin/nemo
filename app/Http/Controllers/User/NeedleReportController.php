@@ -7,6 +7,7 @@ use App\Http\Controllers\HelperController;
 use App\Models\ApprovalMissingFragment;
 use App\Models\MasterCounter;
 use App\Models\MasterLine;
+use App\Models\MasterStatus;
 use App\Models\Needle;
 use App\Models\Stock;
 use Carbon\Carbon;
@@ -100,6 +101,8 @@ class NeedleReportController extends Controller
                 ->rawColumns(['gambar'])
                 ->make(true);
         } else if ($id == 'needle_report_counter') {
+            $stat = MasterStatus::where('name', '!=', 'RETURN')->pluck('id');
+
             $filter_counter = $request->filter_counter;
             $data = [];
             $s = Stock::join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')
@@ -116,7 +119,11 @@ class NeedleReportController extends Controller
                 $d->brand = $s->brand;
                 $d->tipe = $s->tipe;
                 $d->size = $s->size;
-                $d->qty = $s->in - $s->out;
+                $in = $s->in;
+                $out = Needle::where('master_needle_id', $s->master_needle_id)
+                    ->whereIn('master_status_id', $stat)
+                    ->count();
+                $d->qty = $in - $out;
                 $data[] = $d;
             }
 
