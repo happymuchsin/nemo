@@ -16,7 +16,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command(AutoClosing::class)->hourly()->withoutOverlapping()->runInBackground();
+        $schedule->command(AutoClosing::class)->everyFiveMinutes()->withoutOverlapping()->runInBackground();
         $schedule->command(DailySendAlertStock::class)->dailyAt('07:00')->withoutOverlapping()->runInBackground();
         $schedule->command(DailySendAlertStock::class)->dailyAt('12:00')->withoutOverlapping()->runInBackground();
         $schedule->command(SyncHoliday::class)->dailyAt('00:00')->withoutOverlapping()->runInBackground();
