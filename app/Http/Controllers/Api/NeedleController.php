@@ -205,7 +205,6 @@ class NeedleController extends Controller
                     ->where('filename', $filename)
                     ->where('ext', $ext)
                     ->where('created_by', $username)
-                    ->where('created_at', $now)
                     ->first();
                 if (!$select_needle) {
                     $ins = Needle::create([
