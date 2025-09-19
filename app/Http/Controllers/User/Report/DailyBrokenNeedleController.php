@@ -335,7 +335,7 @@ class DailyBrokenNeedleController extends Controller
             $d->total_broken = $deformed;
             $d->total_tumpul = $change;
             $d->missing_fragment_total = $missing_fragment;
-            $d->end_of_stock_update = (($morning_stock - $day) + $incoming_stock) - ($grand_total);
+            $d->end_of_stock_update = ($morning_stock + $incoming_stock) - ($grand_total);
             $data[] = $d;
         }
 

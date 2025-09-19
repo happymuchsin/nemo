@@ -110,6 +110,7 @@ class NeedleReportController extends Controller
                 ->selectRaw('mb.name as box, brand, mn.tipe, size, sum(`in`) as `in`, sum(`out`) as `out`')
                 ->where('stocks.master_counter_id', $filter_counter)
                 ->where('stocks.is_clear', 'not')
+                ->where('mb.tipe', 'NORMAL')
                 ->whereNull('stocks.status')
                 ->groupBy('master_box_id')
                 ->get();
