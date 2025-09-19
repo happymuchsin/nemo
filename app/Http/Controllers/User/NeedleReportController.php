@@ -111,6 +111,9 @@ class NeedleReportController extends Controller
                 ->where('stocks.master_counter_id', $filter_counter)
                 ->where('stocks.is_clear', 'not')
                 ->where('mb.tipe', 'NORMAL')
+                ->whereNull('mb.deleted_at')
+                ->whereNull('stocks.deleted_at')
+                ->whereNull('mn.deleted_at')
                 ->whereNull('stocks.status')
                 ->groupBy('master_box_id')
                 ->get();
