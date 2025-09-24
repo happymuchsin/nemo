@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyClosing;
+use App\Models\HistoryAddStock;
 use App\Models\MasterNeedle;
 use App\Models\MasterStatus;
 use App\Models\Needle;
@@ -32,10 +33,10 @@ class ClosingController extends Controller
                 $tanggal = $start->toDateString();
                 $kemarin = Carbon::parse($tanggal)->subDay()->toDateString();
                 foreach ($master_needle as $m) {
-                    $in = Stock::whereDate('created_at', $tanggal)
-                        ->where('master_needle_id', $m->id)
+                    $in = HistoryAddStock::whereDate('created_at', $tanggal)
+                        ->whereIn('stock_id', fn($q) => $q->select('id')->from('stocks')->where('master_needle_id', $m->id))
                         ->whereNull('status')
-                        ->sum('in');
+                        ->sum('qty');
                     $out = Needle::whereDate('created_at', $tanggal)
                         ->where('master_needle_id', $m->id)
                         ->whereIn('master_status_id', $stat)

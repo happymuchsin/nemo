@@ -72,10 +72,11 @@
                                 <option value="{{ $d->id }}">{{ $d->area->name . ' - ' . $d->name }}</option>
                             @endforeach
                         </x-slot:option>
-                    </x-filter.filter>`
+                    </x-filter.filter>
+                    <x-filter.filter :tipe="'date'" :label="'Date'" :id="'filter_date_counter'" :colom="'col-sm-auto'" />`
                 );
 
-                $('#filter_week').val("{{ date('Y') . '-W' . date('W') }}")
+                $('#filter_date_counter').val("{{ date('Y-m-d') }}")
             }
             if ($('#filterMe').html() != '') {
                 $('#filterMe').append(`
@@ -200,6 +201,7 @@
                             data: function(d) {
                                 d.id = id;
                                 d.filter_counter = $('#filter_counter').val();
+                                d.filter_date = $('#filter_date_counter').val();
                             },
                         },
                         columns: [{
