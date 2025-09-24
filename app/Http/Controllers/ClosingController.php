@@ -34,8 +34,7 @@ class ClosingController extends Controller
                 $kemarin = Carbon::parse($tanggal)->subDay()->toDateString();
                 foreach ($master_needle as $m) {
                     $in = HistoryAddStock::whereDate('created_at', $tanggal)
-                        ->whereIn('stock_id', fn($q) => $q->select('id')->from('stocks')->where('master_needle_id', $m->id))
-                        ->whereNull('status')
+                        ->whereIn('stock_id', fn($q) => $q->select('id')->from('stocks')->where('master_needle_id', $m->id)->whereNull('status'))
                         ->sum('qty');
                     $out = Needle::whereDate('created_at', $tanggal)
                         ->where('master_needle_id', $m->id)
