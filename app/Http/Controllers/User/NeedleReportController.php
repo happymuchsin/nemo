@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\ApprovalMissingFragment;
+use App\Models\DailyClosing;
 use App\Models\HistoryAddStock;
 use App\Models\MasterCounter;
 use App\Models\MasterLine;
@@ -107,32 +108,19 @@ class NeedleReportController extends Controller
             $filter_counter = $request->filter_counter;
             $filter_date = $request->filter_date;
             $data = [];
-            // $s = HistoryAddStock::join('stocks as s', 's.id', 'history_add_stocks.stock_id')
-            //     ->join('master_needles as mn', 'mn.id', 's.master_needle_id')
-            //     ->join('master_boxes as mb', 'mb.id', 's.master_box_id')
-            //     ->selectRaw('mb.name as box, brand, mn.tipe, size, sum(`qty`) as `in`')
-            //     ->where('s.master_counter_id', $filter_counter)
-            //     ->where('s.is_clear', 'not')
-            //     ->where('mb.tipe', 'NORMAL')
-            //     ->whereNull('mb.deleted_at')
-            //     ->whereNull('s.deleted_at')
-            //     ->whereNull('mn.deleted_at')
-            //     ->whereNull('s.status')
-            //     ->whereDate('history_add_stocks.created_at', $filter_date)
-            //     ->groupBy('s.master_box_id')
-            //     ->get();
-            $s = Stock::join('master_needles as mn', 'mn.id', 'stocks.master_needle_id')
-                ->join('master_boxes as mb', 'mb.id', 'stocks.master_box_id')
-                ->selectRaw('mb.name as box, brand, mn.tipe, size, sum(`in`) as `in`')
-                ->where('stocks.master_counter_id', $filter_counter)
-                ->where('stocks.is_clear', 'not')
+            $s = DailyClosing::join('master_needles as mn', 'mn.id', 'daily_closings.master_needle_id')
+                ->join('stocks as s', 's.master_needle_id', 'mn.id')
+                ->join('master_boxes as mb', 'mb.id', 's.master_box_id')
+                ->selectRaw('mb.name as box, brand, mn.tipe, size, sum(`qty`) as `in`')
+                ->where('s.master_counter_id', $filter_counter)
+                ->where('s.is_clear', 'not')
                 ->where('mb.tipe', 'NORMAL')
                 ->whereNull('mb.deleted_at')
-                ->whereNull('stocks.deleted_at')
+                ->whereNull('s.deleted_at')
                 ->whereNull('mn.deleted_at')
-                ->whereNull('stocks.status')
-                ->whereDate('stocks.created_at', $filter_date)
-                ->groupBy('stocks.master_box_id')
+                ->whereNull('s.status')
+                ->where('daily_closings.tanggal', $filter_date)
+                ->groupBy('s.master_box_id')
                 ->get();
             foreach ($s as $s) {
                 $d = new stdClass;
