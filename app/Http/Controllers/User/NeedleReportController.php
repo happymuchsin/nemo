@@ -111,7 +111,7 @@ class NeedleReportController extends Controller
             $s = DailyClosing::join('master_needles as mn', 'mn.id', 'daily_closings.master_needle_id')
                 ->join('stocks as s', 's.master_needle_id', 'mn.id')
                 ->join('master_boxes as mb', 'mb.id', 's.master_box_id')
-                ->selectRaw('mb.name as box, brand, mn.tipe, size, daily_closings.closing as `in`')
+                ->selectRaw('mb.name as box, brand, mn.tipe, size, daily_closings.closing')
                 ->where('s.master_counter_id', $filter_counter)
                 ->where('s.is_clear', 'not')
                 ->where('mb.tipe', 'NORMAL')
@@ -128,11 +128,12 @@ class NeedleReportController extends Controller
                 $d->brand = $s->brand;
                 $d->tipe = $s->tipe;
                 $d->size = $s->size;
-                $in = $s->in;
-                $out = Needle::where('master_needle_id', $s->master_needle_id)
-                    ->whereIn('master_status_id', $stat)
-                    ->count();
-                $d->qty = $in - $out;
+                // $in = $s->in;
+                // $out = Needle::where('master_needle_id', $s->master_needle_id)
+                //     ->whereIn('master_status_id', $stat)
+                //     ->count();
+                // $d->qty = $in - $out;
+                $d->qty = $s->closing;
                 $data[] = $d;
             }
 
