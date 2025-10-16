@@ -223,6 +223,14 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
+                            @can('admin-tools-needle-control')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.tools.needle-control') }}" class="nav-link {{ $page == 'admin_tools_needle_control' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Needle Control</p>
+                                    </a>
+                                </li>
+                            @endcan
                             @can('admin-tools-activity-log')
                                 <li class="nav-item">
                                     <a href="{{ route('admin.tools.activity-log') }}" class="nav-link {{ $page == 'admin_tools_activity_log' ? 'active' : '' }}">

@@ -15,6 +15,7 @@ use App\Models\MasterLine;
 use App\Models\MasterPlacement;
 use App\Models\MasterStatus;
 use App\Models\Stock;
+use App\Models\TimeLimit;
 use App\Models\User;
 use App\Notifications\ApprovalNotification;
 use Carbon\Carbon;
@@ -69,6 +70,7 @@ class NeedleController extends Controller
             }
             $line = $master_line->id;
             $lokasi = $master_line->name;
+
             if ($condition == 'Missing Fragment') {
                 if ($reff == 'line') {
                     return new ApiResource(422, 'Area Line cannot request !!!', '');
@@ -174,8 +176,6 @@ class NeedleController extends Controller
                     return new ApiResource(422, 'Master Status not found', '');
                 }
 
-                DB::beginTransaction();
-
                 $in = Stock::where('master_box_id', $box->id)
                     ->where('master_needle_id', $needle)
                     ->where('is_clear', 'not')
@@ -191,60 +191,65 @@ class NeedleController extends Controller
                     return new ApiResource(422, 'Stock in Box is empty !!!', '');
                 }
 
+                $time_limit = TimeLimit::where('tipe', 'needle')->first();
+                if ($time_limit) {
+                    $limit = $time_limit->waktu;
+                } else {
+                    $limit = 40;
+                }
+
+                DB::beginTransaction();
+
                 $select_needle = Needle::where('user_id', $user->id)
                     ->where('master_line_id', $line)
                     ->where('master_style_id', $style)
                     ->where('master_box_id', $box->id)
                     ->where('master_needle_id', $needle)
                     ->where('master_status_id', $stat->id)
-                    ->where('status', $request_status)
-                    ->where('scan_rfid', $scan_rfid)
-                    ->where('scan_box', $scan_box)
-                    ->where('remark', $remark)
-                    ->where('note', $note)
-                    ->where('filename', $filename)
-                    ->where('ext', $ext)
                     ->where('created_by', $username)
+                    ->where('created_at', '>=', $now->subSeconds($limit))
+                    ->orderBy('created_at', 'desc')
                     ->first();
-                if (!$select_needle) {
-                    $ins = Needle::create([
-                        'user_id' => $user->id,
-                        'master_line_id' => $line,
-                        'master_style_id' => $style,
-                        'master_box_id' => $box->id,
-                        'master_needle_id' => $needle,
-                        'master_status_id' => $stat->id,
-                        'status' => $request_status,
-                        'scan_rfid' => $scan_rfid,
-                        'scan_box' => $scan_box,
-                        'remark' => $remark,
-                        'note' => $note,
-                        'filename' => $filename,
-                        'ext' => $ext,
-                        'created_by' => $username,
-                        'created_at' => $now,
-                    ]);
-                    HelperController::activityLog("ANDROID CREATE NEEDLE", 'needles', 'create', $request->ip(), $request->userAgent(), json_encode([
-                        'user_id' => $user->id,
-                        'master_line_id' => $line,
-                        'master_style_id' => $style,
-                        'master_box_id' => $box->id,
-                        'master_needle_id' => $needle,
-                        'master_status_id' => $stat->id,
-                        'scan_rfid' => $scan_rfid,
-                        'scan_box' => $scan_box,
-                        'status' => $request_status,
-                        'remark' => $remark,
-                        'note' => $note,
-                        'filename' => $filename,
-                        'ext' => $ext,
-                        'created_by' => $username,
-                        'created_at' => $now,
-                    ]), null, $username);
-                    $needle_id = $ins->id;
-                } else {
-                    $needle_id = $select_needle->id;
+
+                if ($select_needle) {
+                    return new ApiResource(422, 'Please wait for Time Limit !!!', '');
                 }
+
+                $ins = Needle::create([
+                    'user_id' => $user->id,
+                    'master_line_id' => $line,
+                    'master_style_id' => $style,
+                    'master_box_id' => $box->id,
+                    'master_needle_id' => $needle,
+                    'master_status_id' => $stat->id,
+                    'status' => $request_status,
+                    'scan_rfid' => $scan_rfid,
+                    'scan_box' => $scan_box,
+                    'remark' => $remark,
+                    'note' => $note,
+                    'filename' => $filename,
+                    'ext' => $ext,
+                    'created_by' => $username,
+                    'created_at' => $now,
+                ]);
+                HelperController::activityLog("ANDROID CREATE NEEDLE", 'needles', 'create', $request->ip(), $request->userAgent(), json_encode([
+                    'user_id' => $user->id,
+                    'master_line_id' => $line,
+                    'master_style_id' => $style,
+                    'master_box_id' => $box->id,
+                    'master_needle_id' => $needle,
+                    'master_status_id' => $stat->id,
+                    'scan_rfid' => $scan_rfid,
+                    'scan_box' => $scan_box,
+                    'status' => $request_status,
+                    'remark' => $remark,
+                    'note' => $note,
+                    'filename' => $filename,
+                    'ext' => $ext,
+                    'created_by' => $username,
+                    'created_at' => $now,
+                ]), null, $username);
+                $needle_id = $ins->id;
 
                 $stock = Stock::where('master_box_id', $box->id)
                     ->where('master_needle_id', $needle)
@@ -367,6 +372,21 @@ class NeedleController extends Controller
                     }
                 }
             }
+
+            /*
+            UPDATE needles
+            JOIN (
+                SELECT id
+                FROM (
+                    SELECT id,
+                        ROW_NUMBER() OVER (PARTITION BY created_at ORDER BY id) AS rn
+                    FROM needles
+                    WHERE deleted_at IS null
+                ) t
+                WHERE t.rn > 1
+            ) dups ON needles.id = dups.id
+            SET needles.deleted_at = '2025-10-06 18:50:04';
+            */
 
             HelperController::reload();
 

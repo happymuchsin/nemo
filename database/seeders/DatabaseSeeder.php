@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
             // MasterSubCategorySeeder::class,
             // MasterSampleSeeder::class,
             // MasterFabricSeeder::class,
+            TimeLimitSeeder::class,
         ]);
 
         if (env('APP_ENV') == 'local') {

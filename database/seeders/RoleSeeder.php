@@ -52,6 +52,10 @@ class RoleSeeder extends Seeder
                 'description' => 'Master'
             ],
             [
+                'name' => 'needle-control',
+                'description' => 'Needle Control'
+            ],
+            [
                 'name' => 'tools',
                 'description' => 'Tools'
             ],
@@ -131,6 +135,13 @@ class RoleSeeder extends Seeder
         // ADMIN
         $permission = Permission::whereIn('name', ['admin-dashboard', 'admin-master', 'admin-master-holiday', 'admin-master-division', 'admin-master-position', 'admin-master-approval', 'admin-master-area', 'admin-master-line', 'admin-master-counter', 'admin-master-box', 'admin-master-placement', 'admin-master-status', 'admin-master-needle', 'admin-master-monthly-stock', 'admin-master-morning-stock', 'admin-master-buyer', 'admin-master-buyer', 'admin-master-category', 'admin-master-sub-category', 'admin-master-sample', 'admin-master-fabric', 'admin-master-style', 'admin-tools-user'])->get();
         $role = Role::findByName('admin');
+        foreach ($permission as $p) {
+            $role->givePermissionTo([(int) $p->id]);
+        }
+
+        // NEEDLE CONTROL
+        $permission = Permission::whereIn('name', ['user-dashboard', 'admin-dashboard', 'admin-tools', 'admin-tools-needle-control'])->get();
+        $role = Role::findByName('needle-control');
         foreach ($permission as $p) {
             $role->givePermissionTo([(int) $p->id]);
         }

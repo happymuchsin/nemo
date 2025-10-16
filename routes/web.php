@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\Master\MasterStyleController;
 use App\Http\Controllers\Admin\Master\MasterSubCategoryController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\Tools\ToolsActivityLogController;
+use App\Http\Controllers\Admin\Tools\ToolsNeedleControlController;
 use App\Http\Controllers\Admin\Tools\ToolsPermissionController;
 use App\Http\Controllers\Admin\Tools\ToolsRoleController;
 use App\Http\Controllers\Admin\Tools\ToolsUserController;
@@ -496,6 +497,16 @@ Route::group(['middleware' => ['auth']], function () {
             Route::prefix('/tools')
                 ->middleware(['permission:admin-tools'])
                 ->group(function () {
+                    Route::prefix('/needle-control')
+                        ->middleware(['permission:admin-tools-needle-control'])
+                        ->group(function () {
+                            Route::get('', [ToolsNeedleControlController::class, 'index'])->name('admin.tools.needle-control');
+                            Route::get('data', [ToolsNeedleControlController::class, 'data'])->name('admin.tools.needle-control.data');
+                            Route::post('update', [ToolsNeedleControlController::class, 'update'])->name('admin.tools.needle-control.update');
+                            Route::get('edit/{tipe?}/{id?}', [ToolsNeedleControlController::class, 'edit'])->name('admin.tools.needle-control.edit');
+                            Route::get('hapus/{tipe?}/{id?}', [ToolsNeedleControlController::class, 'hapus'])->name('admin.tools.needle-control.hapus');
+                        });
+
                     Route::prefix('/user')
                         ->middleware(['permission:admin-tools-user'])
                         ->group(function () {

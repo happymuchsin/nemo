@@ -7,10 +7,8 @@ use App\Models\HistoryAddStock;
 use App\Models\MasterNeedle;
 use App\Models\MasterStatus;
 use App\Models\Needle;
-use App\Models\Stock;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ClosingController extends Controller
@@ -20,6 +18,21 @@ class ClosingController extends Controller
         try {
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
+
+            DB::statement("
+                UPDATE needles
+                JOIN (
+                    SELECT id
+                    FROM (
+                        SELECT id,
+                            ROW_NUMBER() OVER (PARTITION BY created_at ORDER BY id) AS rn
+                        FROM needles
+                        WHERE deleted_at IS null
+                    ) t
+                    WHERE t.rn > 1
+                ) dups ON needles.id = dups.id
+                SET needles.deleted_at = '$now';
+            ");
 
             DB::beginTransaction();
 

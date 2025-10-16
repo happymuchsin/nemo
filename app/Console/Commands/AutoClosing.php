@@ -30,8 +30,8 @@ class AutoClosing extends Command
     public function handle()
     {
         $now = Carbon::now();
-        // $start = '2025-05-01';
-        // $end = '2025-05-31';
+        // $start = '2025-08-15';
+        // $end = '2025-10-15';
         $start = $now->today();
         $end = $now->today();
 

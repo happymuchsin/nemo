@@ -153,11 +153,11 @@ class ApprovalAdjustmentController extends Controller
                             'deleted_at' => $now,
                         ]);
                         $s->status = 'adjustment';
-                        $s->updated_by = Auth::user()->username;
-                        $s->updated_at = $now;
+                        $s->deleted_by = Auth::user()->username;
+                        $s->deleted_at = $now;
                         $s->save();
                     }
-                    Stock::create([
+                    $i = Stock::create([
                         'master_area_id' => $da->master_area_id,
                         'master_counter_id' => $da->master_counter_id,
                         'master_box_id' => $da->master_box_id,
@@ -176,6 +176,22 @@ class ApprovalAdjustmentController extends Controller
                         'in' => $da->after,
                         'out' => 0,
                         'is_clear' => 'not',
+                        'created_by' => Auth::user()->username,
+                        'created_at' => $now,
+                    ]));
+                    HistoryAddStock::create([
+                        'stock_id' => $i->id,
+                        'stock_before' => 0,
+                        'qty' => $da->after,
+                        'stock_after' => $da->after,
+                        'created_by' => Auth::user()->username,
+                        'created_at' => $now,
+                    ]);
+                    HelperController::activityLog("CREATE HISTORY ADD STOCK", 'history_add_stocks', 'create', $request->ip(), $request->userAgent(), json_encode([
+                        'stock_id' => $i->id,
+                        'stock_before' => 0,
+                        'qty' => $da->after,
+                        'stock_after' => $da->after,
                         'created_by' => Auth::user()->username,
                         'created_at' => $now,
                     ]));
