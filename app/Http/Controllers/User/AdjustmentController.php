@@ -99,7 +99,7 @@ class AdjustmentController extends Controller
         $tahun = substr($period, 0, 4);
         $bulan = substr($period, 5, 2);
         $sebelumnya = Carbon::parse($tahun . '-' . $bulan . '-01');
-        if ($sebelumnya < '2025-09-01') {
+        if ($sebelumnya < '2025-12-01') {
             $previous = true;
         } else {
             $previous = false;
@@ -588,7 +588,7 @@ class AdjustmentController extends Controller
 
             $writer = new Xlsx($sp);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment; filename="' .  $name . '.xlsx"');
+            header('Content-Disposition: attachment; filename="' . $name . '.xlsx"');
             $writer->save('php://output');
             exit();
         } catch (Exception $e) {
