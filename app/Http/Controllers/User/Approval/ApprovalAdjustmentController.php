@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\User\Approval;
 
+use App\Http\Controllers\ClosingController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
 use App\Models\Adjustment;
 use App\Models\ApprovalAdjustment;
+use App\Models\DailyClosing;
 use App\Models\HistoryAddStock;
 use App\Models\HistoryEditStock;
 use App\Models\HistoryOutStock;
@@ -153,8 +155,8 @@ class ApprovalAdjustmentController extends Controller
                             'deleted_at' => $now,
                         ]);
                         $s->status = 'adjustment';
-                        $s->deleted_by = Auth::user()->username;
-                        $s->deleted_at = $now;
+                        $s->updated_by = Auth::user()->username;
+                        $s->updated_at = $now;
                         $s->save();
                     }
                     $i = Stock::create([
@@ -207,6 +209,9 @@ class ApprovalAdjustmentController extends Controller
             $adjustment->updated_by = Auth::user()->username;
             $adjustment->updated_at = $now;
             $adjustment->save();
+
+            DailyClosing::where('tanggal', $now->today())->forceDelete();
+            ClosingController::generateStockReport($now, $now->today(), $now->today(), null);
 
             HelperController::reload();
 

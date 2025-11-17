@@ -194,7 +194,7 @@
                         dom: '<"toolbar"B>flrtip',
                         buttons: [{
                             extend: 'excelHtml5',
-                            title: 'Stock ' + $('#filter_counter').text().trim(),
+                            title: 'Stock ' + $('#filter_counter option:selected').text() + ' ' + $('#filter_date_counter').val(),
                         }, ],
                         ajax: {
                             url: "{{ route('user.needle-report.data') }}",

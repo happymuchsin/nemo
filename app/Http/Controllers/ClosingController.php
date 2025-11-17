@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Adjustment;
+use App\Models\ApprovalAdjustment;
 use App\Models\DailyClosing;
 use App\Models\HistoryAddStock;
 use App\Models\MasterNeedle;
@@ -38,6 +40,14 @@ class ClosingController extends Controller
 
             $stat = MasterStatus::where('name', '!=', 'RETURN')->pluck('id');
 
+            $adjustment = false;
+            $approval = ApprovalAdjustment::where('status', 'APPROVE')->orderBy('approve', 'desc')->first();
+            if ($approval) {
+                if (Carbon::parse($startDate)->format('Y-m-d') == Carbon::parse($approval->approve)->format('Y-m-d')) {
+                    $adjustment = true;
+                }
+            }
+
             $master_needle = MasterNeedle::when($master_needle_id, function ($q) use ($master_needle_id) {
                 $q->where('id', $master_needle_id);
             })
@@ -59,6 +69,11 @@ class ClosingController extends Controller
                         ->first();
 
                     $opening = $dc ? $dc->closing : 0;
+
+                    if ($adjustment) {
+                        $opening = 0;
+                    }
+
                     $closing = $opening + $in - $out;
 
                     $dc = DailyClosing::where('master_needle_id', $m->id)

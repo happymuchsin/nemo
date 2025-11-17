@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\ClosingController;
+use App\Models\DailyClosing;
 use App\Models\Needle;
 use App\Models\Stock;
 use Carbon\Carbon;
@@ -36,7 +38,17 @@ class aTest extends Command
 
         // print_r($stock_report->value('in'));
 
-        echo Str::orderedUuid() . PHP_EOL;
+        // echo Str::orderedUuid() . PHP_EOL;
+
+        $now = Carbon::parse('2025-11-17 09:56:44');
+
+        DailyClosing::where('tanggal', $now->today())->forceDelete();
+        ClosingController::generateStockReport($now, $now->today(), $now->today(), null);
+
+        Stock::withTrashed()->where('status', 'adjustment')->update([
+            'deleted_by' => null,
+            'deleted_at' => null,
+        ]);
     }
 
     static function generateStockReport($startDate, $endDate, $master_needle_id, $master_status_id)

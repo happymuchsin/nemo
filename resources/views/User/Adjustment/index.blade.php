@@ -113,6 +113,22 @@
                         <th>Remark</th>
                     </tr>
                 </x-slot:thead>
+                <x-slot:tfoot>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th class="text-center">Total</th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </x-slot:tfoot>
             </x-layout.table>
             <x-modal.body :tipe="'textarea'" :label="'Remark'" :id="'detail_remark'" :row="'3'" />
         </x-slot:body>
@@ -298,6 +314,21 @@
                                     data: 'remark'
                                 },
                             ],
+                            footerCallback: function(tfoot, data, start, end, display) {
+                                if (mode == 'detail') {
+                                    var api = this.api();
+                                    if (end > 0) {
+                                        for (var s = 8; s <= api.columns().count() - 1; s++) {
+                                            var x = api.column(s, {
+                                                search: 'applied'
+                                            }).data().reduce(function(a, b) {
+                                                return +a + +b;
+                                            }, 0);
+                                            $(api.column(s).footer()).html(x);
+                                        }
+                                    }
+                                }
+                            },
                             initComplete: function() {
                                 resolve(true);
                             },
