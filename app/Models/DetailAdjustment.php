@@ -12,4 +12,9 @@ class DetailAdjustment extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = ['id'];
+
+    public function master_needle()
+    {
+        return $this->belongsTo(MasterNeedle::class, 'master_needle_id', 'id');
+    }
 }

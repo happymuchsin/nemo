@@ -13,6 +13,7 @@
                         <th>Code</th>
                         <th>Machine</th>
                         <th>Min Stock</th>
+                        <th>Max Stock</th>
                         <th>Is Sample</th>
                         <th>Action</th>
                     </tr>
@@ -30,6 +31,7 @@
             <x-modal.body :tipe="'text'" :label="'Code'" :id="'code'" />
             <x-modal.body :tipe="'text'" :label="'Machine'" :id="'machine'" />
             <x-modal.body :tipe="'number'" :label="'Min Stock'" :id="'min_stock'" :min="'1'" />
+            <x-modal.body :tipe="'number'" :label="'Max Stock'" :id="'max_stock'" :min="'1'" />
             <x-modal.body :tipe="'checkbox'" :label="'Is Sample?'" :id="'is_sample'" />
         </x-slot:body>
         <x-slot:footer>
@@ -64,6 +66,9 @@
                         data: 'min_stock'
                     },
                     {
+                        data: 'max_stock'
+                    },
+                    {
                         data: 'is_sample'
                     },
                     {
@@ -91,6 +96,7 @@
             $('#code').val('');
             $('#machine').val('');
             $('#min_stock').val('');
+            $('#max_stock').val('');
             $('#is_sample').prop('checked', false);
             $('#key').val(0);
             $('#crupModal').modal('toggle');
@@ -121,6 +127,7 @@
                         'code': $('#code').val(),
                         'machine': $('#machine').val(),
                         'min_stock': $('#min_stock').val(),
+                        'max_stock': $('#max_stock').val(),
                         'is_sample': $('#is_sample').prop('checked'),
                     },
                     success: function(response) {
@@ -156,6 +163,7 @@
                     $('#code').val(response.code);
                     $('#machine').val(response.machine);
                     $('#min_stock').val(response.min_stock);
+                    $('#max_stock').val(response.max_stock);
                     $('#is_sample').prop('checked', response.is_sample);
                     $('#key').val(response.id);
                     $('#crupModal').modal('toggle');

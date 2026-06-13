@@ -61,6 +61,7 @@ class MasterNeedleController extends Controller
         $code = strtoupper($request->code);
         $machine = strtoupper($request->machine);
         $min_stock = $request->min_stock;
+        $max_stock = $request->max_stock;
         $is_sample = $request->is_sample;
         $now = Carbon::now();
 
@@ -72,46 +73,30 @@ class MasterNeedleController extends Controller
                 if ($s) {
                     return response()->json('Brand Tipe Size Code Machine already used', 422);
                 } else {
-                    $mn = MasterNeedle::create([
-                        'brand' => $brand,
-                        'tipe' => $tipe,
-                        'size' => $size,
-                        'code' => $code,
-                        'machine' => $machine,
-                        'min_stock' => $min_stock,
-                        'is_sample' => $is_sample,
-                        'created_by' => Auth::user()->username,
-                        'created_at' => $now,
-                    ]);
-                    HelperController::activityLog("CREATE MASTER NEEDLE", 'master_needles', 'create', $request->ip(), $request->userAgent(), json_encode([
-                        'brand' => $brand,
-                        'tipe' => $tipe,
-                        'size' => $size,
-                        'code' => $code,
-                        'machine' => $machine,
-                        'min_stock' => $min_stock,
-                        'is_sample' => $is_sample,
-                        'created_by' => Auth::user()->username,
-                        'created_at' => $now,
-                    ]));
+                    $x = [];
+                    $x['brand'] = $brand;
+                    $x['tipe'] = $tipe;
+                    $x['size'] = $size;
+                    $x['code'] = $code;
+                    $x['machine'] = $machine;
+                    $x['min_stock'] = $min_stock;
+                    $x['max_stock'] = $max_stock;
+                    $x['is_sample'] = $is_sample;
+                    $x['created_by'] = Auth::user()->username;
+                    $x['created_at'] = $now;
+                    $mn = MasterNeedle::create($x);
+                    HelperController::activityLog("CREATE MASTER NEEDLE", 'master_needles', 'create', $request->ip(), $request->userAgent(), json_encode($x));
                     $master_area = MasterArea::get();
                     foreach ($master_area as $ma) {
-                        DeadStock::create([
-                            'master_area_id' => $ma->id,
-                            'master_needle_id' => $mn->id,
-                            'in' => 0,
-                            'out' => 0,
-                            'created_by' => Auth::user()->username,
-                            'created_at' => $now,
-                        ]);
-                        HelperController::activityLog("CREATE DEAD STOCK", 'dead_stock', 'create', $request->ip(), $request->userAgent(), json_encode([
-                            'master_area_id' => $ma->id,
-                            'master_needle_id' => $mn->id,
-                            'in' => 0,
-                            'out' => 0,
-                            'created_by' => Auth::user()->username,
-                            'created_at' => $now,
-                        ]));
+                        $x = [];
+                        $x['master_area_id'] = $ma->id;
+                        $x['master_needle_id'] = $mn->id;
+                        $x['in'] = 0;
+                        $x['out'] = 0;
+                        $x['created_by'] = Auth::user()->username;
+                        $x['created_at'] = $now;
+                        DeadStock::create($x);
+                        HelperController::activityLog("CREATE DEAD STOCK", 'dead_stock', 'create', $request->ip(), $request->userAgent(), json_encode($x));
                     }
                 }
             } else {
@@ -129,29 +114,19 @@ class MasterNeedleController extends Controller
                 }
 
                 if ($c == 1) {
-                    MasterNeedle::where('id', $id)->update([
-                        'brand' => $brand,
-                        'tipe' => $tipe,
-                        'size' => $size,
-                        'code' => $code,
-                        'machine' => $machine,
-                        'min_stock' => $min_stock,
-                        'is_sample' => $is_sample,
-                        'updated_by' => Auth::user()->username,
-                        'updated_at' => $now,
-                    ]);
-                    HelperController::activityLog("UPDATE MASTER NEEDLE", 'master_needles', 'update', $request->ip(), $request->userAgent(), json_encode([
-                        'id' => $id,
-                        'brand' => $brand,
-                        'tipe' => $tipe,
-                        'size' => $size,
-                        'code' => $code,
-                        'machine' => $machine,
-                        'min_stock' => $min_stock,
-                        'is_sample' => $is_sample,
-                        'updated_by' => Auth::user()->username,
-                        'updated_at' => $now,
-                    ]), $id);
+                    $x = [];
+                    $x['brand'] = $brand;
+                    $x['tipe'] = $tipe;
+                    $x['size'] = $size;
+                    $x['code'] = $code;
+                    $x['machine'] = $machine;
+                    $x['min_stock'] = $min_stock;
+                    $x['max_stock'] = $max_stock;
+                    $x['is_sample'] = $is_sample;
+                    $x['updated_by'] = Auth::user()->username;
+                    $x['updated_at'] = $now;
+                    MasterNeedle::where('id', $id)->update($x);
+                    HelperController::activityLog("UPDATE MASTER NEEDLE", 'master_needles', 'update', $request->ip(), $request->userAgent(), json_encode($x), $id);
                 }
             }
 
@@ -174,6 +149,7 @@ class MasterNeedleController extends Controller
         $d->code = $s->code;
         $d->machine = $s->machine;
         $d->min_stock = $s->min_stock;
+        $d->max_stock = $s->max_stock;
         $d->is_sample = $s->is_sample == '1' ? true : false;
         return response()->json($d, 200);
     }

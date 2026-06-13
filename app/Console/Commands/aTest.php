@@ -3,9 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\ClosingController;
+use App\Models\ActivityLog;
 use App\Models\DailyClosing;
+use App\Models\DetailAdjustment;
 use App\Models\Needle;
 use App\Models\Stock;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
@@ -40,15 +43,26 @@ class aTest extends Command
 
         // echo Str::orderedUuid() . PHP_EOL;
 
-        $now = Carbon::parse('2025-11-17 09:56:44');
+        // $now = Carbon::parse('2025-11-17 09:56:44');
 
-        DailyClosing::where('tanggal', $now->today())->forceDelete();
-        ClosingController::generateStockReport($now, $now->today(), $now->today(), null);
+        // DailyClosing::where('tanggal', $now->today())->forceDelete();
+        // ClosingController::generateStockReport($now, $now->today(), $now->today(), null);
 
-        Stock::withTrashed()->where('status', 'adjustment')->update([
-            'deleted_by' => null,
-            'deleted_at' => null,
-        ]);
+        // Stock::withTrashed()->where('status', 'adjustment')->update([
+        //     'deleted_by' => null,
+        //     'deleted_at' => null,
+        // ]);
+
+        $activity_log = ActivityLog::where('id', 'a06004f0-5b2a-4d6c-b7bd-97f5d83bfe13')->first();
+        $prop = json_decode($activity_log->properties, true);
+        $detail_adj = DetailAdjustment::where('id', $prop['id'])->first();
+        $user = User::where('username', $activity_log->username)->first();
+        echo "TYPE " . $detail_adj->master_needle->tipe . PHP_EOL;
+        echo "SIZE " . $detail_adj->master_needle->size . PHP_EOL;
+        echo "BEFORE " . $prop['before'] . PHP_EOL;
+        echo "AFTER " . $prop['after'] . PHP_EOL;
+        echo "USER " . $user->name . PHP_EOL;
+        echo "DATE TIME " . $activity_log->created_at;
     }
 
     static function generateStockReport($startDate, $endDate, $master_needle_id, $master_status_id)

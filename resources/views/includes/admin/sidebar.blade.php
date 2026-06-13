@@ -145,14 +145,14 @@
                                     </a>
                                 </li>
                             @endcan
-                            @can('admin-master-monthly-stock')
+                            {{-- @can('admin-master-monthly-stock')
                                 <li class="nav-item">
                                     <a href="{{ route('admin.master.monthly-stock') }}" class="nav-link {{ $page == 'admin_master_monthly_stock' ? 'active' : '' }}">
                                         <i class="fa fa-circle nav-icon text-warning"></i>
                                         <p>Monthly Stock</p>
                                     </a>
                                 </li>
-                            @endcan
+                            @endcan --}}
                             @can('admin-master-morning-stock')
                                 <li class="nav-item">
                                     <a href="{{ route('admin.master.morning-stock') }}" class="nav-link {{ $page == 'admin_master_morning_stock' ? 'active' : '' }}">
@@ -228,6 +228,14 @@
                                     <a href="{{ route('admin.tools.needle-control') }}" class="nav-link {{ $page == 'admin_tools_needle_control' ? 'active' : '' }}">
                                         <i class="fa fa-circle nav-icon text-warning"></i>
                                         <p>Needle Control</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('admin-tools-daily-closing')
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.tools.daily-closing') }}" class="nav-link {{ $page == 'admin_tools_daily_closing' ? 'active' : '' }}">
+                                        <i class="fa fa-circle nav-icon text-warning"></i>
+                                        <p>Daily Closing</p>
                                     </a>
                                 </li>
                             @endcan

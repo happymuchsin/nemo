@@ -175,6 +175,11 @@ class PermissionSeeder extends Seeder
                 'description' => 'Tools Needle Control'
             ],
             [
+                'name' => 'admin-tools-daily-closing',
+                'display_name' => 'admin-tools-daily-closing',
+                'description' => 'Tools Daily Closing'
+            ],
+            [
                 'name' => 'admin-tools-user',
                 'display_name' => 'admin-tools-user',
                 'description' => 'Master Data User'

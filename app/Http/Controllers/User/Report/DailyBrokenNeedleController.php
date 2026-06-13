@@ -289,9 +289,11 @@ class DailyBrokenNeedleController extends Controller
             $d->code = $mn->code;
             $d->tipe = $mn->tipe;
             $d->size = $mn->size;
-            $monthly = $collect_master_monthly_stock->where('master_needle_id', $mn->id);
-            $d->min_stock = $monthly->value('min_stock') ?? 0;
-            $d->max_stock = $monthly->value('max_stock') ?? 0;
+            // $monthly = $collect_master_monthly_stock->where('master_needle_id', $mn->id);
+            // $d->min_stock = $monthly->value('min_stock') ?? 0;
+            // $d->max_stock = $monthly->value('max_stock') ?? 0;
+            $d->min_stock = $mn->min_stock;
+            $d->max_stock = $mn->max_stock;
             $day = $collect_needle->where('master_needle_id', $mn->id)->count();
             $morning = $collect_master_morning_stock->where('master_needle_id', $mn->id);
             $morning_stock = $morning->value('value') ?? 0;

@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\Master\MasterStyleController;
 use App\Http\Controllers\Admin\Master\MasterSubCategoryController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\Tools\ToolsActivityLogController;
+use App\Http\Controllers\Admin\Tools\ToolsDailyClosingController;
 use App\Http\Controllers\Admin\Tools\ToolsNeedleControlController;
 use App\Http\Controllers\Admin\Tools\ToolsPermissionController;
 use App\Http\Controllers\Admin\Tools\ToolsRoleController;
@@ -505,6 +506,13 @@ Route::group(['middleware' => ['auth']], function () {
                             Route::post('update', [ToolsNeedleControlController::class, 'update'])->name('admin.tools.needle-control.update');
                             Route::get('edit/{tipe?}/{id?}', [ToolsNeedleControlController::class, 'edit'])->name('admin.tools.needle-control.edit');
                             Route::get('hapus/{tipe?}/{id?}', [ToolsNeedleControlController::class, 'hapus'])->name('admin.tools.needle-control.hapus');
+                        });
+
+                    Route::prefix('/daily-closing')
+                        ->middleware(['permission:admin-tools-daily-closing'])
+                        ->group(function () {
+                            Route::get('', [ToolsDailyClosingController::class, 'index'])->name('admin.tools.daily-closing');
+                            Route::post('save', [ToolsDailyClosingController::class, 'save'])->name('admin.tools.daily-closing.save');
                         });
 
                     Route::prefix('/user')

@@ -56,6 +56,10 @@ class RoleSeeder extends Seeder
                 'description' => 'Needle Control'
             ],
             [
+                'name' => 'daily-closing',
+                'description' => 'Daily Closing'
+            ],
+            [
                 'name' => 'tools',
                 'description' => 'Tools'
             ],
@@ -142,6 +146,13 @@ class RoleSeeder extends Seeder
         // NEEDLE CONTROL
         $permission = Permission::whereIn('name', ['user-dashboard', 'admin-dashboard', 'admin-tools', 'admin-tools-needle-control'])->get();
         $role = Role::findByName('needle-control');
+        foreach ($permission as $p) {
+            $role->givePermissionTo([(int) $p->id]);
+        }
+
+        // DAILY CLOSING
+        $permission = Permission::whereIn('name', ['user-dashboard', 'admin-dashboard', 'admin-tools', 'admin-tools-daily-closing'])->get();
+        $role = Role::findByName('daily-closing');
         foreach ($permission as $p) {
             $role->givePermissionTo([(int) $p->id]);
         }
