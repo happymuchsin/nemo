@@ -16,6 +16,14 @@
                         <th>Action</th>
                     </tr>
                 </x-slot:thead>
+                <x-slot:tfoot>
+                    <tr>
+                        <th colspan="5" class="text-center">TOTAL</th>
+                        @for ($i = 5; $i <= 6; $i++)
+                            <th></th>
+                        @endfor
+                    </tr>
+                </x-slot:tfoot>
             </x-layout.table>
         </x-slot:body>
     </x-layout.content>
@@ -69,6 +77,19 @@
                         data: 'action'
                     },
                 ],
+                footerCallback: function(row, data, start, end, display) {
+                    var api = this.api();
+                    if (end > 0) {
+                        for (var s = 5; s <= api.columns().count() - 1; s++) {
+                            var x = api.column(s, {
+                                search: 'applied'
+                            }).data().reduce(function(a, b) {
+                                return +a + +b;
+                            }, 0);
+                            $(api.column(s).footer()).html(x);
+                        }
+                    }
+                },
             });
         })
 

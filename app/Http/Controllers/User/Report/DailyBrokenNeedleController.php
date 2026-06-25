@@ -261,8 +261,8 @@ class DailyBrokenNeedleController extends Controller
 
         $master_morning_stock = MasterMorningStock::get();
         $collect_master_morning_stock = collect($master_morning_stock);
-        $master_monthly_stock = MasterMonthlyStock::where('tahun', $tahun)->where('bulan', $bulan)->get();
-        $collect_master_monthly_stock = collect($master_monthly_stock);
+        // $master_monthly_stock = MasterMonthlyStock::where('tahun', $tahun)->where('bulan', $bulan)->get();
+        // $collect_master_monthly_stock = collect($master_monthly_stock);
 
         $needle = Needle::with(['user'])
             ->whereBetween('created_at', [$filter_date . ' 00:00:00', $filter_date . ' 23:59:59'])
