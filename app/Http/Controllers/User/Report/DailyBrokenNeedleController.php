@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User\Report;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HelperController;
+use App\Models\DailyClosing;
 use App\Models\HistoryAddStock;
 use App\Models\MasterLine;
 use App\Models\MasterMonthlyStock;
@@ -259,10 +260,13 @@ class DailyBrokenNeedleController extends Controller
         $tahun = date('Y', strtotime($filter_date));
         $data = [];
 
-        $master_morning_stock = MasterMorningStock::get();
-        $collect_master_morning_stock = collect($master_morning_stock);
+        // $master_morning_stock = MasterMorningStock::get();
+        // $collect_master_morning_stock = collect($master_morning_stock);
         // $master_monthly_stock = MasterMonthlyStock::where('tahun', $tahun)->where('bulan', $bulan)->get();
         // $collect_master_monthly_stock = collect($master_monthly_stock);
+
+        $daily_closing = DailyClosing::whereDate('tanggal', $filter_date)->get();
+        $collect_daily_closing = collect($daily_closing);
 
         $needle = Needle::with(['user'])
             ->whereBetween('created_at', [$filter_date . ' 00:00:00', $filter_date . ' 23:59:59'])
@@ -295,8 +299,10 @@ class DailyBrokenNeedleController extends Controller
             $d->min_stock = $mn->min_stock;
             $d->max_stock = $mn->max_stock;
             $day = $collect_needle->where('master_needle_id', $mn->id)->count();
-            $morning = $collect_master_morning_stock->where('master_needle_id', $mn->id);
-            $morning_stock = $morning->value('value') ?? 0;
+            // $morning = $collect_master_morning_stock->where('master_needle_id', $mn->id);
+            // $morning_stock = $morning->value('value') ?? 0;
+            $dc = $collect_daily_closing->where('master_needle_id', $mn->id);
+            $morning_stock = $dc->value('closing') ?? 0;
             $d->morning_stock = $morning_stock;
             $incoming_stock = $collect_history_add_stock->where('stock.master_needle_id', $mn->id)->sum('qty');
             $d->incoming_stock = $incoming_stock;

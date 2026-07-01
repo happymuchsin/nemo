@@ -153,14 +153,14 @@
                                     </a>
                                 </li>
                             @endcan --}}
-                            @can('admin-master-morning-stock')
+                            {{-- @can('admin-master-morning-stock')
                                 <li class="nav-item">
                                     <a href="{{ route('admin.master.morning-stock') }}" class="nav-link {{ $page == 'admin_master_morning_stock' ? 'active' : '' }}">
                                         <i class="fa fa-circle nav-icon text-warning"></i>
                                         <p>Morning Stock</p>
                                     </a>
                                 </li>
-                            @endcan
+                            @endcan --}}
                             @can('admin-master-buyer')
                                 <li class="nav-item">
                                     <a href="{{ route('admin.master.buyer') }}" class="nav-link {{ $page == 'admin_master_buyer' ? 'active' : '' }}">
